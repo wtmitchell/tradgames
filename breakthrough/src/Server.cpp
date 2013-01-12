@@ -3,6 +3,8 @@ using std::cin;
 using std::cerr;
 using std::cout;
 using std::endl;
+#include <sstream>
+using std::stringstream;
 #include <string>
 using std::stoi;
 using std::string;
@@ -24,6 +26,18 @@ void Server::play_game()
          << endl;
 
     wait_for_start();
+
+    // Store the server's set of messages it is waiting to hear echoed
+    set<string> echo;
+
+    // Start game
+    stringstream cmd;
+    cmd << "BEGIN HOPSTEP " << names[players[0]] << " " << names[players[1]];
+
+    cout << cmd.str() << endl;
+    echo.insert(cmd.str());
+    // start timer
+
 }
 
 void Server::wait_for_start()
@@ -60,17 +74,24 @@ void Server::wait_for_start()
         }
     }
 
-    cout << "Names are:\n";
+    int i = 0;
     for (auto s : names)
-        cout << s << "\n";
-    cout << endl;
-
-    /*if (names[0] == names[1] || names[0] == names[2] || names[1] == names[2])
     {
-        cout << "FINAL " << names[0] << " beats " << names[1] << endl;
-        stringstream err_msg;
-        err_msg << "Have duplicate names on the server. Found players: '" << names[0]
-                << "', '" << names[1] << "', and '" << names[2] << "'.";
-        throw logic_error(err_msg.str());
-        }*/
+        if (s != "server" && s != "observer")
+            player_names[i] = s;
+        if (i > 1)
+        {
+            cerr << "Too many clients connected, using only "
+                 << player_names[0] << " and " << player_names[1]
+                 << endl;
+        }
+    }
+
+    if (player_names[0] == player_names[1])
+    {
+        cerr << "Both players have duplicate names: " << player_names[0]
+             << endl;
+        cout << "FINAL " << player_names[0] << " beats " << player_names[1]
+             << endl;
+    }
 }

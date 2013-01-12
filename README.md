@@ -27,10 +27,10 @@ breakthrough is a C++ program that plays the game [breakthrough](http://en.wikip
 
 During the game, the following commands will be issued:
 * BEGIN BREAKTHROUGH player1 player2 - Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.
-* FINAL winner loser - Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.
+* FINAL winner beats loser - Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.
 
 During the game, there is only one valid command to send:
-* MOVE from to - Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 a 3".
+* MOVE from_location to to_location - Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".
 
 At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
 
