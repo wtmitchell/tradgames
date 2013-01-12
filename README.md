@@ -38,4 +38,16 @@ Your Program
 ------------
 To make your program interact, it will communicate over stdin and stdout (System.in and System.out in Java). You may freely write to stderr (System.err) if you wish to see diagnostic information during game play.
 
-See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of a player that plays moves randomly.
+See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of an agent that selects moves randomly.
+
+Compiling Everything
+-------------------
+Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
+
+breakthrough is using cmake to configure the build.
+
+Running a Game
+--------------
+To start a game between two random players type the following:
+
+java GameMaster -1 'path/to/breakthrough_random player1' -2 'path/to/breakthrough_random player2' -m 'path/to/breakthrough'
