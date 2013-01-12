@@ -23,6 +23,8 @@ else()
 endif()
 
 # Catch most of the source files
-file(GLOB_RECURSE source . *.cpp)
+file(GLOB_RECURSE game . game/*.cpp)
+set(shared Client.cpp)
 
-add_executable (breakthrough ${source})
+add_executable(breakthrough ${game} ${shared} Server.cpp main.cpp)
+add_executable(breakthrough_random ${game} ${shared} RandomPlayer.cpp)

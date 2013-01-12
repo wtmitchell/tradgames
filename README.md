@@ -19,6 +19,7 @@ The following commands are server commands:
 * #players - Returns the number of connected players.
 * #quit - Immediately terminates the game. This message is always broadcast to all clients.
 
+Any other command sent with a # prefix will be ignored and not sent on to the other clients.
 
 breakthrough
 ------------
@@ -29,10 +30,12 @@ During the game, the following commands will be issued:
 * FINAL winner loser - Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.
 
 During the game, there is only one valid command to send:
-* MOVE from to - Moves pieces at location from to location to. Locations are specified as in chess with a letter and number. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a2 a3".
+* MOVE from to - Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 a 3".
 
 At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
 
 Your Program
 ------------
 To make your program interact, it will communicate over stdin and stdout (System.in and System.out in Java). You may freely write to stderr (System.err) if you wish to see diagnostic information during game play.
+
+See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of a player that plays moves randomly.
