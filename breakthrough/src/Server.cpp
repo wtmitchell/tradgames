@@ -3,6 +3,8 @@ using std::cin;
 using std::cerr;
 using std::cout;
 using std::endl;
+#include <set>
+using std::set;
 #include <sstream>
 using std::stringstream;
 #include <string>
@@ -32,7 +34,7 @@ void Server::play_game()
 
     // Start game
     stringstream cmd;
-    cmd << "BEGIN HOPSTEP " << names[players[0]] << " " << names[players[1]];
+    cmd << "BEGIN BREAKTHROUGH " << player_names[0] << " " << player_names[1];
 
     cout << cmd.str() << endl;
     echo.insert(cmd.str());
@@ -78,13 +80,16 @@ void Server::wait_for_start()
     for (auto s : names)
     {
         if (s != "server" && s != "observer")
-            player_names[i] = s;
-        if (i > 1)
         {
-            cerr << "Too many clients connected, using only "
-                 << player_names[0] << " and " << player_names[1]
-                 << endl;
+            if (i > 1)
+                cerr << "Too many clients connected, using only "
+                     << player_names[0] << " and " << player_names[1]
+                     << endl;
+
+            player_names[i] = s;
+            ++i;
         }
+
     }
 
     if (player_names[0] == player_names[1])
