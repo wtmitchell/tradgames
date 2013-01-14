@@ -26,11 +26,18 @@ breakthrough
 breakthrough is a C++ program that plays the game [breakthrough](http://en.wikipedia.org/wiki/Breakthrough_%28board_game%29).
 
 During the game, the following commands will be issued:
-* BEGIN BREAKTHROUGH player1 player2 - Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.
-* FINAL winner beats loser - Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.
+<dl>
+    <dt>BEGIN BREAKTHROUGH player1 player2</dt>
+    <dd>Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.</dd>
+    <dt>FINAL winner beats loser</dt>
+    <dd>Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.</dd>
+</d>
 
 During the game, there is only one valid command to send:
-* MOVE from_location to to_location - Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".
+<dl>
+    <dt>MOVE from_location to to_location</dt>
+    <dd>Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation](http://en.wikipedia.org/wiki/Algebraic_chess_notation) except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".</dd>
+</dl>
 
 At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
 
