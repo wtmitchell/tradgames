@@ -1,0 +1,3 @@
+--player1=breakthrough/build/breakthrough_random Random1
+--player2=breakthrough/build/breakthrough_random Random2
+--master=breakthrough/build/breakthrough
