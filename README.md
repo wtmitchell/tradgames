@@ -50,16 +50,16 @@ Running a Game
 --------------
 To start a game between two random players type the following:
 
-java GameMaster -1 'path/to/breakthrough_random player1' -2 'path/to/breakthrough_random player2' -m 'path/to/breakthrough'
+    java GameMaster -1 'path/to/breakthrough_random player1' -2 'path/to/breakthrough_random player2' -m 'path/to/breakthrough'
 
 Alternatively, the game setup can be stored in a response file like
-"""
---player1=path/to/breakthrough_random player1
---player2=path/to/breakthrough_random player2
---master=path/to/breakthrough
-"""
+
+    --player1=path/to/breakthrough_random player1
+    --player2=path/to/breakthrough_random player2
+    --master=path/to/breakthrough
+
 It can then be loaded like:
 
-java GameMaster @response_file_name
+    java GameMaster @response_file_name
 
 A sample response file is included named Random.vs.Random.txt.
