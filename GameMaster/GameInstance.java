@@ -150,7 +150,6 @@ public class GameInstance extends Thread
         System.out.println("Player1: '" + programs.get(1) + "'");
         System.out.println("Player2: '" + programs.get(2) + "'");
 
-        // Set things up
         // Start processes
         startProcess(programs.get(0), true, 0); // Master broadcasts
 
@@ -185,6 +184,7 @@ public class GameInstance extends Thread
                 input_rest.add(stdin);
         } catch (IOException e) {
             System.err.println("IO Exception when running '" + commandline + "'");
+            System.err.println(e);
         }
     }
 
