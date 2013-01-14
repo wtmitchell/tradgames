@@ -43,13 +43,12 @@ During the game, the following commands will be issued:
 During the game, there is only one valid command to send:
 <dl>
     <dt>MOVE from_location to to_location</dt>
-    <dd>Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as [algebraic chess notation][acn] except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".</dd>
+    <dd>Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as <a href="http://en.wikipedia.org/wiki/Algebraic_chess_notation">algebraic chess notation</a> except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".</dd>
 </dl>
 
 At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
 
 [btwiki]: http://en.wikipedia.org/wiki/Breakthrough_%28board_game%29
-[acn]: http://en.wikipedia.org/wiki/Algebraic_chess_notation
 
 Your Program
 ------------
