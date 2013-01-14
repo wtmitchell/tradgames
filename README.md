@@ -13,11 +13,18 @@ GameMaster
 GameMaster is a Java programs that controls the interactions between agents and a master running the game.
 
 The following commands are server commands:
-* #getname ID - Returns the name of player with ID.
-* #master - Tells the server that the programs should receive all messages and sends broadcasts
-* #name NAME - Declares the current agent to be named NAME. No spaces are allowed. The names server and observer are reserved.
-* #players - Returns the number of connected players.
-* #quit - Immediately terminates the game. This message is always broadcast to all clients.
+<dl>
+    <dt>#getname ID</dl>
+    <dt>Returns the name of player with ID.</dd>
+    <dt>#master</dt>
+    <dd>Tells the server that the programs should receive all messages and sends broadcasts.</dd>
+    <dt>#name NAME</dt>
+    <dd>Declares the current agent to be named NAME. No spaces are allowed. The names server and observer are reserved.</dd>
+    <dt>#players</dt>
+    <dd>Returns the number of connected players.</dd>
+    <dt>#quit</dt>
+    <dd>Immediately terminates the game. This message is always broadcast to all clients.</dd>
+</dl>
 
 Any other command sent with a # prefix will be ignored and not sent on to the other clients.
 
