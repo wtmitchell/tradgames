@@ -160,7 +160,7 @@ string GameState::pretty_print_location(const size_t location) const
 
 string GameState::pretty_print_move(const Move m) const
 {
-    return "move " + pretty_print_location(m.from) + " to " + pretty_print_location(m.to);
+    return "MOVE " + pretty_print_location(m.from) + " TO " + pretty_print_location(m.to);
 }
 
 

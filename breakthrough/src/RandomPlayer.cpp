@@ -7,6 +7,7 @@ using std::endl;
 using std::string;
 
 #include "game/GameState.h"
+#include "game/Move.h"
 #include "Client.h"
 
 bool my_turn;
@@ -18,8 +19,9 @@ int player_num;
 
 const int board_size = 8; // We play on an 8x8 board
 
-void wait_for_start();
+Move next_move();
 void play_game();
+void wait_for_start();
 
 int main(int argc, char* argv[])
 {
@@ -35,6 +37,11 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
+Move next_move()
+{
+    return Move(0, 0);
+}
+
 
 void play_game()
 {
@@ -47,19 +54,27 @@ void play_game()
     // Main game loop
     for (;;)
     {
-        if (my_turn)
+        if (curr_player == player_num)
         {
             // Play Move
+            cout << "My turn!" << endl;
+            Move m = next_move();
+
+
+            // It is the opponents turn
+            curr_player = (curr_player % 2) + 1;
         }
         else
         {
             // Wait for move from other player
+
+            // It is now my turn
+            curr_player = (curr_player % 2) + 1;
         }
         /*
         if (player_num == curr_player)
         {
             // My turn
-            Move m = next_move();
 
             if (m.piece == NULL_MOVE)
             {

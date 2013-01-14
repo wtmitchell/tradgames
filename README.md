@@ -36,13 +36,13 @@ During the game, the following commands will be issued:
 <dl>
     <dt>BEGIN BREAKTHROUGH player1 player2</dt>
     <dd>Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.</dd>
-    <dt>FINAL winner beats loser</dt>
+    <dt>FINAL winner BEATS loser</dt>
     <dd>Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.</dd>
 </d>
 
 During the game, there is only one valid command to send:
 <dl>
-    <dt>MOVE from_location to to_location</dt>
+    <dt>MOVE from_location TO to_location</dt>
     <dd>Moves pieces at location from to location to. Locations are specified as in chess with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as <a href="http://en.wikipedia.org/wiki/Algebraic_chess_notation">algebraic chess notation</a> except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 to a 3".</dd>
 </dl>
 
@@ -80,4 +80,4 @@ It can then be loaded like:
 
 A sample response file is included named Random.vs.Random.txt.
 
-Running GameMaster with no arguments, or the argument --help will display the full set of options that the program supports.
+Running GameMaster with no arguments, or the argument --help, will display the full set of options that the program supports.
