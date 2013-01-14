@@ -14,7 +14,7 @@ GameMaster is a Java programs that controls the interactions between agents and 
 
 The following commands are server commands:
 <dl>
-    <dt>#getname ID</dl>
+    <dt>#getname ID</dt>
     <dt>Returns the name of player with ID.</dd>
     <dt>#master</dt>
     <dd>Tells the server that the programs should receive all messages and sends broadcasts.</dd>
