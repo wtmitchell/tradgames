@@ -79,3 +79,5 @@ It can then be loaded like:
     java GameMaster @response_file_name
 
 A sample response file is included named Random.vs.Random.txt.
+
+Running GameMaster with no arguments, or the argument --help will display the full set of options that the program supports.
