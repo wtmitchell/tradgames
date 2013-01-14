@@ -1,5 +1,5 @@
-Code for AI for Traditional Games taught by Nathan Sturtevant
-==========================================
+Code for AI for Traditional Games
+=================================
 
 There are two programs in this repository:
 
@@ -57,7 +57,7 @@ To make your program interact, it will communicate over stdin and stdout (System
 See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of an agent that selects moves randomly.
 
 Compiling Everything
--------------------
+--------------------
 Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
 
 breakthrough is using cmake to configure the build.

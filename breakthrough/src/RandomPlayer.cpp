@@ -9,6 +9,7 @@ using std::string;
 #include "game/GameState.h"
 #include "game/Move.h"
 #include "Client.h"
+#include "Math.h"
 
 bool my_turn;
 GameState* gs;
@@ -21,6 +22,7 @@ const int board_size = 8; // We play on an 8x8 board
 
 Move next_move();
 void play_game();
+void print_and_recv_echo(string msg);
 void wait_for_start();
 
 int main(int argc, char* argv[])
@@ -31,6 +33,8 @@ int main(int argc, char* argv[])
     else
         name = "Random";
 
+    Math::seed_rand();
+
     gs = new GameState(board_size);
     play_game();
 
@@ -39,7 +43,15 @@ int main(int argc, char* argv[])
 
 Move next_move()
 {
-    return Move(0, 0);
+    vector<Move> moves = gs->get_moves();
+
+    if (moves.size() > 0)
+    {
+        unsigned int choice = Math::uniform_rand(static_cast<unsigned int>(moves.size()));
+        return moves[choice];
+    }
+
+    return Move(0, 0); //null move
 }
 
 
@@ -60,6 +72,17 @@ void play_game()
             cout << "My turn!" << endl;
             Move m = next_move();
 
+            if (m.isNull())
+            {
+                // Concede to the server
+                cout << "# I, " << name << ", have no moves to play." << endl;
+
+                curr_player = (curr_player % 2) + 1;
+                // End game locally
+                gs->apply_move(m);
+                continue;
+            }
+            print_and_recv_echo(gs->pretty_print_move(m));
 
             // It is the opponents turn
             curr_player = (curr_player % 2) + 1;
@@ -67,103 +90,26 @@ void play_game()
         else
         {
             // Wait for move from other player
-
-            // It is now my turn
-            curr_player = (curr_player % 2) + 1;
-        }
-        /*
-        if (player_num == curr_player)
-        {
-            // My turn
-
-            if (m.piece == NULL_MOVE)
-            {
-                // Concede to the server
-                cout << "# I, " << name << ", have no moves to play." << endl;
-
-                curr_player = (curr_player % 2) + 1;
-                // End game locally
-                state.apply_move(m);
-                continue;
-            }
-
-            // Translate to net coordinates
-            size_t from, to;
-            mt.move_to_net(state, m, &from, &to);
-
-            // Construct MOVE command
-            stringstream cmd;
-            cmd << "MOVE " << from << " " << to;
-
-            // Double check that the move is valid
-            if (!Client::valid_move_for_player(state, m, player_num))
-            {
-                stringstream err_msg;
-                err_msg << "I was about to play an invalid move: "
-                        << m << ".\n# The sent command would have been: '"
-                        << cmd.str() << "'\n#quit";
-                throw logic_error(err_msg.str());
-            }
-
-            print_and_recv_echo(cmd.str());
-
-            // Apply our move to the state
-            state.apply_move(m);
-
-            // It is the opponents turn
-            curr_player = (curr_player % 2) + 1;
-        }
-        else
-        {
-            // Not my turn
             // Get server's next instruction
             string server_msg;
             vector<string> tokens = Client::read_msg_and_tokenize(&server_msg);
 
-            if (tokens.size() == 3 && tokens[0] == "MOVE")
+            if (tokens.size() == 7 && tokens[0] == "MOVE")
             {
-                try
-                {
-                    // Translate to local coordinates
-                    Move m = mt.net_to_move(state, lexical_cast<int>(tokens[1]),
-                                            lexical_cast<int>(tokens[2]));
+                cerr << "Have move from opponent" << endl;
+                // Translate to local coordinates
+                /*
+                Move m = mt.net_to_move(state, lexical_cast<int>(tokens[1]),
+                                        lexical_cast<int>(tokens[2]));
 
-                    // Require a piece at the from location
-                    if (m.piece == NO_MOVES)
-                    {
-                        stringstream err_msg;
-                        err_msg << "Received invalid position in MOVE command. "
-                                << "There is no piece at "
-                                << lexical_cast<int>(tokens[1]);
-                        throw logic_error(err_msg.str());
-                    }
+                // Apply the move and continue
+                state.apply_move(m);
+                */
 
-                    // Make sure the move is valid
-                    if (!Client::valid_move_for_current_player(state, m))
-                    {
-                        stringstream err_msg;
-                        err_msg << "Received invalid MOVE command. '"
-                                << server_msg << "' is not valid for "
-                                << "the current player.";
-                        throw logic_error(err_msg.str());
-                    }
-
-                    // Apply the move and continue
-                    state.apply_move(m);
-
-                    // It is the opponents turn
-                    curr_player = (curr_player % 2) + 1;
-                    continue;
-                }
-                catch(exception& e)
-                {
-                    stringstream err_msg;
-                    err_msg << e.what() << "\n# Last Received Message '"
-                            << server_msg << "'";
-                    throw logic_error(err_msg.str());
-                }
+                // It is now my turn
+                curr_player = (curr_player % 2) + 1;
             }
-            else if (tokens.size() == 4 && tokens[0] == "FINAL" && tokens[2] == "beats")
+            else if (tokens.size() == 4 && tokens[0] == "FINAL" && tokens[2] == "BEATS")
             {
                 // Game over
                 if (tokens[2] == name && tokens[4] == opp_name)
@@ -176,30 +122,32 @@ void play_game()
                 }
                 else
                 {
-                    stringstream err_msg;
-                    err_msg << "Did not find expected players in FINAL command.\n"
-                            << "# Found '"<< tokens[2] <<"' and '" << tokens[4] << "'. "
-                            << "Expected '" << name << "' and '" << opp_name <<"'.\n"
-                            << "# Received message '" << server_msg << "'";
-                    throw logic_error(err_msg.str());
+                    cerr << "Did not find expected players in FINAL command.\n"
+                         << "# Found '"<< tokens[2] <<"' and '" << tokens[4] << "'. "
+                         << "Expected '" << name << "' and '" << opp_name <<"'.\n"
+                         << "# Received message '" << server_msg << "'";
                 }
-            }
-            else if (tokens.size() == 1 && tokens[0] == "ps")
-            {
-                // Internal command to print state
-                cout << state;
             }
             else
             {
                 // Unknown command
-                stringstream err_msg;
-                err_msg << "Unknown command of '" << server_msg
-                        << "' from the server";
-                throw logic_error(err_msg.str());
+                cerr << "Unknown command of '" << server_msg
+                     << "' from the server";
             }
-            }*/
+        }
     }
 }
+
+/* Sends a msg to stdout and verifies that the next message to come in
+   is it echoed back. This is used by the server to validate moves */
+void print_and_recv_echo(string msg)
+{
+    cout << msg << endl; // Note the endl flushes the stream
+    string echo_recv = Client::read_msg();
+    if (msg != echo_recv)
+        cerr << "Expected echo of '" << msg << "'. Received '" << echo_recv << "'";
+}
+
 
 void wait_for_start()
 {

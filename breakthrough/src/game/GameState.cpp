@@ -139,6 +139,16 @@ vector<Move> GameState::get_moves(const Players player) const
     return moves;
 }
 
+GameState& GameState::apply_move(const Move m)
+{
+    return *this;
+}
+GameState& GameState::undo_move()
+{
+
+    return *this;
+}
+
 bool GameState::game_over() const
 {
     return false;

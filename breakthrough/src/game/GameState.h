@@ -25,14 +25,13 @@ class GameState
  public:
     friend ostream& operator<<(ostream& os, GameState& s);
 
-    explicit GameState(size_t board_size = 8);
+    explicit GameState(size_t board_size = 8); // In theory 4-26 supported, but only 8 has been tested
 
     vector<Move> get_moves() const; // for current player's move
     vector<Move> get_moves(const Players player) const;
-
+    GameState& apply_move(const Move m); // return self-reference
+    GameState& undo_move();
     /*
-    State& apply_move(const Move m); // return self-reference
-    State& undo_move();
     int get_winner() const;
     */
 

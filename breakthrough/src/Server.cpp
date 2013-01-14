@@ -73,11 +73,20 @@ void Server::play_game()
 
         // Print out turn and time information
 
-        if (tokens.size() == 6
+        if (tokens.size() == 7
             //&& tokens[0] == bs::lexical_cast<string>(players[turn])
             && tokens[1] == "MOVE")
         {
             cerr << "Move msg: '" << msg << "'" << endl;
+            // Received move from current player
+
+            // Validate move
+
+            // Apply move and echo it
+
+            // Check if game is over
+
+            // Alternate whose turn
         }
 
     }
