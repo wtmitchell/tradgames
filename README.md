@@ -15,7 +15,7 @@ GameMaster is a Java programs that controls the interactions between agents and 
 The following commands are server commands:
 <dl>
     <dt>#getname ID</dt>
-    <dt>Returns the name of player with ID.</dd>
+    <dd>Returns the name of player with ID.</dd>
     <dt>#master</dt>
     <dd>Tells the server that the programs should receive all messages and sends broadcasts.</dd>
     <dt>#name NAME</dt>
@@ -30,7 +30,7 @@ Any other command sent with a # prefix will be ignored and not sent on to the ot
 
 breakthrough
 ------------
-breakthrough is a C++ program that plays the game [breakthrough](http://en.wikipedia.org/wiki/Breakthrough_%28board_game%29).
+breakthrough is a C++ program that plays the game [breakthrough][btwiki]
 
 During the game, the following commands will be issued:
 <dl>
@@ -47,6 +47,8 @@ During the game, there is only one valid command to send:
 </dl>
 
 At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
+
+[btwiki]: http://en.wikipedia.org/wiki/Breakthrough_%28board_game%29
 
 Your Program
 ------------
