@@ -60,7 +60,7 @@ Compiling Everything
 --------------------
 Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
 
-breakthrough is using cmake to configure the build.
+breakthrough is using cmake to configure the build. On Linux, run build.sh.
 
 Running a Game
 --------------
