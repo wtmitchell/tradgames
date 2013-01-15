@@ -29,7 +29,7 @@ class StreamConsumer extends Thread {
             while ((message = br.readLine()) != null)
                 queue.add(new Message(type, broadcast, message, id));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("IO Exception while reading on ID " + id);
         }
     }
 }

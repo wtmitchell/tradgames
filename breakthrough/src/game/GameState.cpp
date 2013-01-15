@@ -1,4 +1,5 @@
 #include <iostream>
+using std::cerr;
 using std::cout;
 using std::endl;
 #include <ostream>
@@ -141,11 +142,44 @@ vector<Move> GameState::get_moves(const Players player) const
 
 GameState& GameState::apply_move(const Move m)
 {
+    // Store the move on the history stack
+    move_history.push_back(m);
+
+    // Only move if an actual move
+    if (!m.isNull())
+    {
+        // Find the pieces involved in the move
+        size_t mover = pieces.size();
+        size_t captured = mover;
+        for (size_t i = 0; i < pieces.size(); ++i)
+        {
+            if (pieces[i].location == m.from)
+                mover = i;
+            else if (pieces[i].location == m.to)
+                captured = i;
+        }
+
+        // Move the piece
+        board[m.from] = Board::open;
+        if (pieces[mover].player == Players::player1)
+            board[m.to] = Board::player1;
+        else
+            board[m.to] = Board::player2;
+
+        // Remove the captured piece if applicable
+        if (captured != pieces.size())
+            pieces.erase(pieces.begin() + captured);
+    }
+
+    // Change whose turn it is
+    turn = (turn == Players::player1) ? Players::player2 : Players::player1;
+
     return *this;
 }
+
 GameState& GameState::undo_move()
 {
-
+    // Not needed for server/random player so not implemented
     return *this;
 }
 
@@ -212,7 +246,79 @@ void GameState::reset()
     turn = Players::player1;
 }
 
+Move GameState::translate_to_local(const vector<string> message) const
+{
+    size_t from = 0;
+    size_t to = 0;
+
+    if (message[0] == "MOVE")
+    {
+        // Message source is a client
+        from = message[1].at(0) - 'a' + 1 + stoi(message[2]) * (board_size + 2);
+        to = message[4].at(0) - 'a' + 1 + stoi(message[5]) * (board_size + 2);
+    }
+    else
+    {
+        // Message source is the server
+        from = message[2].at(0) - 'a' + 1 + stoi(message[3]) * (board_size + 2);
+        to = message[5].at(0) - 'a' + 1 + stoi(message[6]) * (board_size + 2);
+    }
+
+    return Move(from, to);
+}
+
 bool GameState::valid_move(const Move m) const
 {
+    // Validate the locations are in plausible ranges
+    // Only need to check upper bounds because location type is unsigned
+    if (m.from > (board_size + 2) * (board_size + 2)
+        || m.to > (board_size + 2) * (board_size + 2))
+    {
+        cerr << "Move " << m.from << " to " << m.to << " is outside plausible board range" << endl;
+        return false;
+    }
+
+    // Find the pieces involved in the move
+    size_t mover = pieces.size();
+    size_t captured = mover;
+    for (size_t i = 0; i < pieces.size(); ++i)
+    {
+        if (pieces[i].location == m.from)
+            mover = i;
+        else if (pieces[i].location == m.to)
+            captured = i;
+    }
+
+    // There needs to be a piece at the from location
+    if (mover == pieces.size())
+    {
+        cerr << "Move " << m.from << " to " << m.to << " has no piece at from" << endl;
+        return false;
+    }
+
+    // The moved piece needs to be owned by the current player
+    if (pieces[mover].player != turn)
+    {
+        cerr << "Trying to move opponents piece" << endl;
+        return false;
+    }
+
+    // The to location either needs to be open, or occupied by an opposing piece
+    if (board[m.to] == Board::closed
+        || (board[m.to] == Board::player1 && pieces[captured].player == Players::player1)
+        || (board[m.to] == Board::player2 && pieces[captured].player == Players::player2))
+        return false;
+
+    // The move needs to be a valid for the current player
+    size_t diff = 0;
+    if (turn == Players::player1)
+        diff = m.to - m.from;
+    else
+        diff = m.from - m.to;
+
+    if (board_size + 1 <= diff && diff <= board_size +3)
+        return true;
+
+    // Not a valid move
     return false;
 }

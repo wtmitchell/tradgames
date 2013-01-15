@@ -11,6 +11,14 @@ public class Message
         message = "";
         id = -1;
     }
+
+    public Message(String message) {
+        type = StreamType.stdin;
+        broadcast = true;
+        this.message = message;
+        this.id = -1;
+    }
+
     public Message(StreamType type, boolean broadcast, String message, int id) {
         this.type = type;
         this.broadcast = broadcast;
@@ -19,8 +27,8 @@ public class Message
     }
 
     public String toString() {
-        if (broadcast)
-            return id + " public (" + type + "): " + message;
-        return id + " private (" + type + "): " + message;
+        if (broadcast && type == StreamType.stdout)
+            return id + ":" + type + " all: " + message;
+        return id + ":" + type + ": " + message;
     }
 }

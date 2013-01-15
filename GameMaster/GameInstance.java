@@ -4,6 +4,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class GameInstance extends Thread
@@ -13,8 +14,8 @@ public class GameInstance extends Thread
         messages = new LinkedBlockingQueue<Message>();
         processes = new ArrayList<Process>();
         input_all = new HashMap<Integer, PrintWriter>();
-        input_master = new ArrayList<PrintWriter>();
-        input_rest = new ArrayList<PrintWriter>();
+        input_master = new ArrayList<Integer>();
+        input_rest = new ArrayList<Integer>();
         names = new HashMap<Integer, String>();
     }
 
@@ -30,14 +31,10 @@ public class GameInstance extends Thread
             return;
 
         // Send message to appropriate threads
-        if (m.broadcast) {
-            // Send message to everyone
-            postAll(m.message);
-        } else {
-            // Send to all masters with id as part of message
-            for (PrintWriter pw : input_master)
-                pw.println(m.id + " " + m.message);
-        }
+        if (m.broadcast)
+            postAll(m);
+        else
+            postMasters(m);
     }
 
     private boolean handleServerCommand(Message m) {
@@ -89,7 +86,7 @@ public class GameInstance extends Thread
         } else if (m.message.equals("#quit")) {
             // Quit the game
             running = false;
-            postAll("#quit");
+            postAll(new Message("#quit"));
         }
         return true;
     }
@@ -98,18 +95,21 @@ public class GameInstance extends Thread
         input_all.get(m.id).println(reply);
     }
 
-    public void postAll(String msg) {
-        for (PrintWriter pw : input_master)
-            pw.println(msg);
-        for (PrintWriter pw : input_rest)
-            pw.println(msg);
+    public void postAll(Message m) {
+        for (Map.Entry<Integer, PrintWriter> me : input_all.entrySet())
+            me.getValue().println(m.message);
+    }
+
+    public void postMasters(Message m) {
+        for (Integer i : input_master)
+            input_all.get(i).println(m.id + " " + m.message);
     }
 
     public void processMessages() {
         Message m;
 
         running = true;
-        while (running) {
+        main: while (running) {
             try {
                 Thread.sleep(5);
             } catch (InterruptedException e) {}
@@ -121,11 +121,13 @@ public class GameInstance extends Thread
 
             // Check if any processes have died
             // If they are still running, exitValue triggers an exception
-            for (Process p : processes) {
+            for (int i = 0; i < programs.size(); ++i) {
+                //for (Process p : processes) {
                 try {
-                    p.exitValue();
-                    running = false;
-                    break;
+                    processes.get(i).exitValue();
+                    System.err.println("Player '" + names.get(i)
+                                       + "' has quit. cmd: '" + programs.get(i) + "'");
+                    break main;
                 } catch (IllegalThreadStateException e) {}
             }
         }
@@ -179,9 +181,9 @@ public class GameInstance extends Thread
                                 new BufferedOutputStream(p.getOutputStream())), true);
             input_all.put(id, stdin);
             if (broadcast)
-                input_master.add(stdin);
+                input_master.add(id);
             else
-                input_rest.add(stdin);
+                input_rest.add(id);
         } catch (IOException e) {
             System.err.println("IO Exception when running '" + commandline + "'");
             System.err.println(e);
@@ -189,8 +191,8 @@ public class GameInstance extends Thread
     }
 
     private HashMap<Integer, PrintWriter> input_all;
-    private ArrayList<PrintWriter> input_master;
-    private ArrayList<PrintWriter> input_rest;
+    private ArrayList<Integer> input_master;
+    private ArrayList<Integer> input_rest;
     private LinkedBlockingQueue<Message> messages;
     private HashMap<Integer, String> names;
     private ArrayList<Process> processes;

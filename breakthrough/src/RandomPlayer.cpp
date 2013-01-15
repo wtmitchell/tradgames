@@ -10,13 +10,13 @@ using std::string;
 #include "game/Move.h"
 #include "Client.h"
 #include "Math.h"
+#include "game/Players.h"
 
-bool my_turn;
 GameState* gs;
-int curr_player;
+Players current_player;
+Players my_player;
 string name;
 string opp_name;
-int player_num;
 
 const int board_size = 8; // We play on an 8x8 board
 
@@ -66,26 +66,32 @@ void play_game()
     // Main game loop
     for (;;)
     {
-        if (curr_player == player_num)
+        if (current_player == my_player)
         {
-            // Play Move
-            cout << "My turn!" << endl;
+            // My turn
+            // Determine next move
             Move m = next_move();
+
+            // Apply it
+            gs->apply_move(m);
 
             if (m.isNull())
             {
-                // Concede to the server
+                // Concede to the server so we know what is going on
                 cout << "# I, " << name << ", have no moves to play." << endl;
 
-                curr_player = (curr_player % 2) + 1;
-                // End game locally
-                gs->apply_move(m);
+                current_player = (current_player == Players::player1)
+                    ? Players::player2 : Players::player2;
+                // End game locally, server should detect and send #quit
                 continue;
             }
+
+            // Tell the world
             print_and_recv_echo(gs->pretty_print_move(m));
 
             // It is the opponents turn
-            curr_player = (curr_player % 2) + 1;
+            current_player = (current_player == Players::player1)
+                ? Players::player2 : Players::player1;
         }
         else
         {
@@ -94,39 +100,30 @@ void play_game()
             string server_msg;
             vector<string> tokens = Client::read_msg_and_tokenize(&server_msg);
 
-            if (tokens.size() == 7 && tokens[0] == "MOVE")
+            if (tokens.size() == 6 && tokens[0] == "MOVE")
             {
-                cerr << "Have move from opponent" << endl;
                 // Translate to local coordinates
-                /*
-                Move m = mt.net_to_move(state, lexical_cast<int>(tokens[1]),
-                                        lexical_cast<int>(tokens[2]));
+                Move m = gs->translate_to_local(tokens);
 
                 // Apply the move and continue
-                state.apply_move(m);
-                */
+                gs->apply_move(m);
 
                 // It is now my turn
-                curr_player = (curr_player % 2) + 1;
+                current_player = (current_player == Players::player1)
+                    ? Players::player2 : Players::player1;
             }
             else if (tokens.size() == 4 && tokens[0] == "FINAL" && tokens[2] == "BEATS")
             {
                 // Game over
                 if (tokens[2] == name && tokens[4] == opp_name)
-                {
-                    cout << "# I, " << name << ", have won!" << endl;
-                }
+                    cout << "I, " << name << ", have won!" << endl;
                 else if (tokens[4] == name && tokens[2] == opp_name)
-                {
-                    cout << "# I, " << name << ", have lost." << endl;
-                }
+                    cout << "I, " << name << ", have lost." << endl;
                 else
-                {
                     cerr << "Did not find expected players in FINAL command.\n"
-                         << "# Found '"<< tokens[2] <<"' and '" << tokens[4] << "'. "
+                         << "Found '"<< tokens[2] <<"' and '" << tokens[4] << "'. "
                          << "Expected '" << name << "' and '" << opp_name <<"'.\n"
-                         << "# Received message '" << server_msg << "'";
-                }
+                         << "Received message '" << server_msg << "'" << endl;
             }
             else
             {
@@ -136,10 +133,11 @@ void play_game()
             }
         }
     }
+    cerr << "Quiting" << endl;
 }
 
 /* Sends a msg to stdout and verifies that the next message to come in
-   is it echoed back. This is used by the server to validate moves */
+   is it echoed back. This is how the server to validates moves */
 void print_and_recv_echo(string msg)
 {
     cout << msg << endl; // Note the endl flushes the stream
@@ -163,14 +161,14 @@ void wait_for_start()
             {
                 // We go first!
                 opp_name = tokens[3];
-                player_num = 1;
+                my_player = Players::player1;
                 break;
             }
             else if (tokens[3] == name)
             {
                 // They go first
                 opp_name = tokens[2];
-                player_num = 2;
+                my_player = Players::player2;
                 break;
             }
             else
@@ -186,5 +184,5 @@ void wait_for_start()
     }
 
     // Player 1 goes first
-    curr_player = 1;
+    current_player = Players::player1;
 }

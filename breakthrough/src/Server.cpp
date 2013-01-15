@@ -20,7 +20,9 @@ using std::vector;
 #include "Client.h"
 
 Server::Server()
-{}
+{
+    gs = new GameState();
+}
 
 void Server::play_game()
 {
@@ -51,7 +53,6 @@ void Server::play_game()
 
     // Player 1 has turn 0
     int turn = 0;
-    int moves = 1;
 
     // Main game loop
     for (;;)
@@ -74,22 +75,46 @@ void Server::play_game()
         // Print out turn and time information
 
         if (tokens.size() == 7
-            //&& tokens[0] == bs::lexical_cast<string>(players[turn])
-            && tokens[1] == "MOVE")
+            && static_cast<size_t>(stoi(tokens[0])) == player_ids[turn]
+            && tokens[1] == "MOVE"
+            && tokens[4] == "TO")
         {
-            cerr << "Move msg: '" << msg << "'" << endl;
+            cerr << "Received move msg: '" << msg << "'"
+                 << " turn is " << turn
+                 << endl;
             // Received move from current player
+            Move m = gs->translate_to_local(tokens);
 
             // Validate move
+            if (!gs->valid_move(m))
+            {
+                cerr << "Invalid move: " << msg << endl;
+                cout << "FINAL " << player_names[turn] << " BEATS "
+                     << player_names[(turn + 1) % 2]
+                     << "\n#quit" << endl;
+                break;
+            }
 
             // Apply move and echo it
+            gs->apply_move(m);
+            echo.insert(gs->pretty_print_move(m));
+            cout << gs->pretty_print_move(m) << endl;
+
+            // Display board if requested
+            //cerr << *gs << endl;
 
             // Check if game is over
 
             // Alternate whose turn
+            turn = (turn + 1) % 2;
+        }
+        else
+        {
+            cerr << "Received unknown or out of turn message: " << msg << endl;
         }
 
     }
+    cerr << "Quitting" << endl;
 }
 
 void Server::wait_for_start() throw (logic_error)
@@ -128,16 +153,17 @@ void Server::wait_for_start() throw (logic_error)
 
     // Determine player names
     int i = 0;
-    for (auto s : names)
+    for (size_t j = 0; j < names.size(); ++j)
     {
-        if (s != "server" && s != "observer")
+        if (names[j] != "server" && names[j] != "observer")
         {
             if (i > 1)
                 cerr << "Too many clients connected, using only "
                      << player_names[0] << " and " << player_names[1]
                      << endl;
 
-            player_names[i] = s;
+            player_names[i] = names[j];
+            player_ids[i] = j;
             ++i;
         }
 

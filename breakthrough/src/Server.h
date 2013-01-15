@@ -10,6 +10,8 @@ using std::string;
 #include <vector>
 using std::vector;
 
+#include "game/GameState.h"
+
 class Server
 {
  public:
@@ -20,8 +22,10 @@ class Server
  private:
     void wait_for_start() throw (logic_error);
 
+    GameState* gs;
     vector<string> names;
     array<string, 2> player_names;
+    array<size_t, 2> player_ids;
 };
 
 #endif

@@ -40,12 +40,14 @@ class GameState
     string pretty_print_location(const size_t location) const;
     string pretty_print_move(const Move m) const;
     void reset();
+    Move translate_to_local(const vector<string> message) const;
     bool valid_move(const Move m) const;
 
  private:
     const size_t board_size;
     vector<Board> board;
     vector<Piece> pieces;
+    vector<Move> move_history;
     Players turn;
 };
 
