@@ -1,1 +1,8 @@
+# Linux build dir as setup in build.sh
 build
+
+# Visual Studio stuff
+Debug
+Release
+*.sdf
+*.suo
