@@ -1,3 +1,12 @@
+#include <chrono>
+using std::chrono::duration_cast;
+using std::chrono::hours;
+using std::chrono::minutes;
+using std::chrono::seconds;
+using std::chrono::milliseconds;
+using std::chrono::system_clock;
+#include <iomanip>
+using std::setw;
 #include <iostream>
 using std::cin;
 using std::cerr;
@@ -49,7 +58,9 @@ void Server::play_game()
 
     cout << cmd.str() << endl;
     echo.insert(cmd.str());
+
     // start timer
+    system_clock::time_point start_time = system_clock::now();
 
     // Player 1 has turn 0
     int turn = 0;
@@ -60,7 +71,9 @@ void Server::play_game()
         // Read message
         string msg;
         vector<string> tokens = Client::read_msg_and_tokenize(&msg);
-        //move_stop = microsec_clock::universal_time();
+
+        // Stop the timer
+        system_clock::time_point stop_time = system_clock::now();
         set<string>::iterator it = echo.find(msg);
 
         if (it != echo.end())
@@ -70,18 +83,24 @@ void Server::play_game()
             continue;
         }
 
-        // Stop timer
-
-        // Print out turn and time information
-
         if (tokens.size() == 7
             && static_cast<size_t>(stoi(tokens[0])) == player_ids[turn]
             && tokens[1] == "MOVE"
             && tokens[4] == "TO")
         {
-            /*cerr << "Received move msg: '" << msg << "'"
-                 << " turn is " << player_ids[turn]
-                 << endl;*/
+            // Print out turn and time information
+            system_clock::duration elapsed = stop_time - start_time;
+            hours hh = duration_cast<hours>(elapsed);
+            minutes mm = duration_cast<minutes>(elapsed % hours(1));
+            seconds ss = duration_cast<seconds>(elapsed % minutes(1));
+            milliseconds ms = duration_cast<milliseconds>(elapsed % seconds(1));
+            cerr << "Turn by " << player_ids[turn] << ":" << player_names[turn]
+                 << " took " 
+                 << setw(2) << hh.count() << "h "
+                 << setw(2) << mm.count() << "m "
+                 << setw(2) << ss.count() << "s "
+                 << setw(3) << ms.count() << "ms" << endl;
+
             // Received move from current player
             Move m = gs->translate_to_local(tokens);
 
