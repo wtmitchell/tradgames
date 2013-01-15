@@ -69,8 +69,23 @@ void play_game()
         if (current_player == my_player)
         {
             // My turn
+            if (gs->game_over())
+            {
+                cerr << "I, " << name << ", have lost" << endl;
+                current_player = (current_player == Players::player1)
+                    ? Players::player2 : Players::player1;
+                continue;
+            }
             // Determine next move
             Move m = next_move();
+
+            // Double check it is valid
+            if (!gs->valid_move(m))
+            {
+                cerr << "I was about to play an invalid move: "
+                     << gs->pretty_print_move(m) << endl;
+                cout << "#quit" << endl;
+            }
 
             // Apply it
             gs->apply_move(m);
@@ -81,7 +96,7 @@ void play_game()
                 cout << "# I, " << name << ", have no moves to play." << endl;
 
                 current_player = (current_player == Players::player1)
-                    ? Players::player2 : Players::player2;
+                    ? Players::player2 : Players::player1;
                 // End game locally, server should detect and send #quit
                 continue;
             }

@@ -42,6 +42,7 @@ class GameState
     void reset();
     Move translate_to_local(const vector<string> message) const;
     bool valid_move(const Move m) const;
+    bool valid_move(const Move m, const Players player) const;
 
  private:
     const size_t board_size;

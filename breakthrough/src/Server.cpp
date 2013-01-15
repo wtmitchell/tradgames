@@ -79,9 +79,9 @@ void Server::play_game()
             && tokens[1] == "MOVE"
             && tokens[4] == "TO")
         {
-            cerr << "Received move msg: '" << msg << "'"
-                 << " turn is " << turn
-                 << endl;
+            /*cerr << "Received move msg: '" << msg << "'"
+                 << " turn is " << player_ids[turn]
+                 << endl;*/
             // Received move from current player
             Move m = gs->translate_to_local(tokens);
 
@@ -104,6 +104,17 @@ void Server::play_game()
             //cerr << *gs << endl;
 
             // Check if game is over
+            if (gs->game_over())
+            {
+                // Game was just won by last played move
+                stringstream msg;
+                msg << "FINAL " << player_names[turn] << " BEATS "
+                    << player_names[(turn + 1) % 2];
+                echo.insert(msg.str());
+                cout << msg.str() << endl;
+                echo.insert("#quit");
+                cout << "#quit" << endl;
+            }
 
             // Alternate whose turn
             turn = (turn + 1) % 2;

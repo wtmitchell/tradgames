@@ -100,6 +100,7 @@ vector<Move> GameState::get_moves(const Players player) const
     vector<Move> moves;
 
     for(auto p : pieces)
+    {
         if (p.player == player && player == Players::player1)
         {
             // Player 1
@@ -136,6 +137,7 @@ vector<Move> GameState::get_moves(const Players player) const
                 board[up_right] == Board::player1)
                 moves.push_back(Move(p.location, up_right));
         }
+    }
 
     return moves;
 }
@@ -150,7 +152,7 @@ GameState& GameState::apply_move(const Move m)
     {
         // Find the pieces involved in the move
         size_t mover = pieces.size();
-        size_t captured = mover;
+        size_t captured = pieces.size();
         for (size_t i = 0; i < pieces.size(); ++i)
         {
             if (pieces[i].location == m.from)
@@ -165,6 +167,7 @@ GameState& GameState::apply_move(const Move m)
             board[m.to] = Board::player1;
         else
             board[m.to] = Board::player2;
+        pieces[mover].location = m.to;
 
         // Remove the captured piece if applicable
         if (captured != pieces.size())
@@ -185,6 +188,13 @@ GameState& GameState::undo_move()
 
 bool GameState::game_over() const
 {
+    if (move_history.size() > 1 && move_history.back().isNull())
+        return true;
+
+    for (auto p : pieces)
+        if ((p.player == Players::player1 && p.location > (board_size + 2) * board_size)
+            || (p.player == Players::player2 && p.location < 2 * board_size))
+            return true;
     return false;
 }
 
@@ -269,6 +279,15 @@ Move GameState::translate_to_local(const vector<string> message) const
 
 bool GameState::valid_move(const Move m) const
 {
+    return valid_move(m, turn);
+}
+
+bool GameState::valid_move(const Move m, const Players player) const
+{
+    // Can't make a move if game is over
+    if (game_over())
+        return false;
+
     // Validate the locations are in plausible ranges
     // Only need to check upper bounds because location type is unsigned
     if (m.from > (board_size + 2) * (board_size + 2)
@@ -280,13 +299,13 @@ bool GameState::valid_move(const Move m) const
 
     // Find the pieces involved in the move
     size_t mover = pieces.size();
-    size_t captured = mover;
     for (size_t i = 0; i < pieces.size(); ++i)
     {
         if (pieces[i].location == m.from)
+        {
             mover = i;
-        else if (pieces[i].location == m.to)
-            captured = i;
+            break;
+        }
     }
 
     // There needs to be a piece at the from location
@@ -297,7 +316,7 @@ bool GameState::valid_move(const Move m) const
     }
 
     // The moved piece needs to be owned by the current player
-    if (pieces[mover].player != turn)
+    if (pieces[mover].player != player)
     {
         cerr << "Trying to move opponents piece" << endl;
         return false;
@@ -305,13 +324,16 @@ bool GameState::valid_move(const Move m) const
 
     // The to location either needs to be open, or occupied by an opposing piece
     if (board[m.to] == Board::closed
-        || (board[m.to] == Board::player1 && pieces[captured].player == Players::player1)
-        || (board[m.to] == Board::player2 && pieces[captured].player == Players::player2))
+        || (board[m.from] == Board::player1 && board[m.to] == Board::player1)
+        || (board[m.from] == Board::player2 && board[m.to] == Board::player2))
+    {
+        cerr << "Move is outside of board or capturing own piece" << endl;
         return false;
+    }
 
     // The move needs to be a valid for the current player
     size_t diff = 0;
-    if (turn == Players::player1)
+    if (player == Players::player1)
         diff = m.to - m.from;
     else
         diff = m.from - m.to;
