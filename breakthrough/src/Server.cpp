@@ -119,6 +119,9 @@ void Server::play_game()
             echo.insert(gs->pretty_print_move(m));
             cout << gs->pretty_print_move(m) << endl;
 
+            // Start timer for next player's move
+            start_time = system_clock::now();
+
             // Display board if requested
             //cerr << *gs << endl;
 
