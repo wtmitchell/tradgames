@@ -88,40 +88,41 @@ Sample Game Output
 ------------------
 An example of what a game looks like between two random players may look like:
 
-   $ java -cp GameMaster/ GameMaster @Random.vs.Random.txt
-   Will start game run by: 'breakthrough/build/breakthrough'
-   Player1: 'breakthrough/build/breakthrough_random Random1'
-   Player2: 'breakthrough/build/breakthrough_random Random2'
-   0:stdout all: #name server
-   0:stdout all: #master
-   0:stdout all: #players
-   Received #players query from server; answer: 1
-   1:stdout: #name Random1
-   2:stdout: #name Random2
-   0:stdout all: #players
-   Received #players query from server; answer: 3
-   0:stdout all: #getname 0
-   Received #getname query from server; answer: server
-   0:stdout all: #getname 1
-   Received #getname query from server; answer: Random1
-   0:stdout all: #getname 2
-   Received #getname query from server; answer: Random2
-   0:stdout all: BEGIN BREAKTHROUGH Random1 Random2
-   1:stdout: MOVE f 2 TO e 3
-   0:stderr: Turn by 1:Random1 took  0h  0m  0s  11ms
-   0:stdout all: MOVE f 2 TO e 3
-   2:stdout: MOVE f 7 TO e 6
-   0:stderr: Turn by 2:Random2 took  0h  0m  0s  16ms
-   0:stdout all: MOVE f 7 TO e 6
-   1:stdout: MOVE c 2 TO c 3
-   0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
-   0:stdout all: MOVE c 2 TO c 3
-   2:stdout: MOVE d 7 TO d 6
-   ...
-   1:stdout: MOVE c 7 TO c 8
-   0:stdout all: MOVE c 7 TO c 8
-   0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
-   0:stdout all: FINAL Random1 BEATS Random2
-   0:stdout all: #quit
-   2:stderr: I, Random2, have lost
-   $
+    $ java -cp GameMaster/ GameMaster @Random.vs.Random.txt
+    Will start game run by: 'breakthrough/build/breakthrough'
+    Player1: 'breakthrough/build/breakthrough_random Random1'
+    Player2: 'breakthrough/build/breakthrough_random Random2'
+    0:stdout all: #name server
+    0:stdout all: #master
+    0:stdout all: #players
+    Received #players query from server; answer: 1
+    1:stdout: #name Random1
+    2:stdout: #name Random2
+    0:stdout all: #players
+    Received #players query from server; answer: 3
+    0:stdout all: #getname 0
+    Received #getname query from server; answer: server
+    0:stdout all: #getname 1
+    Received #getname query from server; answer: Random1
+    0:stdout all: #getname 2
+    Received #getname query from server; answer: Random2
+    0:stdout all: BEGIN BREAKTHROUGH Random1 Random2
+    1:stdout: MOVE f 2 TO e 3
+    0:stderr: Turn by 1:Random1 took  0h  0m  0s  11ms
+    0:stdout all: MOVE f 2 TO e 3
+    2:stdout: MOVE f 7 TO e 6
+    0:stderr: Turn by 2:Random2 took  0h  0m  0s  16ms
+    0:stdout all: MOVE f 7 TO e 6
+    1:stdout: MOVE c 2 TO c 3
+    0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
+    0:stdout all: MOVE c 2 TO c 3
+    2:stdout: MOVE d 7 TO d 6
+    ...
+    1:stdout: MOVE c 7 TO c 8
+    0:stdout all: MOVE c 7 TO c 8
+    0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
+    0:stdout all: FINAL Random1 BEATS Random2
+    0:stdout all: #quit
+    2:stderr: I, Random2, have lost
+    $
+
