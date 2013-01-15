@@ -62,6 +62,8 @@ Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate di
 
 breakthrough is using cmake to configure the build. On Linux, run build.sh.
 
+If you are using Visual Studio 2012, load the solution file breakthrough.sln and build the two projects contained within.
+
 Running a Game
 --------------
 To start a game between two random players type the following:
