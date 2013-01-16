@@ -4,7 +4,6 @@ using std::chrono::hours;
 using std::chrono::minutes;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
-using std::chrono::system_clock;
 #include <iomanip>
 using std::setw;
 #include <iostream>
@@ -27,6 +26,8 @@ using std::vector;
 #include "Server.h"
 
 #include "Client.h"
+
+typedef std::chrono::system_clock Clock;
 
 Server::Server()
 {
@@ -60,7 +61,7 @@ void Server::play_game()
     echo.insert(cmd.str());
 
     // start timer
-    system_clock::time_point start_time = system_clock::now();
+    Clock::time_point start_time = Clock::now();
 
     // Player 1 has turn 0
     int turn = 0;
@@ -73,7 +74,7 @@ void Server::play_game()
         vector<string> tokens = Client::read_msg_and_tokenize(&msg);
 
         // Stop the timer
-        system_clock::time_point stop_time = system_clock::now();
+        Clock::time_point stop_time = Clock::now();
         set<string>::iterator it = echo.find(msg);
 
         if (it != echo.end())
@@ -89,11 +90,11 @@ void Server::play_game()
             && tokens[4] == "TO")
         {
             // Print out turn and time information
-            system_clock::duration elapsed = stop_time - start_time;
+            Clock::duration elapsed = stop_time - start_time;
             hours hh = duration_cast<hours>(elapsed);
-            minutes mm = duration_cast<minutes>(elapsed % hours(1));
-            seconds ss = duration_cast<seconds>(elapsed % minutes(1));
-            milliseconds ms = duration_cast<milliseconds>(elapsed % seconds(1));
+            minutes mm = duration_cast<minutes>(elapsed - hh);
+            seconds ss = duration_cast<seconds>(elapsed - hh - mm);
+            milliseconds ms = duration_cast<milliseconds>(elapsed - hh - mm - ss);
             cerr << "Turn by " << player_ids[turn] << ":" << player_names[turn]
                  << " took " 
                  << setw(2) << hh.count() << "h "
@@ -120,7 +121,7 @@ void Server::play_game()
             cout << gs->pretty_print_move(m) << endl;
 
             // Start timer for next player's move
-            start_time = system_clock::now();
+            start_time = Clock::now();
 
             // Display board if requested
             //cerr << *gs << endl;
