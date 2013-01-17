@@ -1,12 +1,10 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,9 +24,6 @@ public class GameMaster {
             if (s.charAt(0) == '@') {
                 try {
                     arguments.addAll(readResponseFile(s.substring(1)));
-                } catch (NoSuchFileException e) {
-                    System.err.println("Response file does not exist.");
-                    System.err.println(e);
                 } catch (IOException e) {
                     System.err.println("IO Error reading response file");
                     System.err.println(e);
@@ -89,9 +84,15 @@ public class GameMaster {
     }
 
     private static List<String> readResponseFile(String filename)
-        throws InvalidPathException, IOException {
-        Path filePath = Paths.get(filename);
-        return Files.readAllLines(filePath, Charset.defaultCharset());
+        throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
+        List<String> lines = new ArrayList<String>();
+        String line = null;
+        while ((line = bufferedReader.readLine()) != null) {
+            lines.add(line);
+        }
+        bufferedReader.close();
+        return lines;
     }
 }
 
