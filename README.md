@@ -60,7 +60,7 @@ Compiling Everything
 --------------------
 Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
 
-breakthrough is using cmake to configure the build. On Linux, run build.sh.
+In the breakthrough directory there is a simple makefile provided. This should work for both Linux and OSX.
 
 If you are using Visual Studio 2012, load the solution file breakthrough.sln and build the two projects contained within.
 
