@@ -26,5 +26,5 @@ endif()
 file(GLOB_RECURSE game . game/*.cpp)
 set(shared Client.cpp Math.cpp)
 
-add_executable(breakthrough ${game} ${shared} Server.cpp main.cpp)
+add_executable(breakthrough ${game} ${shared} Server.cpp ServerMain.cpp)
 add_executable(breakthrough_random ${game} ${shared} RandomPlayer.cpp)
