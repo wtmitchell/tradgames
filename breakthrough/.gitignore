@@ -1,10 +1,17 @@
 # Build files from makefile build
 *.o
 breakthrough_master
+!breakthrough_master/
 breakthrough_random
+!breakthrough_random/
 
-# Visual Studio stuff
-Debug
-Release
+# Visual Studio build stuff
+*.exe
+*.ilk
+*.pdb
 *.sdf
+*.opensdf
 *.suo
+
+Debug/
+Release/
