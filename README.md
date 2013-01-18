@@ -62,7 +62,7 @@ Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate di
 
 In the breakthrough directory there is a simple makefile provided. This should work for both Linux and OSX.
 
-If you are using Visual Studio 2012, load the solution file breakthrough.sln and build the two projects contained within.
+If you are using Visual Studio 2012, load the solution file VS2012\breakthrough.sln and build the two projects contained within.
 
 Running a Game
 --------------
