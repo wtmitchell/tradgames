@@ -1,5 +1,7 @@
-# Linux build dir as setup in build.sh
-build
+# Build files from makefile build
+*.o
+breakthrough_master
+breakthrough_random
 
 # Visual Studio stuff
 Debug
