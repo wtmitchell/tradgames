@@ -89,9 +89,9 @@ Sample Game Output
 An example of what a game looks like between two random players may look like:
 
     $ java -cp GameMaster/ GameMaster @Random.vs.Random.txt
-    Will start game run by: 'breakthrough/build/breakthrough'
-    Player1: 'breakthrough/build/breakthrough_random Random1'
-    Player2: 'breakthrough/build/breakthrough_random Random2'
+    Will start game run by: 'breakthrough/breakthrough_master'
+    Player1: 'breakthrough/breakthrough_random Random1'
+    Player2: 'breakthrough/breakthrough_random Random2'
     0:stdout all: #name server
     0:stdout all: #master
     0:stdout all: #players
