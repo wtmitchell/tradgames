@@ -3,7 +3,6 @@
 #include <iostream>
 using std::cout;
 
-#include "game/GameState.h"
 #include "Server.h"
 
 int main(int argc, char* argv[])

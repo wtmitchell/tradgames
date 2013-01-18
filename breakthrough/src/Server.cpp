@@ -26,6 +26,7 @@ using std::vector;
 #include "Server.h"
 
 #include "Client.h"
+#include "game/GameState.h"
 
 typedef std::chrono::system_clock Clock;
 
