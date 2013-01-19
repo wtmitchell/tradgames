@@ -98,7 +98,7 @@ void Client::play_game() {
       print_and_recv_echo(m);
 
       // It is the opponents turn
-      current_player = (current_player == player1) ? player2 : ::player1;
+      current_player = (current_player == player1) ? player2 : player1;
     } else {
       // Wait for move from other player
       // Get server's next instruction
@@ -140,7 +140,8 @@ void Client::print_and_recv_echo(const string msg) const {
   cout << msg << endl;  // Note the endl flushes the stream, which is necessary
   const string echo_recv = read_msg();
   if (msg != echo_recv)
-    cerr << "Expected echo of '" << msg << "'. Received '" << echo_recv << "'";
+    cerr << "Expected echo of '" << msg << "'. Received '" << echo_recv << "'"
+         << endl;
 }
 
 /* Reads a line, up to a newline from the server */
@@ -194,8 +195,9 @@ void Client::wait_for_start() {
         cerr << "Did not find '" << name
              << "', my name, in the BEGIN BREAKTHROUGH command.\n"
              << "# Found '"<< tokens[2] <<"' and '" << tokens[3] << "'"
-             << " as player names. Received message '" << response << "'";
-        cout << "#quit";
+             << " as player names. Received message '" << response << "'"
+             << endl;
+        cout << "#quit" << endl;
         exit(EXIT_FAILURE);
       }
     }
