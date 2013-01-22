@@ -2,8 +2,9 @@
 #define TIMER_H
 
 // Determine how timing should occur
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || _MSC_VER >= 1700L
 // Use C++11 facilities if using C++11
+// _MSC_VER >= 1700L implies VS2012 or newer
 #define CPP11_TIMING
 #else
 #error "No Timer implemented for current compiler settings"
