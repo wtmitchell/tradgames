@@ -191,10 +191,23 @@ bool GameState::game_over() const
     if (move_history.size() > 1 && move_history.back().isNull())
         return true;
 
+    int p1_count = 0;
+    int p2_count = 0;
+
     for (auto p : pieces)
+    {
+        // Check if piece is in last row
         if ((p.player == Players::player1 && p.location > (board_size + 2) * board_size)
             || (p.player == Players::player2 && p.location < 2 * board_size))
             return true;
+        if (p.player == Players::player1) ++p1_count;
+        if (p.player == Players::player2) ++p2_count;
+    }
+
+    // Game is over if one player has no pieces
+    if (p1_count == 0 || p2_count == 0)
+        return true;
+
     return false;
 }
 
