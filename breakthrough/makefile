@@ -1,7 +1,7 @@
 CXXFLAGS=-O3 -std=c++11
 
 GAMESTATE = game/GameState.o game/Move.o
-CLIENTSHARED = Client.o Math.o
+CLIENTSHARED = Client.o Math.o Timer.o
 CLIENTRANDOM = RandomPlayer.o $(CLIENTSHARED) $(GAMESTATE)
 CLIENTMASTER = ServerMain.o Server.o $(CLIENTSHARED) $(GAMESTATE)
 
@@ -21,6 +21,7 @@ Math.o: Math.h
 RandomPlayer.o: game/GameState.h game/Move.h Client.h Math.h game/Players.h
 Server.o: Server.h Client.h game/GameState.h
 ServerMain.o: Server.h
+Timer.o:
 
 .PHONY: clean
 clean:

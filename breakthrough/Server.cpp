@@ -1,11 +1,3 @@
-#include <chrono>
-using std::chrono::duration_cast;
-using std::chrono::hours;
-using std::chrono::minutes;
-using std::chrono::seconds;
-using std::chrono::milliseconds;
-#include <iomanip>
-using std::setw;
 #include <iostream>
 using std::cin;
 using std::cerr;
@@ -27,8 +19,7 @@ using std::vector;
 
 #include "Client.h"
 #include "game/GameState.h"
-
-typedef std::chrono::system_clock Clock;
+#include "Timer.h"
 
 Server::Server()
 {
@@ -54,6 +45,9 @@ void Server::play_game()
     // Store the server's set of messages it is waiting to hear echoed
     set<string> echo;
 
+    // Setup the timer
+    Timer *move_timer = new Timer();
+
     // Start game
     stringstream cmd;
     cmd << "BEGIN BREAKTHROUGH " << player_names[0] << " " << player_names[1];
@@ -62,7 +56,7 @@ void Server::play_game()
     echo.insert(cmd.str());
 
     // start timer
-    Clock::time_point start_time = Clock::now();
+    move_timer->start();
 
     // Player 1 has turn 0
     int turn = 0;
@@ -75,7 +69,9 @@ void Server::play_game()
         vector<string> tokens = Client::read_msg_and_tokenize(&msg);
 
         // Stop the timer
-        Clock::time_point stop_time = Clock::now();
+        move_timer->stop();
+
+        // Look for echoes
         set<string>::iterator it = echo.find(msg);
 
         if (it != echo.end())
@@ -91,17 +87,9 @@ void Server::play_game()
             && tokens[4] == "TO")
         {
             // Print out turn and time information
-            Clock::duration elapsed = stop_time - start_time;
-            hours hh = duration_cast<hours>(elapsed);
-            minutes mm = duration_cast<minutes>(elapsed - hh);
-            seconds ss = duration_cast<seconds>(elapsed - hh - mm);
-            milliseconds ms = duration_cast<milliseconds>(elapsed - hh - mm - ss);
             cerr << "Turn by " << player_ids[turn] << ":" << player_names[turn]
-                 << " took " 
-                 << setw(2) << hh.count() << "h "
-                 << setw(2) << mm.count() << "m "
-                 << setw(2) << ss.count() << "s "
-                 << setw(3) << ms.count() << "ms" << endl;
+                 << " took " << *move_timer << endl;
+
 
             // Received move from current player
             Move m = gs->translate_to_local(tokens);
@@ -122,7 +110,7 @@ void Server::play_game()
             cout << gs->pretty_print_move(m) << endl;
 
             // Start timer for next player's move
-            start_time = Clock::now();
+            move_timer->start();
 
             // Display board if requested
             //cerr << *gs << endl;
