@@ -1,8 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <array>
-using std::array;
 #include <stdexcept>
 using std::logic_error;
 #include <string>
@@ -24,8 +22,8 @@ class Server
 
     GameState* gs;
     vector<string> names;
-    array<string, 2> player_names;
-    array<size_t, 2> player_ids;
+    string player_names[2];
+    size_t player_ids[2];
 };
 
 #endif
