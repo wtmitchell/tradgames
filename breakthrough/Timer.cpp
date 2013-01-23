@@ -25,8 +25,6 @@ ostream& operator<<(ostream& os, Timer& t)
     seconds ss = duration_cast<seconds>(elapsed - hh - mm);
     milliseconds ms = duration_cast<milliseconds>(elapsed - hh - mm - ss);
 
-    os << "C++11_TIMING ";
-
     os << setw(2) << hh.count() << "h "
        << setw(2) << mm.count() << "m "
        << setw(2) << ss.count() << "s "
@@ -46,8 +44,6 @@ ostream& operator<<(ostream& os, Timer& t)
     auto mm = (seconds / 60) % 60;
     auto ss = seconds % 60;
     auto ms = useconds / 1000;
-
-    os << "POSIX_TIMING ";
 
     os << setw(2) << hh << "h "
        << setw(2) << mm << "m "
