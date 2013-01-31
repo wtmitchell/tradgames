@@ -37,7 +37,7 @@ During the game, the following commands will be issued:
     <dt>BEGIN BREAKTHROUGH player1 player2</dt>
     <dd>Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.</dd>
     <dt>FINAL winner BEATS loser</dt>
-    <dd>Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in player of winner and loser.</dd>
+    <dd>Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in place of winner and loser.</dd>
 </d>
 
 During the game, there is only one valid command to send:
@@ -54,15 +54,21 @@ Your Program
 ------------
 To make your program interact, it will communicate over stdin and stdout (System.in and System.out in Java). You may freely write to stderr (System.err) if you wish to see diagnostic information during game play.
 
-See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of an agent that selects moves randomly.
+See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of an agent that selects moves randomly. There are also three sample agent implementations in the SampleAgents directory in C, C++, and Java.
 
 Compiling Everything
 --------------------
 Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
 
-In the breakthrough directory there is a simple makefile provided. This should work for both Linux and OSX.
+To build breakthrough, the build is operating system dependent.
 
-If you are using Visual Studio 2012, load the solution file VS2012\breakthrough.sln and build the two projects contained within.
+If you are using Visual Studio 2012 on Windows, load the solution file VS2012\breakthrough.sln and build the two projects contained within.
+
+If you are using Linux, use CMake. Create a new build directory, then in a terminal execute 'cmake path/to/breakthrough; make'. Alternatively the provided makefile should work minor modifications to the CXXFLAGS line.
+
+If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
+
+If there are any problems compiling, please contact Will.
 
 Running a Game
 --------------
