@@ -1,4 +1,5 @@
-CXXFLAGS=-O3 -std=c++11
+CXXFLAGS=-O3 -std=c++11 -stdlib=libc++
+# Linux users, remove '-stdlib=libc++' in the above line if you get an error
 
 GAMESTATE = game/GameState.o game/Move.o
 CLIENTSHARED = Client.o Math.o Timer.o
