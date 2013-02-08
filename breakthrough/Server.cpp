@@ -26,7 +26,7 @@ Server::Server()
     gs = new GameState();
 }
 
-void Server::play_game()
+void Server::play_game(bool print_board, bool quiet)
 {
     // Identify myself
     cout << "#name server\n"
@@ -113,7 +113,8 @@ void Server::play_game()
             move_timer->start();
 
             // Display board if requested
-            //cerr << *gs << endl;
+            if (print_board)
+                cerr << *gs << endl;
 
             // Check if game is over
             if (gs->game_over())
@@ -133,7 +134,8 @@ void Server::play_game()
         }
         else
         {
-            cerr << "Received unknown or out of turn message: " << msg << endl;
+            if (!quiet)
+                cerr << "Received unknown or out of turn message: " << msg << endl;
         }
 
     }

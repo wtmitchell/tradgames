@@ -7,9 +7,10 @@ using std::cout;
 
 int main(int argc, char* argv[])
 {
-
+    bool quiet = false;
+    bool print_board = false;
     Server *s = new Server();
-    s->play_game();
+    s->play_game(print_board, quiet);
 
     return EXIT_SUCCESS;
 }

@@ -15,7 +15,7 @@ class Server
  public:
     Server();
 
-    void play_game();
+    void play_game(bool print_board, bool quiet);
 
  private:
     void wait_for_start() throw (logic_error);
