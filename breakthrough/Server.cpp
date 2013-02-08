@@ -97,6 +97,9 @@ void Server::play_game(bool print_board, bool quiet)
             // Validate move
             if (!gs->valid_move(m))
             {
+                // Display board if requested
+                if (print_board)
+                    cerr << *gs << endl;
                 cerr << "Invalid move: " << msg << endl;
                 cout << "FINAL " << player_names[turn] << " BEATS "
                      << player_names[(turn + 1) % 2]
