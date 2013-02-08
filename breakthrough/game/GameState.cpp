@@ -110,8 +110,7 @@ vector<Move> GameState::get_moves(const Players player) const
                 moves.push_back(Move(p.location, down_left));
 
             size_t down = p.location + board_size + 2;
-            if (board[down] == Board::open ||
-                board[down] == Board::player2)
+            if (board[down] == Board::open)
                 moves.push_back(Move(p.location, down));
 
             size_t down_right = p.location + board_size + 3;
@@ -128,8 +127,7 @@ vector<Move> GameState::get_moves(const Players player) const
                 moves.push_back(Move(p.location, up_left));
 
             size_t up = p.location - board_size - 2;
-            if (board[up] == Board::open ||
-                board[up] == Board::player1)
+            if (board[up] == Board::open)
                 moves.push_back(Move(p.location, up));
 
             size_t up_right = p.location - board_size -1;
@@ -324,23 +322,27 @@ bool GameState::valid_move(const Move m, const Players player) const
     // There needs to be a piece at the from location
     if (mover == pieces.size())
     {
-        cerr << "Move " << m.from << " to " << m.to << " has no piece at from" << endl;
+        cerr << "Move has no piece at from location" << endl;
         return false;
     }
 
     // The moved piece needs to be owned by the current player
     if (pieces[mover].player != player)
     {
-        cerr << "Trying to move opponents piece" << endl;
+        cerr << "Move trying to move opponents piece" << endl;
         return false;
     }
 
     // The to location either needs to be open, or occupied by an opposing piece
-    if (board[m.to] == Board::closed
-        || (board[m.from] == Board::player1 && board[m.to] == Board::player1)
+    if (board[m.to] == Board::closed)
+    {
+        cerr << "Move results in piece being off the board" << endl;
+        return false;
+    }
+    if ((board[m.from] == Board::player1 && board[m.to] == Board::player1)
         || (board[m.from] == Board::player2 && board[m.to] == Board::player2))
     {
-        cerr << "Move is outside of board or capturing own piece" << endl;
+        cerr << "Move tries to capture own piece" << endl;
         return false;
     }
 
@@ -350,6 +352,13 @@ bool GameState::valid_move(const Move m, const Players player) const
         diff = m.to - m.from;
     else
         diff = m.from - m.to;
+
+    // If up or down, can't capture
+    if (diff == board_size + 2 && board[m.to] != Board::open)
+    {
+        cerr << "Move tries to capture, but it is not a diagonal move" << endl;
+        return false;
+    }
 
     if (board_size + 1 <= diff && diff <= board_size +3)
         return true;
