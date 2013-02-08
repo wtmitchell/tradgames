@@ -196,7 +196,7 @@ bool GameState::game_over() const
     {
         // Check if piece is in last row
         if ((p.player == Players::player1 && p.location > (board_size + 2) * board_size)
-            || (p.player == Players::player2 && p.location < 2 * board_size))
+            || (p.player == Players::player2 && p.location < 2 * (board_size + 2)))
             return true;
         if (p.player == Players::player1) ++p1_count;
         if (p.player == Players::player2) ++p2_count;
