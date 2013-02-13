@@ -71,7 +71,7 @@ void play_game()
             // My turn
             if (gs->game_over())
             {
-                cerr << "I, " << name << ", have lost" << endl;
+                cerr << "By looking at the board, I know that I, " << name << ", have lost." << endl;
                 current_player = (current_player == Players::player1)
                     ? Players::player2 : Players::player1;
                 continue;
@@ -130,13 +130,13 @@ void play_game()
             else if (tokens.size() == 4 && tokens[0] == "FINAL" && tokens[2] == "BEATS")
             {
                 // Game over
-                if (tokens[2] == name && tokens[4] == opp_name)
+                if (tokens[1] == name && tokens[3] == opp_name)
                     cout << "I, " << name << ", have won!" << endl;
-                else if (tokens[4] == name && tokens[2] == opp_name)
+                else if (tokens[3] == name && tokens[1] == opp_name)
                     cout << "I, " << name << ", have lost." << endl;
                 else
                     cerr << "Did not find expected players in FINAL command.\n"
-                         << "Found '"<< tokens[2] <<"' and '" << tokens[4] << "'. "
+                         << "Found '"<< tokens[1] <<"' and '" << tokens[3] << "'. "
                          << "Expected '" << name << "' and '" << opp_name <<"'.\n"
                          << "Received message '" << server_msg << "'" << endl;
             }
