@@ -131,9 +131,9 @@ void play_game()
             {
                 // Game over
                 if (tokens[1] == name && tokens[3] == opp_name)
-                    cout << "I, " << name << ", have won!" << endl;
+                    cerr << "I, " << name << ", have won!" << endl;
                 else if (tokens[3] == name && tokens[1] == opp_name)
-                    cout << "I, " << name << ", have lost." << endl;
+                    cerr << "I, " << name << ", have lost." << endl;
                 else
                     cerr << "Did not find expected players in FINAL command.\n"
                          << "Found '"<< tokens[1] <<"' and '" << tokens[3] << "'. "
