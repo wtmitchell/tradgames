@@ -12,7 +12,8 @@ using std::vector;
 #include "Piece.h"
 #include "Players.h"
 
-enum class Board {closed, open, player1, player2};
+//enum class Board {closed, open, player1, player2};
+typedef enum {board_closed, board_open, board_player1, board_player2} Board;
 
 inline size_t row_major(size_t x, size_t y, size_t row_size)
 {

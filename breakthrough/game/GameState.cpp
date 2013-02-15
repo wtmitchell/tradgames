@@ -39,16 +39,16 @@ ostream& operator<<(ostream& os, GameState& s)
 
         switch(s.board[i])
         {
-            case Board::open:
+            case board_open:
                 os << ".";
                 break;
-            case Board::closed:
+            case board_closed:
                 os << "X";
                 break;
-            case Board::player1:
+            case board_player1:
                 os << "1";
                 break;
-            case Board::player2:
+            case board_player2:
                 os << "2";
                 break;
         }
@@ -57,7 +57,7 @@ ostream& operator<<(ostream& os, GameState& s)
     int p1_count = 0;
     int p2_count = 0;
     for (auto i : s.pieces)
-        if (i.player == Players::player1)
+        if (i.player == player1)
             ++p1_count;
         else
             ++p2_count;
@@ -66,13 +66,13 @@ ostream& operator<<(ostream& os, GameState& s)
        << "Of them, " << p1_count << " are Player 1's "
        << "and " << p2_count << " Player 2's.\n";
 
-    vector<Move> p1moves = s.get_moves(Players::player1);
+    vector<Move> p1moves = s.get_moves(player1);
     os << "Player 1 has " << p1moves.size() << " moves: ";
     for (auto m : p1moves)
         os << s.pretty_print_move(m) << ", ";
     os << "\n";
 
-    vector<Move> p2moves = s.get_moves(Players::player2);
+    vector<Move> p2moves = s.get_moves(player2);
     os << "Player 2 has " << p2moves.size() << " moves: ";
     for (auto m : p2moves)
         os << s.pretty_print_move(m) << ", ";
@@ -101,38 +101,38 @@ vector<Move> GameState::get_moves(const Players player) const
 
     for(auto p : pieces)
     {
-        if (p.player == player && player == Players::player1)
+        if (p.player == player && player == player1)
         {
             // Player 1
             size_t down_left = p.location + board_size + 1;
-            if (board[down_left] == Board::open ||
-                board[down_left] == Board::player2)
+            if (board[down_left] == board_open ||
+                board[down_left] == board_player2)
                 moves.push_back(Move(p.location, down_left));
 
             size_t down = p.location + board_size + 2;
-            if (board[down] == Board::open)
+            if (board[down] == board_open)
                 moves.push_back(Move(p.location, down));
 
             size_t down_right = p.location + board_size + 3;
-            if (board[down_right] == Board::open ||
-                board[down_right] == Board::player2)
+            if (board[down_right] == board_open ||
+                board[down_right] == board_player2)
                 moves.push_back(Move(p.location, down_right));
         }
-        else if (p.player == player && player == Players::player2)
+        else if (p.player == player && player == player2)
         {
             // Player 2
             size_t up_left = p.location - board_size - 3;
-            if (board[up_left] == Board::open ||
-                board[up_left] == Board::player1)
+            if (board[up_left] == board_open ||
+                board[up_left] == board_player1)
                 moves.push_back(Move(p.location, up_left));
 
             size_t up = p.location - board_size - 2;
-            if (board[up] == Board::open)
+            if (board[up] == board_open)
                 moves.push_back(Move(p.location, up));
 
             size_t up_right = p.location - board_size -1;
-            if (board[up_right] == Board::open ||
-                board[up_right] == Board::player1)
+            if (board[up_right] == board_open ||
+                board[up_right] == board_player1)
                 moves.push_back(Move(p.location, up_right));
         }
     }
@@ -160,11 +160,11 @@ GameState& GameState::apply_move(const Move m)
         }
 
         // Move the piece
-        board[m.from] = Board::open;
-        if (pieces[mover].player == Players::player1)
-            board[m.to] = Board::player1;
+        board[m.from] = board_open;
+        if (pieces[mover].player == player1)
+            board[m.to] = board_player1;
         else
-            board[m.to] = Board::player2;
+            board[m.to] = board_player2;
         pieces[mover].location = m.to;
 
         // Remove the captured piece if applicable
@@ -173,7 +173,7 @@ GameState& GameState::apply_move(const Move m)
     }
 
     // Change whose turn it is
-    turn = (turn == Players::player1) ? Players::player2 : Players::player1;
+    turn = (turn == player1) ? player2 : player1;
 
     return *this;
 }
@@ -195,11 +195,11 @@ bool GameState::game_over() const
     for (auto p : pieces)
     {
         // Check if piece is in last row
-        if ((p.player == Players::player1 && p.location > (board_size + 2) * board_size)
-            || (p.player == Players::player2 && p.location < 2 * (board_size + 2)))
+        if ((p.player == player1 && p.location > (board_size + 2) * board_size)
+            || (p.player == player2 && p.location < 2 * (board_size + 2)))
             return true;
-        if (p.player == Players::player1) ++p1_count;
-        if (p.player == Players::player2) ++p2_count;
+        if (p.player == player1) ++p1_count;
+        if (p.player == player2) ++p2_count;
     }
 
     // Game is over if one player has no pieces
@@ -239,9 +239,9 @@ void GameState::reset()
     for (size_t i = 0; i < board_size + 2; ++i)
         for (size_t j = 0; j < board_size + 2; ++j)
             if (i == 0 || i == (board_size + 1) || j == 0 || j == (board_size + 1))
-                board.push_back(Board::closed);
+                board.push_back(board_closed);
             else
-                board.push_back(Board::open);
+                board.push_back(board_open);
 
 
     pieces.clear();
@@ -250,8 +250,8 @@ void GameState::reset()
     for (size_t i = board_size + 3; i < 3 * (board_size + 2); ++i)
         if (i % (board_size + 2) !=  0 && i % (board_size + 2) != board_size + 1)
         {
-            pieces.push_back(Piece(i, Players::player1));
-            board[i] = Board::player1;
+            pieces.push_back(Piece(i, player1));
+            board[i] = board_player1;
         }
 
     // Player 2 pieces
@@ -259,12 +259,12 @@ void GameState::reset()
          i < (board_size + 2) * (board_size + 1); ++i)
         if (i % (board_size + 2) !=  0 && i % (board_size + 2) != board_size + 1)
         {
-            pieces.push_back(Piece(i, Players::player2));
-            board[i] = Board::player2;
+            pieces.push_back(Piece(i, player2));
+            board[i] = board_player2;
         }
 
     // Everything else
-    turn = Players::player1;
+    turn = player1;
 }
 
 Move GameState::translate_to_local(const vector<string> message) const
@@ -334,13 +334,13 @@ bool GameState::valid_move(const Move m, const Players player) const
     }
 
     // The to location either needs to be open, or occupied by an opposing piece
-    if (board[m.to] == Board::closed)
+    if (board[m.to] == board_closed)
     {
         cerr << "Move results in piece being off the board" << endl;
         return false;
     }
-    if ((board[m.from] == Board::player1 && board[m.to] == Board::player1)
-        || (board[m.from] == Board::player2 && board[m.to] == Board::player2))
+    if ((board[m.from] == board_player1 && board[m.to] == board_player1)
+        || (board[m.from] == board_player2 && board[m.to] == board_player2))
     {
         cerr << "Move tries to capture own piece" << endl;
         return false;
@@ -348,13 +348,13 @@ bool GameState::valid_move(const Move m, const Players player) const
 
     // The move needs to be a valid for the current player
     size_t diff = 0;
-    if (player == Players::player1)
+    if (player == player1)
         diff = m.to - m.from;
     else
         diff = m.from - m.to;
 
     // If up or down, can't capture
-    if (diff == board_size + 2 && board[m.to] != Board::open)
+    if (diff == board_size + 2 && board[m.to] != board_open)
     {
         cerr << "Move tries to capture, but it is not a diagonal move" << endl;
         return false;
