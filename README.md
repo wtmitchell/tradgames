@@ -64,7 +64,7 @@ To build breakthrough, the build is operating system dependent.
 
 If you are using Visual Studio 2012 on Windows, load the solution file VS2012\breakthrough.sln and build the two projects contained within.
 
-If you are using Linux, use CMake. Create a new build directory, then in a terminal execute 'cmake path/to/breakthrough; make'. Alternatively the provided makefile should work minor modifications to the CXXFLAGS line.
+If you are using Linux, use CMake. Create a new build directory, then in a terminal execute 'cmake path/to/breakthrough; make'. Alternatively the provided makefile should also work.
 
 If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
 
