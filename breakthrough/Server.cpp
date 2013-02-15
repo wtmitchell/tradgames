@@ -123,11 +123,11 @@ void Server::play_game(bool print_board, bool quiet)
             if (gs->game_over())
             {
                 // Game was just won by last played move
-                stringstream msg;
-                msg << "FINAL " << player_names[turn] << " BEATS "
-                    << player_names[(turn + 1) % 2];
-                echo.insert(msg.str());
-                cout << msg.str() << endl;
+                stringstream out_msg;
+                out_msg << "FINAL " << player_names[turn] << " BEATS "
+                        << player_names[(turn + 1) % 2];
+                echo.insert(out_msg.str());
+                cout << out_msg.str() << endl;
                 echo.insert("#quit");
                 cout << "#quit" << endl;
             }
