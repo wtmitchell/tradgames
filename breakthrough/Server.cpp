@@ -10,7 +10,6 @@ using std::set;
 #include <sstream>
 using std::stringstream;
 #include <string>
-using std::stoi;
 using std::string;
 #include <vector>
 using std::vector;
@@ -19,6 +18,7 @@ using std::vector;
 
 #include "Client.h"
 #include "game/GameState.h"
+#include "String.h"
 #include "Timer.h"
 
 Server::Server()
@@ -82,7 +82,7 @@ void Server::play_game(bool print_board, bool quiet)
         }
 
         if (tokens.size() == 7
-            && static_cast<size_t>(stoi(tokens[0])) == player_ids[turn]
+            && static_cast<size_t>(String::stoi(tokens[0])) == player_ids[turn]
             && tokens[1] == "MOVE"
             && tokens[4] == "TO")
         {
@@ -154,7 +154,7 @@ void Server::wait_for_start() throw (logic_error)
         string response;
         vector<string> tokens = Client::read_msg_and_tokenize(&response);
 
-        int players = stoi(tokens[1]);
+        int players = String::stoi(tokens[1]);
 
         if (tokens.size() == 2 && tokens[0] == "#players" && players >= 3)
         {
@@ -165,7 +165,7 @@ void Server::wait_for_start() throw (logic_error)
                 string name_response;
                 vector<string> name_tokens = Client::read_msg_and_tokenize(&name_response);
                 if (name_tokens.size() == 3 && name_tokens[0] == "#getname" &&
-                    stoi(name_tokens[1]) == i)
+                    String::stoi(name_tokens[1]) == i)
                 {
                     names.push_back(name_tokens[2]);
                 }

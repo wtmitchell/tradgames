@@ -9,6 +9,9 @@ using std::ostringstream;
 
 #include "GameState.h"
 
+// Use stoi out of String.h, could be replaced with std::stoi in C++11
+#include "../String.h"
+
 ostream& operator<<(ostream& os, GameState& s)
 {
     os << "--------------------------------------------------------------\n";
@@ -275,14 +278,14 @@ Move GameState::translate_to_local(const vector<string> message) const
     if (message[0] == "MOVE")
     {
         // Message source is a client
-        from = message[1].at(0) - 'a' + 1 + stoi(message[2]) * (board_size + 2);
-        to = message[4].at(0) - 'a' + 1 + stoi(message[5]) * (board_size + 2);
+        from = message[1].at(0) - 'a' + 1 + String::stoi(message[2]) * (board_size + 2);
+        to = message[4].at(0) - 'a' + 1 + String::stoi(message[5]) * (board_size + 2);
     }
     else
     {
         // Message source is the server
-        from = message[2].at(0) - 'a' + 1 + stoi(message[3]) * (board_size + 2);
-        to = message[5].at(0) - 'a' + 1 + stoi(message[6]) * (board_size + 2);
+        from = message[2].at(0) - 'a' + 1 + String::stoi(message[3]) * (board_size + 2);
+        to = message[5].at(0) - 'a' + 1 + String::stoi(message[6]) * (board_size + 2);
     }
 
     return Move(from, to);

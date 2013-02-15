@@ -49,5 +49,9 @@ namespace String
         }
         return tokens;
     }
+
+    inline int stoi(std::string str) {
+        return atoi(str.c_str());
+    }
 }
 #endif
