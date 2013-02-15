@@ -59,7 +59,7 @@ ostream& operator<<(ostream& os, GameState& s)
 
     int p1_count = 0;
     int p2_count = 0;
-    for (vector<Piece>::const_iterator i = s.pieces.cbegin(), e = s.pieces.cend(); i != e; ++i)
+    for (vector<Piece>::const_iterator i = s.pieces.begin(), e = s.pieces.end(); i != e; ++i)
         if (i->player == player1)
             ++p1_count;
         else
@@ -71,13 +71,13 @@ ostream& operator<<(ostream& os, GameState& s)
 
     vector<Move> p1moves = s.get_moves(player1);
     os << "Player 1 has " << p1moves.size() << " moves: ";
-    for (vector<Move>::const_iterator m = p1moves.cbegin(), e = p1moves.cend(); m != e; ++m)
+    for (vector<Move>::const_iterator m = p1moves.begin(), e = p1moves.end(); m != e; ++m)
         os << s.pretty_print_move(*m) << ", ";
     os << "\n";
 
     vector<Move> p2moves = s.get_moves(player2);
     os << "Player 2 has " << p2moves.size() << " moves: ";
-    for (vector<Move>::const_iterator m = p2moves.cbegin(), e = p2moves.cend(); m != e; ++m)
+    for (vector<Move>::const_iterator m = p2moves.begin(), e = p2moves.end(); m != e; ++m)
         os << s.pretty_print_move(*m) << ", ";
     os << "\n";
 
@@ -102,7 +102,7 @@ vector<Move> GameState::get_moves(const Players player) const
 {
     vector<Move> moves;
 
-    for(vector<Piece>::const_iterator p = pieces.cbegin(), e = pieces.cend(); p != e; ++p)
+    for(vector<Piece>::const_iterator p = pieces.begin(), e = pieces.end(); p != e; ++p)
     {
         if (p->player == player && player == player1)
         {
@@ -195,7 +195,7 @@ bool GameState::game_over() const
     int p1_count = 0;
     int p2_count = 0;
 
-    for (vector<Piece>::const_iterator p = pieces.cbegin(), e = pieces.cend(); p != e; ++p)
+    for (vector<Piece>::const_iterator p = pieces.begin(), e = pieces.end(); p != e; ++p)
     {
         // Check if piece is in last row
         if ((p->player == player1 && p->location > (board_size + 2) * board_size)
