@@ -30,8 +30,8 @@ ostream& operator<<(ostream& os, Timer& t)
        << setw(2) << ss.count() << "s "
        << setw(3) << ms.count() << "ms";
 #elif defined(POSIX_TIMING)
-    auto seconds = t.stop_time.tv_sec - t.start_time.tv_sec;
-    auto useconds = t.stop_time.tv_usec - t.start_time.tv_usec;
+    time_t seconds = t.stop_time.tv_sec - t.start_time.tv_sec;
+    suseconds_t useconds = t.stop_time.tv_usec - t.start_time.tv_usec;
 
     // The subtraction could leave negative time which makes no sense, correct it
     if (useconds < 0)
@@ -40,10 +40,10 @@ ostream& operator<<(ostream& os, Timer& t)
         useconds += 1e6;
     }
 
-    auto hh = seconds / (60*60);
-    auto mm = (seconds / 60) % 60;
-    auto ss = seconds % 60;
-    auto ms = useconds / 1000;
+    time_t hh = seconds / (60*60);
+    time_t mm = (seconds / 60) % 60;
+    time_t ss = seconds % 60;
+    suseconds_t ms = useconds / 1000;
 
     os << setw(2) << hh << "h "
        << setw(2) << mm << "m "

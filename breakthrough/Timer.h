@@ -2,10 +2,10 @@
 #define TIMER_H
 
 // Determine how timing should occur
-#if __APPLE__ && _POSIX_C_SOURCE
+#if defined(__APPLE__)
     // Fall back to POSIX style gettimeofday timing on OSX
     #define POSIX_TIMING
-#elif __cplusplus >= 201103L || _MSC_VER >= 1700L
+#elif (defined(__cplusplus) && __cplusplus >= 201103L) || (defined(_MSC_VER) && _MSC_VER >= 1700L)
     // Use C++11 std::chrono for timing
     // _MSC_VER >= 1700L implies VS2012 or newer
     // __cplusplus >= 201203L is defined by the C++11 standard
