@@ -56,8 +56,8 @@ ostream& operator<<(ostream& os, GameState& s)
 
     int p1_count = 0;
     int p2_count = 0;
-    for (auto i : s.pieces)
-        if (i.player == player1)
+    for (vector<Piece>::const_iterator i = s.pieces.cbegin(), e = s.pieces.cend(); i != e; ++i)
+        if (i->player == player1)
             ++p1_count;
         else
             ++p2_count;
@@ -68,14 +68,14 @@ ostream& operator<<(ostream& os, GameState& s)
 
     vector<Move> p1moves = s.get_moves(player1);
     os << "Player 1 has " << p1moves.size() << " moves: ";
-    for (auto m : p1moves)
-        os << s.pretty_print_move(m) << ", ";
+    for (vector<Move>::const_iterator m = p1moves.cbegin(), e = p1moves.cend(); m != e; ++m)
+        os << s.pretty_print_move(*m) << ", ";
     os << "\n";
 
     vector<Move> p2moves = s.get_moves(player2);
     os << "Player 2 has " << p2moves.size() << " moves: ";
-    for (auto m : p2moves)
-        os << s.pretty_print_move(m) << ", ";
+    for (vector<Move>::const_iterator m = p2moves.cbegin(), e = p2moves.cend(); m != e; ++m)
+        os << s.pretty_print_move(*m) << ", ";
     os << "\n";
 
     os << "--------------------------------------------------------------"
@@ -99,41 +99,41 @@ vector<Move> GameState::get_moves(const Players player) const
 {
     vector<Move> moves;
 
-    for(auto p : pieces)
+    for(vector<Piece>::const_iterator p = pieces.cbegin(), e = pieces.cend(); p != e; ++p)
     {
-        if (p.player == player && player == player1)
+        if (p->player == player && player == player1)
         {
             // Player 1
-            size_t down_left = p.location + board_size + 1;
+            size_t down_left = p->location + board_size + 1;
             if (board[down_left] == board_open ||
                 board[down_left] == board_player2)
-                moves.push_back(Move(p.location, down_left));
+                moves.push_back(Move(p->location, down_left));
 
-            size_t down = p.location + board_size + 2;
+            size_t down = p->location + board_size + 2;
             if (board[down] == board_open)
-                moves.push_back(Move(p.location, down));
+                moves.push_back(Move(p->location, down));
 
-            size_t down_right = p.location + board_size + 3;
+            size_t down_right = p->location + board_size + 3;
             if (board[down_right] == board_open ||
                 board[down_right] == board_player2)
-                moves.push_back(Move(p.location, down_right));
+                moves.push_back(Move(p->location, down_right));
         }
-        else if (p.player == player && player == player2)
+        else if (p->player == player && player == player2)
         {
             // Player 2
-            size_t up_left = p.location - board_size - 3;
+            size_t up_left = p->location - board_size - 3;
             if (board[up_left] == board_open ||
                 board[up_left] == board_player1)
-                moves.push_back(Move(p.location, up_left));
+                moves.push_back(Move(p->location, up_left));
 
-            size_t up = p.location - board_size - 2;
+            size_t up = p->location - board_size - 2;
             if (board[up] == board_open)
-                moves.push_back(Move(p.location, up));
+                moves.push_back(Move(p->location, up));
 
-            size_t up_right = p.location - board_size -1;
+            size_t up_right = p->location - board_size -1;
             if (board[up_right] == board_open ||
                 board[up_right] == board_player1)
-                moves.push_back(Move(p.location, up_right));
+                moves.push_back(Move(p->location, up_right));
         }
     }
 
@@ -192,14 +192,14 @@ bool GameState::game_over() const
     int p1_count = 0;
     int p2_count = 0;
 
-    for (auto p : pieces)
+    for (vector<Piece>::const_iterator p = pieces.cbegin(), e = pieces.cend(); p != e; ++p)
     {
         // Check if piece is in last row
-        if ((p.player == player1 && p.location > (board_size + 2) * board_size)
-            || (p.player == player2 && p.location < 2 * (board_size + 2)))
+        if ((p->player == player1 && p->location > (board_size + 2) * board_size)
+            || (p->player == player2 && p->location < 2 * (board_size + 2)))
             return true;
-        if (p.player == player1) ++p1_count;
-        if (p.player == player2) ++p2_count;
+        if (p->player == player1) ++p1_count;
+        if (p->player == player2) ++p2_count;
     }
 
     // Game is over if one player has no pieces

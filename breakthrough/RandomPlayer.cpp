@@ -72,8 +72,7 @@ void play_game()
             if (gs->game_over())
             {
                 cerr << "By looking at the board, I know that I, " << name << ", have lost." << endl;
-                current_player = (current_player == Players::player1)
-                    ? Players::player2 : Players::player1;
+                current_player = (current_player == player1) ? player2 : player1;
                 continue;
             }
             // Determine next move
@@ -95,8 +94,7 @@ void play_game()
                 // Concede to the server so we know what is going on
                 cout << "# I, " << name << ", have no moves to play." << endl;
 
-                current_player = (current_player == Players::player1)
-                    ? Players::player2 : Players::player1;
+                current_player = (current_player == player1) ? player2 : player1;
                 // End game locally, server should detect and send #quit
                 continue;
             }
@@ -105,8 +103,7 @@ void play_game()
             print_and_recv_echo(gs->pretty_print_move(m));
 
             // It is the opponents turn
-            current_player = (current_player == Players::player1)
-                ? Players::player2 : Players::player1;
+            current_player = (current_player == player1) ? player2 : player1;
         }
         else
         {
@@ -124,8 +121,7 @@ void play_game()
                 gs->apply_move(m);
 
                 // It is now my turn
-                current_player = (current_player == Players::player1)
-                    ? Players::player2 : Players::player1;
+                current_player = (current_player == player1) ? player2 : player1;
             }
             else if (tokens.size() == 4 && tokens[0] == "FINAL" && tokens[2] == "BEATS")
             {
@@ -176,14 +172,14 @@ void wait_for_start()
             {
                 // We go first!
                 opp_name = tokens[3];
-                my_player = Players::player1;
+                my_player = player1;
                 break;
             }
             else if (tokens[3] == name)
             {
                 // They go first
                 opp_name = tokens[2];
-                my_player = Players::player2;
+                my_player = player2;
                 break;
             }
             else
@@ -199,5 +195,5 @@ void wait_for_start()
     }
 
     // Player 1 goes first
-    current_player = Players::player1;
+    current_player = player1;
 }
