@@ -5,6 +5,9 @@ breakthrough_master
 breakthrough_random
 !breakthrough_random/
 
+# conventional CMake directory
+build/
+
 # Visual Studio build stuff
 *.exe
 *.ilk

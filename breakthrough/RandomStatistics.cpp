@@ -44,15 +44,16 @@ void collect_random_statistics()
     acc::accumulator_set<size_t, acc::stats<acc::tag::mean, acc::tag::count,
         acc::tag::variance, acc::tag::min, acc::tag::max> > game_lengths;
 
-    // The bucketed accumulators allow games of up to 200 moves
+    // The bucketed accumulators need a max theoretical limit
+    const int max_game_length = 200; // Note divisible by 20, 10, and 5
     acc::accumulator_set<size_t, acc::stats<acc::tag::mean, acc::tag::count,
         acc::tag::variance> > bfactor_all; // All turns
     acc::accumulator_set<size_t, acc::stats<acc::tag::mean, acc::tag::count,
-        acc::tag::variance> > bfactor_20[10]; // Groups of 20
+        acc::tag::variance> > bfactor_20[max_game_length/20]; // Groups of 20
     acc::accumulator_set<size_t, acc::stats<acc::tag::mean, acc::tag::count,
-        acc::tag::variance> > bfactor_10[20]; // Groups of 10
+        acc::tag::variance> > bfactor_10[max_game_length/10]; // Groups of 10
     acc::accumulator_set<size_t, acc::stats<acc::tag::mean, acc::tag::count,
-        acc::tag::variance> > bfactor_5[40]; // Groups of 5
+        acc::tag::variance> > bfactor_5[max_game_length/5]; // Groups of 5
 
     unsigned int p1_wins = 0;
 
