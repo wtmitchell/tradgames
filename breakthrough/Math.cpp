@@ -26,6 +26,7 @@ unsigned int Math::uniform_rand(const unsigned int max)
 
     while(result > rand_limit)
     {
+        // Safe type conversion since rand returns in [0, RAND_MAX]
         result = rand();
     }
 
