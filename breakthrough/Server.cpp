@@ -24,9 +24,16 @@ using std::vector;
 Server::Server()
 {
     gs = new GameState();
+    logging = false;
 }
 
-void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
+Server::~Server()
+{
+    if (log_file.is_open())
+        log_file.close();
+}
+
+void Server::play_game(bool print_board, bool quiet, double turn_time_limit, bool log_game)
 {
     // Identify myself
     cout << "#name server\n"
@@ -42,8 +49,9 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
         return;
     }
 
-    // Store the server's set of messages it is waiting to hear echoed
-    set<string> echo;
+    // Set up logging
+    if (log_game)
+        set_up_logging();
 
     // Setup the timer
     Timer *move_timer = new Timer();
@@ -51,15 +59,14 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
     // Start game
     stringstream cmd;
     cmd << "BEGIN BREAKTHROUGH " << player_names[0] << " " << player_names[1];
-
-    cout << cmd.str() << endl;
-    echo.insert(cmd.str());
+    broadcast(cmd.str());
 
     // start timer
     move_timer->start();
 
     // Player 1 has turn 0
     int turn = 0;
+    turn_count = 0;
 
     // Main game loop
     for (;;)
@@ -73,7 +80,6 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
 
         // Look for echoes
         set<string>::iterator it = echo.find(msg);
-
         if (it != echo.end())
         {
             // We received an expected echo
@@ -86,21 +92,28 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
             && tokens[1] == "MOVE"
             && tokens[4] == "TO")
         {
+            ++turn_count;
             // Print out turn and time information
-            cerr << "Turn by " << player_ids[turn] << ":" << player_names[turn]
-                 << " took " << *move_timer << endl;
+            stringstream time_msg;
+            time_msg << "Turn "<< turn_count << " by " << player_ids[turn] << ":"
+                     << player_names[turn] << " took " << *move_timer;
+            diagnostic(time_msg.str());
 
             // Took too long
             if (move_timer->seconds_elapsed() > turn_time_limit)
             {
-                cerr << "Too long. Exceeds time limit of " << turn_time_limit << " seconds. "
-                     << player_ids[turn] << ":" << player_names[turn]
-                     << " forfeits." << endl;
+                stringstream forfeit_msg;
+                forfeit_msg << "Too long. Exceeds time limit of " << turn_time_limit << " seconds. "
+                            << player_ids[turn] << ":" << player_names[turn]
+                            << " forfeits.";
+                diagnostic(forfeit_msg.str());
+
                 if (print_board)
                     cerr << *gs << endl;
-                cout << "FINAL " << player_names[(turn + 1) % 2] << " BEATS "
-                     << player_names[turn] << "\n#quit" << endl;
-                break;
+
+                final((turn + 1) % 2, turn);
+                broadcast("#quit");
+                continue;
             }
 
 
@@ -113,17 +126,18 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
                 // Display board if requested
                 if (print_board)
                     cerr << *gs << endl;
-                cerr << "Invalid move: " << msg << endl;
-                cout << "FINAL " << player_names[(turn + 1) % 2] << " BEATS "
-                     << player_names[turn]
-                     << "\n#quit" << endl;
-                break;
+                stringstream invalid_msg;
+                invalid_msg << "Invalid move: " << msg;
+                diagnostic(invalid_msg.str());
+
+                final((turn + 1) % 2, turn);
+                broadcast("#quit");
+                continue;
             }
 
             // Apply move and echo it
             gs->apply_move(m);
-            echo.insert(gs->pretty_print_move(m));
-            cout << gs->pretty_print_move(m) << endl;
+            broadcast(gs->pretty_print_move(m));
 
             // Start timer for next player's move
             move_timer->start();
@@ -136,13 +150,9 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
             if (gs->game_over())
             {
                 // Game was just won by last played move
-                stringstream out_msg;
-                out_msg << "FINAL " << player_names[turn] << " BEATS "
-                        << player_names[(turn + 1) % 2];
-                echo.insert(out_msg.str());
-                cout << out_msg.str() << endl;
-                echo.insert("#quit");
-                cout << "#quit" << endl;
+                final(turn, (turn + 1) % 2);
+                broadcast("#quit");
+                continue;
             }
 
             // Alternate whose turn
@@ -153,9 +163,7 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
             if (!quiet)
                 cerr << "Received unknown or out of turn message: " << msg << endl;
         }
-
     }
-    cerr << "Quitting" << endl;
 }
 
 void Server::wait_for_start() throw (logic_error)
@@ -219,4 +227,38 @@ void Server::wait_for_start() throw (logic_error)
              << endl;
         throw(logic_error("Duplicate names"));
     }
+}
+
+// Open files for logging
+void Server::set_up_logging()
+{
+    string filename = player_names[0] + "-vs-" + player_names[1] + ".txt";
+    log_file.open(filename.c_str());
+    logging = true;
+}
+
+void Server::broadcast(const string& msg)
+{
+    echo.insert(msg);
+    if (logging)
+        log_file << msg << endl;
+    cout << msg << endl;
+}
+
+void Server::diagnostic(const string& msg)
+{
+    if (logging)
+        log_file << "# " << msg << endl;
+    cerr << msg << endl;
+}
+
+void Server::final(size_t winner, size_t loser)
+{
+    stringstream final_msg;
+    final_msg << "FINAL " << player_names[winner] << " BEATS "
+              << player_names[loser];
+    broadcast(final_msg.str());
+    stringstream movecount_msg;
+    movecount_msg << turn_count << " moves were played in total";
+    diagnostic(movecount_msg.str());
 }
