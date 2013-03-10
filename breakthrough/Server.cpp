@@ -26,7 +26,7 @@ Server::Server()
     gs = new GameState();
 }
 
-void Server::play_game(bool print_board, bool quiet)
+void Server::play_game(bool print_board, bool quiet, double turn_time_limit)
 {
     // Identify myself
     cout << "#name server\n"
@@ -90,6 +90,19 @@ void Server::play_game(bool print_board, bool quiet)
             cerr << "Turn by " << player_ids[turn] << ":" << player_names[turn]
                  << " took " << *move_timer << endl;
 
+            // Took too long
+            if (move_timer->seconds_elapsed() > turn_time_limit)
+            {
+                cerr << "Too long. Exceeds time limit of " << turn_time_limit << " seconds. "
+                     << player_ids[turn] << ":" << player_names[turn]
+                     << " forfeits." << endl;
+                if (print_board)
+                    cerr << *gs << endl;
+                cout << "FINAL " << player_names[(turn + 1) % 2] << " BEATS "
+                     << player_names[turn] << "\n#quit" << endl;
+                break;
+            }
+
 
             // Received move from current player
             Move m = gs->translate_to_local(tokens);
@@ -101,8 +114,8 @@ void Server::play_game(bool print_board, bool quiet)
                 if (print_board)
                     cerr << *gs << endl;
                 cerr << "Invalid move: " << msg << endl;
-                cout << "FINAL " << player_names[turn] << " BEATS "
-                     << player_names[(turn + 1) % 2]
+                cout << "FINAL " << player_names[(turn + 1) % 2] << " BEATS "
+                     << player_names[turn]
                      << "\n#quit" << endl;
                 break;
             }
