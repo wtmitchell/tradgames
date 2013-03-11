@@ -104,6 +104,7 @@ void Server::play_game(bool print_board, bool quiet, double turn_time_limit, boo
             {
                 stringstream forfeit_msg;
                 forfeit_msg << "Too long. Exceeds time limit of " << turn_time_limit << " seconds. "
+                            << "Took " << move_timer->seconds_elapsed() << " seconds. "
                             << player_ids[turn] << ":" << player_names[turn]
                             << " forfeits.";
                 diagnostic(forfeit_msg.str());
