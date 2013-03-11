@@ -61,7 +61,7 @@ double Timer::seconds_elapsed()
 #if defined(CPP11_TIMING)
     return static_cast<double>(duration_cast<milliseconds>(elapsed).count()) / 1000;
 #elif defined(POSIX_TIMING)
-    return seconds + static_cast<double>(useconds) / 1000;
+    return seconds + static_cast<double>(useconds) / 1000000;
 #endif
 }
 
