@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <string>
 
 #include "ChineseCheckers/State.h"
@@ -22,10 +23,16 @@ TEST(State, getMoves) {
 
   // This assumes the order of returned moves which is not a safe assumption
   // in general
+  expected.push_back({2, 20});
+  expected.push_back({2, 4});
   expected.push_back({3, 12});
   expected.push_back({3, 4});
+  expected.push_back({10, 28});
+  expected.push_back({10, 12});
   expected.push_back({11, 20});
   expected.push_back({11, 12});
+  expected.push_back({18, 36});
+  expected.push_back({18, 20});
   expected.push_back({19, 28});
   expected.push_back({19, 20});
   expected.push_back({27, 36});
@@ -34,6 +41,6 @@ TEST(State, getMoves) {
   s.getMoves(moves);
 
   EXPECT_EQ(expected.size(), moves.size());
-  for (unsigned i = 0, e = expected.size(); i != e; ++i)
+  for (size_t i = 0, e = expected.size(); i != e; ++i)
     EXPECT_EQ(expected[i], moves[i]) << "i = " << i;
 }

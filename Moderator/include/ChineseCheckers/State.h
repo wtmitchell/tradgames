@@ -59,9 +59,14 @@ public:
 
   // Dump out the current state, usable with loadState
   std::string dumpState() const;
+
 private:
-  std::array<int, 81> board;
+  // mutable due to how we find jump moves
+  mutable std::array<int, 81> board;
   bool currentPlayer;
+
+  void getMovesSingleStep(std::vector<Move> &moves, unsigned from) const;
+  void getMovesJumps(std::vector<Move> &moves, unsigned from, unsigned current) const;
 };
 } // namespace ChineseCheckers
 
