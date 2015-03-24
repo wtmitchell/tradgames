@@ -1,6 +1,7 @@
 //===------------------------------------------------------------*- C++ -*-===//
 #include "ChineseCheckers/State.h"
 
+#include <algorithm>
 #include <array>
 #include <sstream>
 #include <string>
@@ -36,12 +37,42 @@ void State::getMoves(std::vector<Move> &moves) const {
 }
 
 bool State::applyMove(Move m) {
-  return false; // TODO
+  // Ensure the from and to are reasonable
+  if (m.from > 80 || m.to > 80 || m.from == m.to)
+    return false;
+
+  // Check the move
+  if (!isMoveValid(m))
+    return false;
+
+  // Apply the move
+  std::swap(board[m.from], board[m.to]);
+
+  // Update whose turn it is
+  swapTurn();
+
+  return true;
 }
 
 bool State::undoMove(Move m) {
-  std::swap(m.from, m.to);
-  return applyMove(m);
+  // Ensure the from and to are reasonable
+  if (m.from > 80 || m.to > 80 || m.from == m.to)
+    return false;
+
+  // Undo the move
+  std::swap(board[m.from], board[m.to]);
+  swapTurn();
+
+  // Check the move is valid from this state that is back one step
+  if (!isMoveValid(m)) {
+    // Woops, it was not valid, undo our changes
+    swapTurn();
+    std::swap(board[m.from], board[m.to]);
+
+    return false;
+  }
+
+  return true;
 }
 
 bool State::gameOver() const {
@@ -147,6 +178,26 @@ void State::getMovesJumps(std::vector<Move> &moves, unsigned from,
 
   // Restore the current state
   board[current] = originalCurrent;
+}
+
+
+bool State::isMoveValid(const Move &m) const {
+  // Ensure from and to make sense
+  if (board[m.from] != currentPlayer || board[m.to] != 0)
+    return false;
+
+  // Get current available moves
+  std::vector<Move> moves;
+  getMoves(moves);
+
+  // Find the move among the set of available moves
+  bool found = std::find(moves.begin(), moves.end(), m) != moves.end();
+
+  return found;
+}
+
+void State::swapTurn() {
+  currentPlayer = ((currentPlayer + 1) % 2) + 1;
 }
 
 } // namespace ChineseCheckers

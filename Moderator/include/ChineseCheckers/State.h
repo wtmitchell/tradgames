@@ -3,6 +3,8 @@
 /// \file
 /// \brief Defines the Chinese Checkers game state
 ///
+/// Note: Many aspects of this State are inefficient to make the code clearer
+///
 //===----------------------------------------------------------------------===//
 #ifndef CHINESECHECKERS_STATE_H_INCLUDED
 #define CHINESECHECKERS_STATE_H_INCLUDED
@@ -67,6 +69,10 @@ private:
 
   void getMovesSingleStep(std::vector<Move> &moves, unsigned from) const;
   void getMovesJumps(std::vector<Move> &moves, unsigned from, unsigned current) const;
+
+  bool isMoveValid(const Move &m) const;
+
+  void swapTurn();
 };
 } // namespace ChineseCheckers
 

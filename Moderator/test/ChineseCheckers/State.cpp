@@ -44,3 +44,31 @@ TEST(State, getMoves) {
   for (size_t i = 0, e = expected.size(); i != e; ++i)
     EXPECT_EQ(expected[i], moves[i]) << "i = " << i;
 }
+
+void DepthLimitedDFS(ChineseCheckers::State &s, int depth);
+
+void DepthLimitedDFS(ChineseCheckers::State &s, int depth) {
+  if (depth == 0)
+    return;
+
+  std::vector<ChineseCheckers::Move> moves;
+  s.getMoves(moves);
+
+  for (const auto m : moves) {
+    EXPECT_TRUE(s.applyMove(m)) << "depth = " << depth << " move = " << m
+                                << " state = " << s.dumpState();
+    DepthLimitedDFS(s, depth - 1);
+    EXPECT_TRUE(s.undoMove(m)) << "depth = " << depth << " move = " << m
+                               << " state = " << s.dumpState();
+  }
+}
+
+TEST(State, DepthLimitedDFS3) {
+  ChineseCheckers::State s;
+
+  std::string original = s.dumpState();
+
+  DepthLimitedDFS(s, 3);
+
+  EXPECT_EQ(original, s.dumpState());
+}
