@@ -11,6 +11,12 @@ bool operator==(const Move &lhs, const Move &rhs) {
   return lhs.from == rhs.from && lhs.to == rhs.to;
 }
 
+std::ostream &operator<<(std::ostream &out, const Move &m) {
+  out << "{" << m.from << ", " << m.to << "}";
+  return out;
+}
+
+
 State::State()
     : board{{1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
              0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

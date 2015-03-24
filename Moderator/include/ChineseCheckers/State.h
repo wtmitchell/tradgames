@@ -8,6 +8,7 @@
 #define CHINESECHECKERS_STATE_H_INCLUDED
 
 #include <array>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ struct Move {
 };
 
 bool operator==(const Move &lhs, const Move &rhs);
+std::ostream &operator<<(std::ostream &out, const Move &m);
 
 class State {
 public:
