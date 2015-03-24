@@ -84,7 +84,7 @@ The format is the digit 1 or 2 indicating whose turn it is, followed by a space,
     1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2
 
 This corresponds to the board position:
-![Board](board.png)
+![Board](board.png?raw=true)
 
 #### `LOADSTATE new_state`
 Directs the agent to load new_state as the current state. The format is identical to that of `DUMPSTATE`.
