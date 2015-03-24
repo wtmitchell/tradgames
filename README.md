@@ -76,9 +76,16 @@ As with `BEGIN`, the names declared by the `#name` command will be used in place
 #### `LISTMOVES`
 Directs the agent to list all the valid moves for the current board state. TODO specify format
 #### `DUMPSTATE`
-Directs the agent to print out the current game state. TODO specify format
+Directs the agent to print out the current game state.
+The format is the digit 1 or 2 indicating whose turn it is, followed by a space, followed by 81 integers valued 0, 1, or 2, indicating an empty square, a place occupied by player 1, or a place occupied by player 2. For example, the state prior to the game starting should be:
+
+    1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2
+
+This corresponds to the board position:
+![Image](../blob/master/board.svg?raw=true)
+
 #### `LOADSTATE new_state`
-Directs the agent to load new_state as the current state. TODO specify format
+Directs the agent to load new_state as the current state. The format is identical to that of `DUMPSTATE`.
 #### `MOVE from_location TO to_location`
 Moves the piece at `from_location` to `to_location`.
 An agent will receive this command to indicate an opponents move.
@@ -110,3 +117,5 @@ If you are using Linux, use CMake. Create a new build directory, then in a termi
 If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
 
 If there are any problems compiling, please contact Will.
+
+The board image originally from [Wikimedia Commons](http://commons.wikimedia.org/wiki/File:Chinese_checkers_start_positions.svg) license under CC BY-SA.
