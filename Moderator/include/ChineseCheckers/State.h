@@ -8,9 +8,17 @@
 #define CHINESECHECKERS_STATE_H_INCLUDED
 
 #include <array>
+#include <string>
 #include <vector>
 
 namespace ChineseCheckers {
+struct Move {
+  unsigned from;
+  unsigned to;
+};
+
+bool operator==(const Move &lhs, const Move &rhs);
+
 class State {
 public:
   // Initialize with the starting state for a 2 player game
@@ -51,3 +59,5 @@ private:
   bool currentPlayer;
 };
 } // namespace ChineseCheckers
+
+#endif

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(PPRL)
+project(MODERATOR)
 
 set (PROJECT_VERSION_MAJOR 0)
 set (PROJECT_VERSION_MINOR 1)
@@ -47,9 +47,24 @@ else()
   endif()
 endif()
 
-add_subdirectory(apps)
-add_subdirectory(include)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
+enable_testing()
+
+#add_subdirectory(apps)
 add_subdirectory(lib)
+add_subdirectory(test)
+add_subdirectory(util)
+
+# Setup valgrind tools
+find_program(VALGRIND_PROGRAM NAMES valgrind)
+if (VALGRIND_PROGRAM)
+  set(VALGRIND_FOUND TRUE)
+  set(VALGRIND_MEMCHECK_OPTIONS "--tool=memcheck --error-exitcode=1 --leak-check=full --show-reachable=yes --track-origins=yes --trace-children=yes")
+  set(VALGRIND_MEMCHECK "${VALGRIND_PROGRAM} ${VALGRIND_MEMCHECK_OPTIONS}")
+  separate_arguments(VALGRIND_MEMCHECK)
+  add_custom_target(memcheck-all)
+endif (VALGRIND_PROGRAM)
 
 # clang-format stuff
 file(GLOB_RECURSE format_files apps/*.cpp include/*.h lib/*.cpp)

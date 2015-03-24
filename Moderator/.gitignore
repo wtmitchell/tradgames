@@ -1,20 +1,2 @@
-# Build files from makefile build
-*.o
-breakthrough_master
-!breakthrough_master/
-breakthrough_random
-!breakthrough_random/
-
 # conventional CMake directory
 build/
-
-# Visual Studio build stuff
-*.exe
-*.ilk
-*.pdb
-*.sdf
-*.opensdf
-*.suo
-
-Debug/
-Release/

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Notes
+# -----
+
+# This directory contains Google Test svn R654 in a stripped down form. The procedure
+# for stripping was taken from that of LLVM (http://llvm.org). See their
+# utils/unittest/googletest directory for more information.
+
+# This stripped version removes all elements except for the actual source code
+# of Google Test.
+
+# Cleaned up as follows:
+
+# Remove all the unnecessary files and directories
+rm -f aclocal* CMakeLists.txt configure* Makefile* CHANGES CONTRIBUTORS README
+rm -rf build-aux cmake codegear fused-src m4 make msvc samples scripts test xcode
+rm -f `find . -name \*\.pump`
+
+# Move all the source files to the current directory
+mv src/* .
+rmdir src
+
+# Move extra headers into the already-existing internal headers dir
+mv *.h include/gtest/internal/
+
+# Update paths to the included files
+perl -pi -e 's|^#include "src/|#include "gtest/internal/|' *.cc
+
