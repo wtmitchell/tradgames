@@ -1,77 +1,20 @@
-Code for AI for Traditional Games
-=================================
+# Code for AI for Traditional Games Spring 2015
 
 There are two programs in this repository:
 
-1. GameMaster - A Java program that controls the interactions between agents and a master running the game.
+1. GameMaster - A Java program that controls the interactions between agents and a moderator running the game.
 
-2. breakthrough - A C++ program that implements a server to play the game breakthrough.
+2. ChineseCheckersModerator - A C++ program that validates moves and moderates the play of a game of Chinese Checkers
 
 
-GameMaster
-----------
+## GameMaster
 GameMaster is a Java programs that controls the interactions between agents and a master running the game.
+It has both a command line interface and a graphical user interface.
 
-The following commands are server commands:
-<dl>
-    <dt>#getname ID</dt>
-    <dd>Returns the name of player with ID.</dd>
-    <dt>#master</dt>
-    <dd>Tells the server that the programs should receive all messages and sends broadcasts.</dd>
-    <dt>#name NAME</dt>
-    <dd>Declares the current agent to be named NAME. No spaces are allowed. The names server and observer are reserved.</dd>
-    <dt>#players</dt>
-    <dd>Returns the number of connected players.</dd>
-    <dt>#quit</dt>
-    <dd>Immediately terminates the game. This message is always broadcast to all clients.</dd>
-</dl>
+### GUI (WIP)
+If GameMaster is executed with no arguments the GUI interface is loaded.
 
-Any other command sent with a # prefix will be ignored and not sent on to the other clients.
-
-breakthrough
-------------
-breakthrough is a C++ program that plays the game [breakthrough][btwiki]
-
-During the game, the following commands will be issued:
-<dl>
-    <dt>BEGIN BREAKTHROUGH player1 player2</dt>
-    <dd>Starts a game using with player1 starting first. The names player1 and player2 will be replaced with the names provided to the server with the #name command.</dd>
-    <dt>FINAL winner BEATS loser</dt>
-    <dd>Declares the game over with the winner and loser specified. As with BEGIN, the names declared by the #name command will be used in place of winner and loser.</dd>
-</d>
-
-During the game, there is only one valid command to send:
-<dl>
-    <dt>MOVE from_location TO to_location</dt>
-    <dd>Moves the piece at from_location to to_location. Locations are specified with a letter and number, separated by a space. The letter designates the column and the number the row. The locations are the same as <a href="http://en.wikipedia.org/wiki/Algebraic_chess_notation">algebraic chess notation</a> except since all pieces are the same, no notation of the pieces are made. An example move is "MOVE a 2 TO a 3".</dd>
-</dl>
-
-At the start of the game, player1 has their pieces in rows 1 and 2, whereas player2 has their pieces in rows 7 and 8.
-
-[btwiki]: http://en.wikipedia.org/wiki/Breakthrough_%28board_game%29
-
-Your Program
-------------
-To make your program interact, it will communicate over stdin and stdout (System.in and System.out in Java). You may freely write to stderr (System.err) if you wish to see diagnostic information during game play.
-
-See the source breakthrough/src/RandomPlayer.cpp to see a simple implementation of an agent that selects moves randomly. There are also three sample agent implementations in the SampleAgents directory in C, C++, and Java.
-
-Compiling Everything
---------------------
-Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
-
-To build breakthrough, the build is operating system dependent.
-
-If you are using Visual Studio 2012 on Windows, load the solution file VS2012\breakthrough.sln and build the two projects contained within.
-
-If you are using Linux, use CMake. Create a new build directory, then in a terminal execute 'cmake path/to/breakthrough; make'. Alternatively the provided makefile should also work.
-
-If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
-
-If there are any problems compiling, please contact Will.
-
-Running a Game
---------------
+### Command line interface
 To start a game between two random players type the following:
 
     java GameMaster -1 'path/to/breakthrough_random player1' -2 'path/to/breakthrough_random player2' -m 'path/to/breakthrough'
@@ -88,47 +31,82 @@ It can then be loaded like:
 
 A sample response file is included named Random.vs.Random.txt.
 
-Running GameMaster with no arguments, or the argument --help, will display the full set of options that the program supports.
+Running GameMaster with the argument `--help` will display the full set of options that the program supports.
 
-Sample Game Output
-------------------
-An example of what a game looks like between two random players may look like:
+## ChineseCheckersModerator
+ChineseCheckersModerator is a C++ program that validates moves and moderates the play of a game of Chinese Checkers.
+It is responsible for the following tasks:
+* Tracking the players in the game
+* Ensuring all played moves are valid
+* Ensuring that a move is played within the required time limit
+* Ensuring that a player does not play out of turn
+* Determining when a game is over
 
-    $ java -cp GameMaster/ GameMaster @Random.vs.Random.txt
-    Will start game run by: 'breakthrough/breakthrough_master'
-    Player1: 'breakthrough/breakthrough_random Random1'
-    Player2: 'breakthrough/breakthrough_random Random2'
-    0:stdout all: #name server
-    0:stdout all: #master
-    0:stdout all: #players
-    Received #players query from server; answer: 1
-    1:stdout: #name Random1
-    2:stdout: #name Random2
-    0:stdout all: #players
-    Received #players query from server; answer: 3
-    0:stdout all: #getname 0
-    Received #getname query from server; answer: server
-    0:stdout all: #getname 1
-    Received #getname query from server; answer: Random1
-    0:stdout all: #getname 2
-    Received #getname query from server; answer: Random2
-    0:stdout all: BEGIN BREAKTHROUGH Random1 Random2
-    1:stdout: MOVE f 2 TO e 3
-    0:stderr: Turn by 1:Random1 took  0h  0m  0s  11ms
-    0:stdout all: MOVE f 2 TO e 3
-    2:stdout: MOVE f 7 TO e 6
-    0:stderr: Turn by 2:Random2 took  0h  0m  0s  16ms
-    0:stdout all: MOVE f 7 TO e 6
-    1:stdout: MOVE c 2 TO c 3
-    0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
-    0:stdout all: MOVE c 2 TO c 3
-    2:stdout: MOVE d 7 TO d 6
-    ...
-    1:stdout: MOVE c 7 TO c 8
-    0:stdout all: MOVE c 7 TO c 8
-    0:stderr: Turn by 1:Random1 took  0h  0m  0s  16ms
-    0:stdout all: FINAL Random1 BEATS Random2
-    0:stdout all: #quit
-    2:stderr: I, Random2, have lost
-    $
+## Communication Protocol
+All communication between agents and the moderator will use only `std::cin` and `std::cout` (`stdin` and `stdout` in C and `System.in` and `System.out` in Java).
+You may freely write to `std::cerr` if you wish to have debugging output (`stderr` in C and `System.err` in Java).
+Anything written to `std::cout` will be considered a command.
+Any invalid command will result in forfeiting the game.
 
+There are two types of commands: GameMaster commands and game commands.
+
+### GameMaster commands
+GameMaster commands are generic non-game commands related to setting up a game to play. All of these commands can be sent by an agent. Only the `#quit` command will be sent to an agent.
+
+#### `#getname ID`
+Returns the name of player with ID.
+#### `#moderator`
+Registers the agent as a moderator. It will receive all messages and broadcasts must be qualified by their recipient. It is intended for use only by the ChineseCheckersModerator
+#### `#name NAME</dt>`
+Declares the current agent to be named NAME. No spaces are allowed. The names `moderator` and `observer` are reserved.
+#### `#players`
+Returns the number of connected players.
+#### `#quit`
+Immediately terminates the game. This message is always broadcast to all clients.
+
+### Game commands
+An agent must be able to respond to all of the commands below. Only the `MOVE` command should be sent by an agent.
+
+#### `BEGIN CHINESECHECKERS player1 player2`
+Starts a new game with player1 starting first.
+The names player1 and player2 will be replaced with the names provided to the moderator with the `#name` command.
+#### `FINAL winner BEATS loser`
+Declares the game over with the winner and loser specified.
+As with `BEGIN`, the names declared by the `#name` command will be used in place of winner and loser.
+#### `LISTMOVES`
+Directs the agent to list all the valid moves for the current board state. TODO specify format
+#### `DUMPSTATE`
+Directs the agent to print out the current game state. TODO specify format
+#### `LOADSTATE new_state`
+Directs the agent to load new_state as the current state. TODO specify format
+#### `MOVE from_location TO to_location`
+Moves the piece at `from_location` to `to_location`.
+An agent will receive this command to indicate an opponents move.
+An agent will send this command to indicate their move.
+TODO specify location format
+
+## Your program
+When your program starts is must immediately register using the `#name` command.
+It will then wait for the `BEGIN` command to start a game.
+Prior to a game starting, your agent should correctly respond to `LOADSTATE`, `DUMPSTATE`, `LISTMOVES`, and the `MOVE` command which will immediately call the apply moves.
+The purpose of handling these commands prior to a game beginning to allow for automated testing of your agent's handling of the game state.
+
+
+## Sample Ageents
+There are three sample agent implementations in the SampleAgents directory in C, C++, and Java.
+These provide a very bare framework to show how an agent should be communicating.
+
+Additionally the random player TODO
+
+## Compiling Everything
+Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
+
+To build breakthrough, the build is operating system dependent.
+
+If you are using Visual Studio 2012 on Windows, load the solution file VS2012\breakthrough.sln and build the two projects contained within. FIXME
+
+If you are using Linux, use CMake. Create a new build directory, then in a terminal execute 'cmake path/to/breakthrough; make'. Alternatively the provided makefile should also work.
+
+If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
+
+If there are any problems compiling, please contact Will.
