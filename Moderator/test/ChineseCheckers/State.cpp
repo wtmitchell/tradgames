@@ -72,3 +72,43 @@ TEST(State, DepthLimitedDFS3) {
 
   EXPECT_EQ(original, s.dumpState());
 }
+
+TEST(State, LoadDumpState) {
+  ChineseCheckers::State s;
+
+  auto starting = s.dumpState();
+
+  EXPECT_TRUE(s.loadState(starting));
+  EXPECT_EQ(starting, s.dumpState());
+
+  // Invalid player
+  std::string invalid1 =
+      "0 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2";
+  EXPECT_FALSE(s.loadState(invalid1));
+
+  // Invalid player
+  std::string invalid2 =
+      "3 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2";
+  EXPECT_FALSE(s.loadState(invalid2));
+
+  // Too few entries
+  std::string invalid3 =
+      "1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 2 2";
+  EXPECT_FALSE(s.loadState(invalid3));
+
+  // Too many entries
+  std::string invalid4 =
+      "1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2 0";
+  EXPECT_FALSE(s.loadState(invalid4));
+
+  s.reset();
+  EXPECT_EQ(starting, s.dumpState());
+}

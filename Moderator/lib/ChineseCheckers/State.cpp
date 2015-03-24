@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "Common/String.h"
+
 namespace ChineseCheckers {
 bool operator==(const Move &lhs, const Move &rhs) {
   return lhs.from == rhs.from && lhs.to == rhs.to;
@@ -17,13 +19,9 @@ std::ostream &operator<<(std::ostream &out, const Move &m) {
   return out;
 }
 
-
-State::State()
-    : board{{1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
-             0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-             0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0,
-             0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2}},
-      currentPlayer(1) {}
+State::State() {
+  reset();
+}
 
 void State::getMoves(std::vector<Move> &moves) const {
   moves.clear();
@@ -76,11 +74,47 @@ bool State::undoMove(Move m) {
 }
 
 bool State::gameOver() const {
-  return false; // TODO
+  return player1Wins() || player2Wins();
 }
 
 int State::winner() const {
-  return -1; // TODO
+  if (player1Wins())
+    return 1;
+  if (player2Wins())
+    return 2;
+  return -1; // No one has won
+}
+
+void State::reset() {
+  board = {{1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
+            0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0,
+            0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2}};
+  currentPlayer = 1;
+
+}
+
+bool State::loadState(const std::string &newState) {
+  auto tokenized = Common::split(newState);
+
+  // Ensure the length
+  if (tokenized.size() != 82)
+    return false;
+
+  // Validate first item, whose turn it is
+  if (tokenized[0] != "1" && tokenized[0] != "2")
+    return false;
+  currentPlayer = std::stoi(tokenized[0]);
+
+  // Ensure rest of tokens are valid
+  for(size_t i = 1, e = tokenized.size(); i != e; ++i) {
+    int val = std::stoi(tokenized[i]);
+    if (0 <= val && val <= 2)
+      board[i - 1] = val;
+    else
+      return false;
+  }
+  return true;
 }
 
 std::string State::dumpState() const {
@@ -198,6 +232,36 @@ bool State::isMoveValid(const Move &m) const {
 
 void State::swapTurn() {
   currentPlayer = ((currentPlayer + 1) % 2) + 1;
+}
+
+bool State::player1Wins() const {
+  // Win by having all of bottom triangle filed and at least one is from the
+  // first player
+
+  bool p1inTriangle = false;
+  for (const auto i : {53u, 61u, 62u, 69u, 70u, 71u, 77u, 78u, 79u, 80u}) {
+    if (board[i] == 0)
+      return false;
+    if (board[i] == 1)
+      p1inTriangle = true;
+  }
+
+  return p1inTriangle;
+}
+
+bool State::player2Wins() const {
+  // Win by having all of bottom triangle filed and at least one is from the
+  // first player
+
+  bool p2inTriangle = false;
+  for (const auto i : {0u, 1u, 2u, 3u, 9u, 10u, 11u, 18u, 19u, 27u}) {
+    if (board[i] == 0)
+      return false;
+    if (board[i] == 1)
+      p2inTriangle = true;
+  }
+
+  return p2inTriangle;
 }
 
 } // namespace ChineseCheckers

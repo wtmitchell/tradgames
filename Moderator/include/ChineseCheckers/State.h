@@ -56,6 +56,9 @@ public:
   // Return the player who won, assuming the game is over
   int winner() const;
 
+  // Reset the board to the initial state
+  void reset();
+
   // Loads the state stored in the string, returning true if it is a valid state, false if not
   bool loadState(const std::string &newState);
 
@@ -73,6 +76,9 @@ private:
   bool isMoveValid(const Move &m) const;
 
   void swapTurn();
+
+  bool player1Wins() const;
+  bool player2Wins() const;
 };
 } // namespace ChineseCheckers
 
