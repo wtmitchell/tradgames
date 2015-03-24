@@ -32,3 +32,4 @@ if("${CMAKE_C_COMPILER}" MATCHES "clang")
 endif()
 
 add_subdirectory(ChineseCheckers)
+add_subdirectory(Common)
