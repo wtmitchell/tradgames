@@ -6,6 +6,8 @@ There are two programs in this repository:
 
 2. ChineseCheckersModerator - A C++ program that validates moves and moderates the play of a game of Chinese Checkers
 
+3. ChineseCheckersRandom - A C++ program that plays a game of Chinese Checkers by taking each move randomly.
+
 
 ## GameMaster
 GameMaster is a Java programs that controls the interactions between agents and a master running the game.
@@ -82,7 +84,7 @@ The format is the digit 1 or 2 indicating whose turn it is, followed by a space,
     1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2
 
 This corresponds to the board position:
-![Image](board.png)
+![Board](board.png)
 
 #### `LOADSTATE new_state`
 Directs the agent to load new_state as the current state. The format is identical to that of `DUMPSTATE`.
