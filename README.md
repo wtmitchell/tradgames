@@ -57,7 +57,7 @@ GameMaster commands are generic non-game commands related to setting up a game t
 Returns the name of player with ID.
 #### `#moderator`
 Registers the agent as a moderator. It will receive all messages and broadcasts must be qualified by their recipient. It is intended for use only by the ChineseCheckersModerator
-#### `#name NAME</dt>`
+#### `#name NAME`
 Declares the current agent to be named NAME. No spaces are allowed. The names `moderator` and `observer` are reserved.
 #### `#players`
 Returns the number of connected players.
@@ -92,7 +92,7 @@ Prior to a game starting, your agent should correctly respond to `LOADSTATE`, `D
 The purpose of handling these commands prior to a game beginning to allow for automated testing of your agent's handling of the game state.
 
 
-## Sample Ageents
+## Sample Agents
 There are three sample agent implementations in the SampleAgents directory in C, C++, and Java.
 These provide a very bare framework to show how an agent should be communicating.
 
