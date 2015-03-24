@@ -92,7 +92,7 @@ Directs the agent to load new_state as the current state. The format is identica
 Moves the piece at `from_location` to `to_location`.
 An agent will receive this command to indicate an opponents move.
 An agent will send this command to indicate their move.
-TODO specify location format
+A location is specified as a single integer ranging from 0 to 80, as in the above image.
 
 ## Your program
 When your program starts is must immediately register using the `#name` command.
