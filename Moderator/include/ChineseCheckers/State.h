@@ -51,6 +51,9 @@ public:
   // Returns true iff the game is over
   bool gameOver() const;
 
+  // Return the player who won, assuming the game is over
+  int winner() const;
+
   // Loads the state stored in the string, returning true if it is a valid state, false if not
   bool loadState(const std::string &newState);
 

@@ -57,6 +57,23 @@ void State::getMoves(std::vector<Move> &moves) const {
   }
 }
 
+bool State::applyMove(Move m) {
+  return false; // TODO
+}
+
+bool State::undoMove(Move m) {
+  std::swap(m.from, m.to);
+  return applyMove(m);
+}
+
+bool State::gameOver() const {
+  return false; // TODO
+}
+
+int State::winner() const {
+  return -1; // TODO
+}
+
 std::string State::dumpState() const {
   std::stringstream out;
   out << currentPlayer;
