@@ -16,15 +16,38 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class GameMaster {
-  private static void browseListener(JTextField dest, String title) {
-    final JFileChooser fc = new JFileChooser();
-    int returnVal = fc.showOpenDialog(null);
+  public static void main(String[] args) { GameMaster g = new GameMaster(); }
 
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
+  public GameMaster() {
+    // Set the Look and Feel
+    try {
+      UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+    } catch (UnsupportedLookAndFeelException ex) {
+      ex.printStackTrace();
+    } catch (IllegalAccessException ex) {
+      ex.printStackTrace();
+    } catch (InstantiationException ex) {
+      ex.printStackTrace();
+    } catch (ClassNotFoundException ex) {
+      ex.printStackTrace();
+    }
+
+    // Turn off metal's use bold fonts
+    UIManager.put("swing.boldMetal", Boolean.FALSE);
+
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+      public void run() { createAndShowGUI(); }
+    });
+  }
+
+  private void browseListener(JTextField dest, String title) {
+    final JFileChooser fc = new JFileChooser();
+    fc.setDialogTitle(title);
+    if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
       dest.setText(fc.getSelectedFile().getAbsolutePath());
     }
   }
-  private static void createProgramSelectorPanel(Container pane) {
+  private void createProgramSelectorPanel(Container pane) {
     // Add center panel that has selectors
     JPanel center =
         new JPanel(new GridLayout(3, 3, 5, 5)); // row, col, hgap, vgap
@@ -72,14 +95,20 @@ public class GameMaster {
     JButton gobutton = new JButton("Begin Game");
     pane.add(gobutton, BorderLayout.LINE_END);
   }
-  private static void createCenterPanel(Container pane) {
+
+  private void createCenterPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
     JPanel gameBoard = new JPanel();
+    gameBoard.add(new JLabel("Not yet implemented"));
     tabbed.add(gameBoard, "Board");
 
-    JPanel modstdout = new JPanel();
+    // JPanel modstdoutpanel = new JPanel();
+    JTextArea modstdout = new JTextArea();
+    // modstdoutpanel.add(modstdout);
+    // tabbed.add(modstdoutpanel, "Moderator stdout");
     tabbed.add(modstdout, "Moderator stdout");
+    // modstdot.append("test");
 
     JPanel modstderr = new JPanel();
     tabbed.add(modstderr, "Moderator stderr");
@@ -105,7 +134,8 @@ public class GameMaster {
     movePanel.add(movesArea, BorderLayout.CENTER);
     pane.add(movePanel, BorderLayout.LINE_END);
   }
-  private static void createAndShowGUI() {
+
+  private void createAndShowGUI() {
     // Create and set up the window.
     JFrame frame = new JFrame("GameMaster");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -125,27 +155,5 @@ public class GameMaster {
     // Display the window.
     frame.pack();
     frame.setVisible(true);
-  }
-
-  public static void main(String[] args) {
-    // Set the Look and Feel
-    try {
-      UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-    } catch (UnsupportedLookAndFeelException ex) {
-      ex.printStackTrace();
-    } catch (IllegalAccessException ex) {
-      ex.printStackTrace();
-    } catch (InstantiationException ex) {
-      ex.printStackTrace();
-    } catch (ClassNotFoundException ex) {
-      ex.printStackTrace();
-    }
-
-    // Turn off metal's use bold fonts
-    UIManager.put("swing.boldMetal", Boolean.FALSE);
-
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() { createAndShowGUI(); }
-    });
   }
 }
