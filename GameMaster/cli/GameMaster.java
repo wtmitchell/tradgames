@@ -40,19 +40,16 @@ public class GameMaster {
                           .withDescription("Command to run player 1")
                           .hasArg()
                           .withArgName("CMD")
-                          .isRequired()
                           .create("1"));
         options.addOption(OptionBuilder.withLongOpt("player2")
                           .withDescription("Command to run player 2")
                           .hasArg()
                           .withArgName("CMD")
-                          .isRequired()
                           .create("2"));
-        options.addOption(OptionBuilder.withLongOpt("master")
-                          .withDescription("Command to run master which administers the game")
+        options.addOption(OptionBuilder.withLongOpt("moderator")
+                          .withDescription("Command to run moderator which administers the game")
                           .hasArg()
                           .withArgName("CMD")
-                          .isRequired()
                           .create("m"));
 
         boolean printUsage = false;
@@ -75,7 +72,7 @@ public class GameMaster {
 
         // Start things up
         ArrayList<String> programs = new ArrayList<String>();
-        programs.add(cmd.getOptionValue("master"));
+        programs.add(cmd.getOptionValue("moderator"));
         programs.add(cmd.getOptionValue("player1"));
         programs.add(cmd.getOptionValue("player2"));
 
