@@ -11,6 +11,7 @@
 
 #include <array>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,9 @@ struct Move {
 };
 
 bool operator==(const Move &lhs, const Move &rhs);
+bool operator<(const Move &lhs, const Move &rhs);
 std::ostream &operator<<(std::ostream &out, const Move &m);
+
 
 class State {
 public:
@@ -50,6 +53,9 @@ public:
   // Undo the move m, returning true if m is a move that can be undone, false if not
   bool undoMove(Move m);
 
+  // Returns true iff the move m is valid
+  bool isValidMove(const Move &m) const;
+
   // Returns true iff the game is over
   bool gameOver() const;
 
@@ -65,15 +71,17 @@ public:
   // Dump out the current state, usable with loadState
   std::string dumpState() const;
 
+  // Translates a sequence of tokens from the move format used to the local move type
+  Move translateToLocal(const std::vector<std::string> &tokens) const;
+
 private:
   // mutable due to how we find jump moves
   mutable std::array<int, 81> board;
   bool currentPlayer;
 
-  void getMovesSingleStep(std::vector<Move> &moves, unsigned from) const;
-  void getMovesJumps(std::vector<Move> &moves, unsigned from, unsigned current) const;
+  void getMovesSingleStep(std::set<Move> &moves, unsigned from) const;
+  void getMovesJumps(std::set<Move> &moves, unsigned from, unsigned current) const;
 
-  bool isMoveValid(const Move &m) const;
 
   void swapTurn();
 

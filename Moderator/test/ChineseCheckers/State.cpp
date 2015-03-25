@@ -22,27 +22,44 @@ TEST(State, getMoves) {
   std::vector<ChineseCheckers::Move> expected;
 
   // This assumes the order of returned moves which is not a safe assumption
-  // in general
-  expected.push_back({2, 20});
+  // in general. We know the order in this specific case is lexicographic
   expected.push_back({2, 4});
-  expected.push_back({3, 12});
+  expected.push_back({2, 20});
   expected.push_back({3, 4});
-  expected.push_back({10, 28});
+  expected.push_back({3, 12});
   expected.push_back({10, 12});
-  expected.push_back({11, 20});
+  expected.push_back({10, 28});
   expected.push_back({11, 12});
-  expected.push_back({18, 36});
+  expected.push_back({11, 20});
   expected.push_back({18, 20});
-  expected.push_back({19, 28});
+  expected.push_back({18, 36});
   expected.push_back({19, 20});
-  expected.push_back({27, 36});
+  expected.push_back({19, 28});
   expected.push_back({27, 28});
+  expected.push_back({27, 36});
 
   s.getMoves(moves);
 
-  EXPECT_EQ(expected.size(), moves.size());
-  for (size_t i = 0, e = expected.size(); i != e; ++i)
-    EXPECT_EQ(expected[i], moves[i]) << "i = " << i;
+  EXPECT_EQ(expected, moves);
+
+  // Configuration that leads to duplicated moves arrived at by different paths
+  EXPECT_TRUE(s.loadState("1 "
+                          "1 2 0 0 0 0 0 0 0 "
+                          "2 2 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0 "
+                          "0 0 0 0 0 0 0 0 0"));
+  expected.clear();
+
+  s.getMoves(moves);
+  expected.push_back({0, 2});
+  expected.push_back({0, 18});
+
+  EXPECT_EQ(expected, moves);
 }
 
 void DepthLimitedDFS(ChineseCheckers::State &s, int depth);

@@ -14,6 +14,11 @@ bool operator==(const Move &lhs, const Move &rhs) {
   return lhs.from == rhs.from && lhs.to == rhs.to;
 }
 
+// Lexicographic
+bool operator<(const Move &lhs, const Move &rhs) {
+  return lhs.from < rhs.from || (!(rhs.from < lhs.from) && lhs.to < rhs.to);
+}
+
 std::ostream &operator<<(std::ostream &out, const Move &m) {
   out << "{" << m.from << ", " << m.to << "}";
   return out;
@@ -24,14 +29,19 @@ State::State() {
 }
 
 void State::getMoves(std::vector<Move> &moves) const {
-  moves.clear();
-
+  // Using set like this is inefficient, but it will correctly
+  // solve having duplicate moves
+  std::set<Move> setMoves;
   for (unsigned i = 0; i < 81; ++i) {
     if (board[i] == currentPlayer) {
-      getMovesSingleStep(moves, i);
-      getMovesJumps(moves, i, i);
+      getMovesSingleStep(setMoves, i);
+      getMovesJumps(setMoves, i, i);
     }
   }
+
+  moves.clear();
+  for (auto i : setMoves)
+    moves.push_back(i);
 }
 
 bool State::applyMove(Move m) {
@@ -40,7 +50,7 @@ bool State::applyMove(Move m) {
     return false;
 
   // Check the move
-  if (!isMoveValid(m))
+  if (!isValidMove(m))
     return false;
 
   // Apply the move
@@ -62,7 +72,7 @@ bool State::undoMove(Move m) {
   swapTurn();
 
   // Check the move is valid from this state that is back one step
-  if (!isMoveValid(m)) {
+  if (!isValidMove(m)) {
     // Woops, it was not valid, undo our changes
     swapTurn();
     std::swap(board[m.from], board[m.to]);
@@ -126,36 +136,36 @@ std::string State::dumpState() const {
   return out.str();
 }
 
-void State::getMovesSingleStep(std::vector<Move> &moves, unsigned from) const {
+void State::getMovesSingleStep(std::set<Move> &moves, unsigned from) const {
   unsigned row = from / 9;
   unsigned col = from % 9;
 
   // Up Left
   if (col > 0 && board[from - 1] == 0)
-    moves.push_back({from, from - 1});
+    moves.insert({from, from - 1});
 
   // Up Right
   if (row > 0 && board[from - 9] == 0)
-    moves.push_back({from, from - 9});
+    moves.insert({from, from - 9});
 
   // Left
   if (col > 0 && row < 8 && board[from + 8] == 0)
-    moves.push_back({from, from + 8});
+    moves.insert({from, from + 8});
 
   // Right
   if (col < 8 && row > 0 && board[from - 8] == 0)
-    moves.push_back({from, from - 8});
+    moves.insert({from, from - 8});
 
   // Down Left
   if (row < 8 && board[from + 9] == 0)
-    moves.push_back({from, from + 9});
+    moves.insert({from, from + 9});
 
   // Down Right
   if (col < 8 && board[from + 1] == 0)
-    moves.push_back({from, from + 1});
+    moves.insert({from, from + 1});
 }
 
-void State::getMovesJumps(std::vector<Move> &moves, unsigned from,
+void State::getMovesJumps(std::set<Move> &moves, unsigned from,
                           unsigned current) const {
   // Mark the current state as visited
   int originalCurrent = board[current];
@@ -163,7 +173,7 @@ void State::getMovesJumps(std::vector<Move> &moves, unsigned from,
 
   // If from != current we have a valid move to get here
   if (from != current)
-    moves.push_back({from, current});
+    moves.insert({from, current});
 
   unsigned row = current / 9;
   unsigned col = current % 9;
@@ -214,8 +224,7 @@ void State::getMovesJumps(std::vector<Move> &moves, unsigned from,
   board[current] = originalCurrent;
 }
 
-
-bool State::isMoveValid(const Move &m) const {
+bool State::isValidMove(const Move &m) const {
   // Ensure from and to make sense
   if (board[m.from] != currentPlayer || board[m.to] != 0)
     return false;
@@ -228,6 +237,13 @@ bool State::isMoveValid(const Move &m) const {
   bool found = std::find(moves.begin(), moves.end(), m) != moves.end();
 
   return found;
+}
+
+Move State::translateToLocal(const std::vector<std::string> &tokens) const {
+  // The numbers in the MOVE command sent by the moderator is already in the
+  // format we need
+  return Move{static_cast<unsigned>(std::stoi(tokens[2])),
+              static_cast<unsigned>(std::stoi(tokens[4]))};
 }
 
 void State::swapTurn() {
