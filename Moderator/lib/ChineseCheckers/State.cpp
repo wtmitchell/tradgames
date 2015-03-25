@@ -251,7 +251,7 @@ void State::swapTurn() {
 }
 
 bool State::player1Wins() const {
-  // Win by having all of bottom triangle filed and at least one is from the
+  // Win by having all of bottom triangle filled and at least one is from the
   // first player
 
   bool p1inTriangle = false;
@@ -266,14 +266,14 @@ bool State::player1Wins() const {
 }
 
 bool State::player2Wins() const {
-  // Win by having all of bottom triangle filed and at least one is from the
-  // first player
+  // Win by having all of top triangle filled and at least one is from the
+  // second player
 
   bool p2inTriangle = false;
   for (const auto i : {0u, 1u, 2u, 3u, 9u, 10u, 11u, 18u, 19u, 27u}) {
     if (board[i] == 0)
       return false;
-    if (board[i] == 1)
+    if (board[i] == 2)
       p2inTriangle = true;
   }
 

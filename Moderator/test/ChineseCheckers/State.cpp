@@ -129,3 +129,27 @@ TEST(State, LoadDumpState) {
   s.reset();
   EXPECT_EQ(starting, s.dumpState());
 }
+
+TEST(State, GameOver) {
+  ChineseCheckers::State s;
+
+  EXPECT_FALSE(s.gameOver());
+
+  std::string p1wins =
+      "1 1 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 1 2 2";
+
+  EXPECT_TRUE(s.loadState(p1wins));
+  EXPECT_TRUE(s.gameOver());
+  EXPECT_EQ(1, s.winner());
+
+  std::string p2wins =
+      "1 2 1 1 1 0 0 0 0 0 1 1 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 0 0 "
+      "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 2 2 0 0 "
+      "0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2";
+
+  EXPECT_TRUE(s.loadState(p2wins));
+  EXPECT_TRUE(s.gameOver());
+  EXPECT_EQ(2, s.winner());
+}
