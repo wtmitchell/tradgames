@@ -51,7 +51,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 enable_testing()
 
-#add_subdirectory(apps)
+add_subdirectory(apps)
 add_subdirectory(lib)
 add_subdirectory(test)
 add_subdirectory(util)

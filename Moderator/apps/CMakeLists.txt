@@ -1,0 +1,2 @@
+add_subdirectory(ChineseCheckersModerator)
+add_subdirectory(ChineseCheckersRandom)
