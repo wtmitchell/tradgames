@@ -76,9 +76,9 @@ The names player1 and player2 will be replaced with the names provided to the mo
 Declares the game over with the winner and loser specified.
 As with `BEGIN`, the names declared by the `#name` command will be used in place of winner and loser.
 #### `LISTMOVES`
-Directs the agent to list all the valid moves for the current board state. A move will be formatted as `{from, to}` with semi-colons in between. The order of the moves may vary. For example, the valid moves at the beginning of the game are
+Directs the agent to list all the valid moves for the current board state. A move will be formatted as `from, to` with a comma between `from` and `to` semi-colons between moves. The order of the moves may vary. For example, the valid moves at the beginning of the game are
 
-    {2, 4};{2, 20};{3, 4};{3, 12};{10, 12};{10, 28};{11, 12};{11, 20};{18, 20};{18, 36};{19, 20};{19, 28};{27, 28};{27, 36};
+    2, 4; 2, 20; 3, 4; 3, 12; 10, 12; 10, 28; 11, 12; 11, 20; 18, 20; 18, 36; 19, 20; 19, 28; 27, 28; 27, 36;
 
 #### `DUMPSTATE`
 Directs the agent to print out the current game state.

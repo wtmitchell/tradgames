@@ -181,7 +181,7 @@ void Random<GameState, GameClient>::waitForStart() {
       std::vector<typename GameClient::Move> moves;
       gs.getMoves(moves);
       for (const auto i : moves)
-        std::cout << i << ";";
+        std::cout << i.from << ", " << i.to << "; ";
       std::cout << std::endl;
     } else if (tokens[0] == "MOVE") {
       // Just apply the move
