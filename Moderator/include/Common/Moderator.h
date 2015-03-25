@@ -10,7 +10,6 @@
 #include <array>
 #include <fstream>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -39,7 +38,7 @@ public:
                  bool logGame);
 
 private:
-  void waitForStart() noexcept(false);
+  void waitForStart();
 
   // Open files for logging
   void setupLogging();
@@ -81,12 +80,7 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
   std::cout << "#name moderator\n"
             << "#master" << std::endl;
 
-  try {
-    waitForStart();
-  } catch (std::logic_error e) {
-    // Duplicate names can't be recovered from
-    return;
-  }
+  waitForStart();
 
   // Set up logging
   if (logGame)
@@ -122,7 +116,17 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
       continue;
     }
 
-    if (GameClient::isValidMoveMessage(playerIds[turn], tokens)) {
+    if (static_cast<unsigned>(std::stoi(tokens[0])) != playerIds[turn]) {
+      std::cerr << "Received out of turn message '"<< msg <<"'from " << playerNames[static_cast<unsigned>(std::stoi(tokens[0]))] << ". They automatically forfeit.\n";
+      std::stringstream forfeitMsg;
+      forfeitMsg << "FINAL " << playerNames[turn] << " BEATS " << playerNames[(turn + 1) % 2];
+      broadcast(forfeitMsg.str());
+      broadcast("#quit");
+      break;
+    }
+    tokens.erase(tokens.begin(), tokens.begin() + 1);
+
+    if (GameClient::isValidMoveMessage(tokens)) {
       ++turnCount;
       // Print out turn and time information
       std::stringstream timeMsg;
@@ -188,7 +192,7 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
       turn = (turn + 1) % 2;
     } else {
       if (!quiet)
-        std::cerr << "Received unknown or out of turn message: " << msg << std::endl;
+        std::cerr << "Received unknown message: " << msg << std::endl;
     }
   }
 }
@@ -243,7 +247,8 @@ void Moderator<GameState, GameClient>::waitForStart() noexcept(false) {
               << std::endl;
     std::cout << "FINAL " << playerNames[0] << " beats " << playerNames[1]
               << std::endl;
-    throw(std::logic_error("Duplicate names"));
+    std::cout << "#quit" << std::endl;
+    std::exit(1);
   }
 }
 

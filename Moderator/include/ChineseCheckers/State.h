@@ -19,6 +19,8 @@ namespace ChineseCheckers {
 struct Move {
   unsigned from;
   unsigned to;
+
+  bool isNull() const;
 };
 
 bool operator==(const Move &lhs, const Move &rhs);

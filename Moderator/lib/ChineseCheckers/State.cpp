@@ -10,6 +10,10 @@
 #include "Common/String.h"
 
 namespace ChineseCheckers {
+bool Move::isNull() const {
+  return from == to;
+}
+
 bool operator==(const Move &lhs, const Move &rhs) {
   return lhs.from == rhs.from && lhs.to == rhs.to;
 }

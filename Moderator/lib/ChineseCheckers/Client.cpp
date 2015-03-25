@@ -14,13 +14,10 @@ bool Client::isValidStartGameMessage(const std::vector<std::string> &tokens) {
   return tokens.size() == 4 && tokens[0] == "BEGIN" && tokens[1] == "CHINESECHECKERS";
 }
 
-
-bool Client::isValidMoveMessage(unsigned currentPlayer, const std::vector<std::string> &tokens) {
-  return tokens.size() == 5 &&
-         static_cast<unsigned>(std::stoi(tokens[0])) == currentPlayer &&
-         tokens[1] == "MOVE" &&
-         static_cast<unsigned>(std::stoi(tokens[2])) < 81 &&
-         tokens[3] == "TO" && static_cast<unsigned>(std::stoi(tokens[4])) < 81;
+bool Client::isValidMoveMessage(const std::vector<std::string> &tokens) {
+  return tokens.size() == 5 && tokens[0] == "MOVE" && tokens[1] == "FROM" &&
+    //static_cast<unsigned>(std::stoi(tokens[2])) < 81 &&
+    tokens[3] == "TO";// && static_cast<unsigned>(std::stoi(tokens[4])) < 81;
 }
 
 std::string Client::moveMessage(Move m) {
