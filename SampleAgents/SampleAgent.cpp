@@ -173,7 +173,7 @@ void Client::wait_for_start() {
         break;
       } else {
         std::cerr << "Did not find '" << name
-                  << "', my name, in the BEGIN BREAKTHROUGH command.\n"
+                  << "', my name, in the BEGIN command.\n"
                   << "# Found '" << tokens[2] << "' and '" << tokens[3] << "'"
                   << " as player names. Received message '" << response << "'"
                   << std::endl;
