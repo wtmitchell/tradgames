@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -14,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -36,6 +38,12 @@ public class GameMaster {
 
     // Turn off metal's use bold fonts
     UIManager.put("swing.boldMetal", Boolean.FALSE);
+
+    // Instantiate the update queues
+    for (int i = 0; i < StreamIDs.count; ++i) {
+      updateQueues.add(new LinkedBlockingQueue<String>());
+      textAreas.add(new JTextArea());
+    }
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
       public void run() { createAndShowGUI(); }
@@ -95,23 +103,12 @@ public class GameMaster {
     gameBoardTab.add(movePanel, BorderLayout.LINE_END);
     tabbed.add(gameBoardTab, "Board");
 
-    JTextArea modstdout = new JTextArea();
-    tabbed.add(modstdout, "Moderator stdout");
-
-    JPanel modstderr = new JPanel();
-    tabbed.add(modstderr, "Moderator stderr");
-
-    JPanel p1stdout = new JPanel();
-    tabbed.add(p1stdout, "Player 1 stdout");
-
-    JPanel p1stderr = new JPanel();
-    tabbed.add(p1stderr, "Player 1 stderr");
-
-    JPanel p2stdout = new JPanel();
-    tabbed.add(p2stdout, "Player 2 stdout");
-
-    JPanel p2stderr = new JPanel();
-    tabbed.add(p2stderr, "Player 2 stderr");
+    tabbed.add(textAreas.get(StreamIDs.modstdout), "Moderator stdout");
+    tabbed.add(textAreas.get(StreamIDs.modstderr), "Moderator stderr");
+    tabbed.add(textAreas.get(StreamIDs.p1stdout), "Player 1 stdout");
+    tabbed.add(textAreas.get(StreamIDs.p1stderr), "Player 1 stderr");
+    tabbed.add(textAreas.get(StreamIDs.p2stdout), "Player 2 stdout");
+    tabbed.add(textAreas.get(StreamIDs.p2stderr), "Player 2 stderr");
 
     pane.add(tabbed, BorderLayout.CENTER);
 
@@ -211,6 +208,9 @@ public class GameMaster {
     }
   }
 
+  private void processQueue(int id) {
+  }
+
   private void startGameInstance() {
     if (modcmd.getText().equals("")) {
       JOptionPane.showMessageDialog(null,
@@ -236,6 +236,88 @@ public class GameMaster {
       changeState(State.WAITING);
       return;
     }
+    ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
+    // Create a PCB for the moderator
+    pcbs.add(
+        new ProcessControlBlock(modcmd.getText(), true,
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.modstdout).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.modstdout);
+                                      }
+                                    });
+                                  }
+                                },
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.modstderr).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.modstderr);
+                                      }
+                                    });
+                                  }
+                                }));
+    // Create a PCB for player1
+    pcbs.add(
+        new ProcessControlBlock(p1cmd.getText(), true,
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.p1stdout).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.p1stdout);
+                                      }
+                                    });
+                                  }
+                                },
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.p1stderr).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.p1stderr);
+                                      }
+                                    });
+                                  }
+                                }));
+    // Create a PCB for player2
+    pcbs.add(
+        new ProcessControlBlock(p2cmd.getText(), true,
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.p2stdout).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.p2stdout);
+                                      }
+                                    });
+                                  }
+                                },
+                                new UpdateHook() {
+                                  @Override
+                                  public void update(String msg) {
+                                    updateQueues.get(StreamIDs.p2stderr).add(msg);
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                        processQueue(StreamIDs.p2stderr);
+                                      }
+                                    });
+                                  }
+                                }));
     ArrayList<String> programs = new ArrayList<String>();
     programs.add(modcmd.getText());
     programs.add(p1cmd.getText());
@@ -254,4 +336,20 @@ public class GameMaster {
   private JButton modBrowse = new JButton("Browse");
   private enum State { WAITING, RUNNING, STOPPING }
   private State currentState = State.STOPPING;
+
+  // Note that the elements of StreamIDs must start at zero
+  // and increase by 1 between constants. These are used as
+  // named constants to access into the updateQueues ArrayList
+  private class StreamIDs {
+    public final static int modstdout = 0;
+    public final static int modstderr = 1;
+    public final static int p1stdout = 2;
+    public final static int p1stderr = 3;
+    public final static int p2stdout = 4;
+    public final static int p2stderr = 5;
+    public final static int count = 6;
+  }
+  private ArrayList<LinkedBlockingQueue<String>> updateQueues =
+      new ArrayList<LinkedBlockingQueue<String>>();
+  private ArrayList<JTextArea> textAreas = new ArrayList<JTextArea>();
 }
