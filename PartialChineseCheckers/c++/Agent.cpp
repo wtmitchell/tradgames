@@ -159,7 +159,8 @@ void Agent::waitForStart() {
     } else if (tokens[0] == "MOVE") {
       // Just apply the move
       const Move m = state.translateToLocal(tokens);
-      state.applyMove(m);
+      if (!state.applyMove(m))
+        std::cout << "Unable to apply move " << m << std::endl;
     } else {
       std::cerr << "Unexpected message " << response << "\n";
     }

@@ -25,7 +25,6 @@ bool operator==(const Move &lhs, const Move &rhs);
 bool operator<(const Move &lhs, const Move &rhs);
 std::ostream &operator<<(std::ostream &out, const Move &m);
 
-
 class ChineseCheckersState {
 public:
   // Initialize with the starting state for a 2 player game
