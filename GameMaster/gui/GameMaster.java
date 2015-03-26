@@ -209,9 +209,14 @@ public class GameMaster {
   }
 
   private void processQueue(int id) {
+    // Read from the queue until it is empty
+    for (String msg = updateQueues.get(id).poll(); msg != null;
+         msg = updateQueues.get(id).poll())
+      textAreas.get(id).append(msg);
   }
 
   private void startGameInstance() {
+    // Ensure the user selected at least something
     if (modcmd.getText().equals("")) {
       JOptionPane.showMessageDialog(null,
                                     "Moderator cannot be empty.",
@@ -236,6 +241,7 @@ public class GameMaster {
       changeState(State.WAITING);
       return;
     }
+
     ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
     // Create a PCB for the moderator
     pcbs.add(
