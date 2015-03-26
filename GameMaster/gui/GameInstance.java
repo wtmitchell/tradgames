@@ -53,8 +53,6 @@ public class GameInstance extends Thread {
       } else {
         try {
           int query = Integer.parseInt(m.message.substring(9));
-          System.out.println("Received #getname query from " + names.get(m.id) +
-                             "; answer: " + names.get(query));
           reply(m, "#getname " + query + " " + names.get(query));
         } catch (NumberFormatException e) {
           System.err.println("Malformed #getname query from " +
@@ -78,8 +76,6 @@ public class GameInstance extends Thread {
       }
     } else if (m.message.equals("#players")) {
       // Query number of players
-      System.out.println("Received #players query from " + names.get(m.id) +
-                         "; answer: " + names.size());
       reply(m, "#players " + names.size());
     } else if (m.message.equals("#quit")) {
       // Quit the game
