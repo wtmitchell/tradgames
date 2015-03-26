@@ -14,7 +14,7 @@ public:
 
 private:
   Move nextMove();
-  void print_and_recv_echo(const std::string &msg) const;
+  void printAndRecvEcho(const std::string &msg) const;
   std::string readMsg() const;
   std::vector<std::string> tokenizeMsg(const std::string &msg) const;
   void waitForStart();

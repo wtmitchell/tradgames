@@ -42,7 +42,7 @@ void Agent::playGame() {
       state.applyMove(m);
 
       // Tell the world
-      print_and_recv_echo(m);
+      printAndRecvEcho(m);
 
       // It is the opponents turn
       switchCurrentPlayer();
@@ -83,7 +83,7 @@ void Agent::playGame() {
 
 // Sends a msg to stdout and verifies that the next message to come in is it
 // echoed back. This is how the server validates moves
-void Agent::print_and_recv_echo(const std::string &msg) const {
+void Agent::printAndRecvEcho(const std::string &msg) const {
   // Note the endl flushes the stream, which is necessary
   std::cout << msg << std::endl;
   const std::string echo_recv = readMsg();
