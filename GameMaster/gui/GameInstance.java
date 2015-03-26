@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class GameInstance extends Thread {
-  public GameInstance(ArrayList<ProcessControlBlock> pcbs) {
+  public GameInstance(ArrayList<ProcessControlBlock> pcbs, UpdateHook complete) {
     this.pcbs = pcbs;
+    this.complete = complete;
   }
 
   public void handleMessage(Message m) {
@@ -150,6 +151,7 @@ public class GameInstance extends Thread {
       startProcess(p, i++);
 
     processMessages();
+    complete.update();
   }
 
   private void startProcess(ProcessControlBlock pcb, int id) {
@@ -186,7 +188,6 @@ public class GameInstance extends Thread {
   private HashMap<Integer, String> names = new HashMap<>();
   private ArrayList<Process> processes = new ArrayList<>();
   private boolean running;
-
   private ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
-
+  private UpdateHook complete;
 }

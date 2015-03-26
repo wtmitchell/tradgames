@@ -338,7 +338,17 @@ public class GameMaster {
                                 }));
 
     // Start the actual game
-    GameInstance gi = new GameInstance(pcbs);
+    GameInstance gi = new GameInstance(pcbs, new UpdateHook() {
+        @Override
+        public void update() {
+          SwingUtilities.invokeLater(new Runnable() {
+              @Override
+              public void run() {
+                changeState(State.WAITING);
+              }
+            });
+        }
+      });
     gi.start();
   }
 
