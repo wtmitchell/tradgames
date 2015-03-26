@@ -212,7 +212,7 @@ public class GameMaster {
     // Read from the queue until it is empty
     for (String msg = updateQueues.get(id).poll(); msg != null;
          msg = updateQueues.get(id).poll())
-      textAreas.get(id).append(msg);
+      textAreas.get(id).append(msg + "\n");
   }
 
   private void startGameInstance() {
@@ -272,7 +272,7 @@ public class GameMaster {
                                 }));
     // Create a PCB for player1
     pcbs.add(
-        new ProcessControlBlock(p1cmd.getText(), true,
+        new ProcessControlBlock(p1cmd.getText(), false,
                                 new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
@@ -299,7 +299,7 @@ public class GameMaster {
                                 }));
     // Create a PCB for player2
     pcbs.add(
-        new ProcessControlBlock(p2cmd.getText(), true,
+        new ProcessControlBlock(p2cmd.getText(), false,
                                 new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
@@ -324,12 +324,9 @@ public class GameMaster {
                                     });
                                   }
                                 }));
-    ArrayList<String> programs = new ArrayList<String>();
-    programs.add(modcmd.getText());
-    programs.add(p1cmd.getText());
-    programs.add(p2cmd.getText());
 
-    GameInstance gi = new GameInstance(programs);
+    // Start the actual game
+    GameInstance gi = new GameInstance(pcbs);
     gi.start();
   }
 

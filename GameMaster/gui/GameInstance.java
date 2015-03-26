@@ -8,18 +8,16 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class GameInstance extends Thread {
-  public GameInstance(ArrayList<String> programs) {
-    this.programs = programs;
-    messages = new LinkedBlockingQueue<Message>();
-    processes = new ArrayList<Process>();
-    input_all = new HashMap<Integer, PrintWriter>();
-    input_master = new ArrayList<Integer>();
-    input_rest = new ArrayList<Integer>();
-    names = new HashMap<Integer, String>();
+  public GameInstance(ArrayList<ProcessControlBlock> pcbs) {
+    this.pcbs = pcbs;
   }
 
   public void handleMessage(Message m) {
-    System.out.println(m);
+    // Report message to appropriate hook
+    if (m.type == StreamType.stdout)
+      pcbs.get(m.id).stdout.update(m.message);
+    if (m.type == StreamType.stderr)
+      pcbs.get(m.id).stderr.update(m.message);
 
     // Ignore things sent to stderr
     if (m.type == StreamType.stderr)
@@ -123,12 +121,11 @@ public class GameInstance extends Thread {
 
       // Check if any processes have died
       // If they are still running, exitValue triggers an exception
-      for (int i = 0; i < programs.size(); ++i) {
-        // for (Process p : processes) {
+      for (int i = 0; i < processes.size(); ++i) {
         try {
           processes.get(i).exitValue();
           System.err.println("Player '" + names.get(i) + "' has quit. cmd: '" +
-                             programs.get(i) + "'");
+                             pcbs.get(i) + "'");
           break main;
         } catch (IllegalThreadStateException e) {
         }
@@ -151,32 +148,24 @@ public class GameInstance extends Thread {
   }
 
   public void run() {
-    System.out.println("Will start game run by: '" + programs.get(0) + "'");
-    System.out.println("Player1: '" + programs.get(1) + "'");
-    System.out.println("Player2: '" + programs.get(2) + "'");
-
     // Start processes
-    startProcess(programs.get(0), true, 0); // Master broadcasts
-
-    for (int i = 1; i < programs.size(); ++i)
-      startProcess(programs.get(i), false, i);
+    int i = 0;
+    for (ProcessControlBlock p : pcbs)
+      startProcess(p, i++);
 
     processMessages();
   }
 
-  private void startProcess(String commandline, boolean broadcast, int id) {
+  private void startProcess(ProcessControlBlock pcb, int id) {
     try {
-      ArrayList<String> args = new ArrayList<String>();
-      for (String s : commandline.split(" "))
-        args.add(s);
-      ProcessBuilder pb = new ProcessBuilder(args);
+      ProcessBuilder pb = new ProcessBuilder(pcb.args);
       Process p = pb.start();
       processes.add(p);
 
       StreamConsumer stdout = new StreamConsumer(
-          p.getInputStream(), StreamType.stdout, broadcast, messages, id);
+          p.getInputStream(), StreamType.stdout, pcb.broadcast, messages, id);
       StreamConsumer stderr = new StreamConsumer(
-          p.getErrorStream(), StreamType.stderr, broadcast, messages, id);
+          p.getErrorStream(), StreamType.stderr, pcb.broadcast, messages, id);
       stdout.start();
       stderr.start();
 
@@ -184,22 +173,24 @@ public class GameInstance extends Thread {
           new OutputStreamWriter(new BufferedOutputStream(p.getOutputStream())),
           true);
       input_all.put(id, stdin);
-      if (broadcast)
+      if (pcb.broadcast)
         input_master.add(id);
       else
         input_rest.add(id);
     } catch (IOException e) {
-      System.err.println("IO Exception when running '" + commandline + "'");
+      System.err.println("IO Exception when running '" + pcb + "'");
       System.err.println(e);
     }
   }
 
-  private HashMap<Integer, PrintWriter> input_all;
-  private ArrayList<Integer> input_master;
-  private ArrayList<Integer> input_rest;
-  private LinkedBlockingQueue<Message> messages;
-  private HashMap<Integer, String> names;
-  private ArrayList<Process> processes;
-  private ArrayList<String> programs;
+  private HashMap<Integer, PrintWriter> input_all = new HashMap<>();
+  private ArrayList<Integer> input_master = new ArrayList<>();
+  private ArrayList<Integer> input_rest = new ArrayList<>();
+  private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+  private HashMap<Integer, String> names = new HashMap<>();
+  private ArrayList<Process> processes = new ArrayList<>();
   private boolean running;
+
+  private ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
+
 }
