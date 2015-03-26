@@ -187,39 +187,33 @@ public class GameMaster {
       });
   }
 
+  private void changeEnable(boolean enable) {
+    p1cmd.setEditable(enable);
+    p2cmd.setEditable(enable);
+    modcmd.setEditable(enable);
+    p1Browse.setEnabled(enable);
+    p2Browse.setEnabled(enable);
+    modBrowse.setEnabled(enable);
+  }
+
   private void changeState(State newState) {
     // No change
     if (currentState == newState)
       return;
 
     if (newState == State.WAITING) {
-      p1cmd.setEditable(true);
-      p2cmd.setEditable(true);
-      modcmd.setEditable(true);
-      p1Browse.setEnabled(true);
-      p2Browse.setEnabled(true);
-      modBrowse.setEnabled(true);
+      changeEnable(true);
       mainButton.setEnabled(true);
       mainButton.setText("Begin Game");
       currentState = State.WAITING;
     } else if (newState == State.RUNNING) {
-      p1cmd.setEditable(false);
-      p2cmd.setEditable(false);
-      modcmd.setEditable(false);
-      p1Browse.setEnabled(false);
-      p2Browse.setEnabled(false);
-      modBrowse.setEnabled(false);
+      changeEnable(false);
       mainButton.setEnabled(true);
       mainButton.setText("Stop everything");
       currentState = State.RUNNING;
-      startGameInstance();
+      startGame();
     } else if (newState == State.STOPPING) {
-      p1cmd.setEditable(false);
-      p2cmd.setEditable(false);
-      modcmd.setEditable(false);
-      p1Browse.setEnabled(false);
-      p2Browse.setEnabled(false);
-      modBrowse.setEnabled(false);
+      changeEnable(false);
       mainButton.setEnabled(false);
       mainButton.setText("Stopping. Please wait");
       currentState = State.STOPPING;
@@ -233,7 +227,7 @@ public class GameMaster {
       textAreas.get(id).append(msg + "\n");
   }
 
-  private void startGameInstance() {
+  private void startGame() {
     // Ensure the user selected at least something
     if (modcmd.getText().equals("")) {
       JOptionPane.showMessageDialog(null,
