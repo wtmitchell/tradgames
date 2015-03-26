@@ -92,6 +92,7 @@ public class GameMaster {
   private void createCenterPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
+    /* Hide until functional
     JPanel gameBoardTab = new JPanel(new BorderLayout());
     gameBoardTab.add(new JLabel("Not yet implemented"), BorderLayout.CENTER);
     JPanel movePanel = new JPanel(new BorderLayout());
@@ -102,6 +103,7 @@ public class GameMaster {
     movePanel.add(movesArea, BorderLayout.CENTER);
     gameBoardTab.add(movePanel, BorderLayout.LINE_END);
     tabbed.add(gameBoardTab, "Board");
+    */
 
     tabbed.add(textAreas.get(StreamIDs.modstdout), "Moderator stdout");
     tabbed.add(textAreas.get(StreamIDs.modstderr), "Moderator stderr");
@@ -111,8 +113,6 @@ public class GameMaster {
     tabbed.add(textAreas.get(StreamIDs.p2stderr), "Player 2 stderr");
 
     pane.add(tabbed, BorderLayout.CENTER);
-
-
   }
 
   private void createAndShowGUI() {
