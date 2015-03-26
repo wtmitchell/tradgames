@@ -3,11 +3,11 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-
-#include "String.h"
 
 Move::operator std::string() const {
   std::stringstream ss;
@@ -104,7 +104,11 @@ void ChineseCheckersState::reset() {
 }
 
 bool ChineseCheckersState::loadState(const std::string &newState) {
-  auto tokenized = Common::split(newState);
+  // Tokenize newState using whitespace as delimiter
+  std::stringstream ss(newState);
+  std::istream_iterator<std::string> begin(ss);
+  std::istream_iterator<std::string> end;
+  std::vector<std::string> tokenized(begin, end);
 
   // Ensure the length
   if (tokenized.size() != 82)
@@ -113,15 +117,28 @@ bool ChineseCheckersState::loadState(const std::string &newState) {
   // Validate first item, whose turn it is
   if (tokenized[0] != "1" && tokenized[0] != "2")
     return false;
-  currentPlayer = std::stoi(tokenized[0]);
+
+  try {
+    currentPlayer = std::stoi(tokenized[0]);
+  } catch (std::invalid_argument e) {
+    return false;
+  } catch (std::out_of_range e) {
+    return false;
+  }
 
   // Ensure rest of tokens are valid
-  for(size_t i = 1, e = tokenized.size(); i != e; ++i) {
-    int val = std::stoi(tokenized[i]);
-    if (0 <= val && val <= 2)
-      board[i - 1] = val;
-    else
+  for (size_t i = 1, e = tokenized.size(); i != e; ++i) {
+    try {
+      int val = std::stoi(tokenized[i]);
+      if (0 <= val && val <= 2)
+        board[i - 1] = val;
+      else
+        return false;
+    } catch (std::invalid_argument e) {
       return false;
+    } catch (std::out_of_range e) {
+      return false;
+    }
   }
   return true;
 }
@@ -169,7 +186,7 @@ bool ChineseCheckersState::isValidMove(const Move &m) const {
   if (board[m.from] != currentPlayer || board[m.to] != 0)
     return false;
 
-  // Note: Checking validity in this way is inefficient
+  // NOTE: Checking validity in this way is inefficient
 
   // Get current available moves
   std::vector<Move> moves;
@@ -193,7 +210,7 @@ void ChineseCheckersState::swapTurn() {
 }
 
 bool ChineseCheckersState::player1Wins() const {
-  // Win by having all of bottom triangle filled and at least one is from the
+  // Wins by having all the bottom triangle filled and at least one is from the
   // first player
 
   bool p1inTriangle = false;
@@ -208,7 +225,7 @@ bool ChineseCheckersState::player1Wins() const {
 }
 
 bool ChineseCheckersState::player2Wins() const {
-  // Win by having all of top triangle filled and at least one is from the
+  // Wins by having all of top triangle filled and at least one is from the
   // second player
 
   bool p2inTriangle = false;

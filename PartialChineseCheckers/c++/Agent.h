@@ -15,10 +15,10 @@ public:
 private:
   Move nextMove();
   void print_and_recv_echo(const std::string &msg) const;
-  std::string read_msg() const;
-  std::vector<std::string> tokenize_msg(const std::string &msg) const;
+  std::string readMsg() const;
+  std::vector<std::string> tokenizeMsg(const std::string &msg) const;
   void waitForStart();
-  void switch_current_player();
+  void switchCurrentPlayer();
 
   bool isValidStartGameMessage(const std::vector<std::string> &tokens) const;
   bool isValidMoveMessage(const std::vector<std::string> &tokens) const;

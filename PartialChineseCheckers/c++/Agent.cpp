@@ -31,7 +31,7 @@ void Agent::playGame() {
       // Check if game is over
       if (state.gameOver()) {
         std::cerr << "I, " << name << ", have lost" << std::endl;
-        switch_current_player();
+        switchCurrentPlayer();
         continue;
       }
 
@@ -45,12 +45,12 @@ void Agent::playGame() {
       print_and_recv_echo(m);
 
       // It is the opponents turn
-      switch_current_player();
+      switchCurrentPlayer();
     } else {
       // Wait for move from other player
       // Get server's next instruction
-      std::string server_msg = read_msg();
-      const std::vector<std::string> tokens = tokenize_msg(server_msg);
+      std::string server_msg = readMsg();
+      const std::vector<std::string> tokens = tokenizeMsg(server_msg);
 
       if (tokens.size() == 5 && tokens[0] == "MOVE") {
         // Translate to local coordinates and update our local state
@@ -58,7 +58,7 @@ void Agent::playGame() {
         state.applyMove(m);
 
         // It is now my turn
-        switch_current_player();
+        switchCurrentPlayer();
       } else if (tokens.size() == 4 && tokens[0] == "FINAL" &&
                  tokens[2] == "BEATS") {
         // Game over
@@ -86,14 +86,14 @@ void Agent::playGame() {
 void Agent::print_and_recv_echo(const std::string &msg) const {
   // Note the endl flushes the stream, which is necessary
   std::cout << msg << std::endl;
-  const std::string echo_recv = read_msg();
+  const std::string echo_recv = readMsg();
   if (msg != echo_recv)
     std::cerr << "Expected echo of '" << msg << "'. Received '" << echo_recv
               << "'" << std::endl;
 }
 
-/* Reads a line, up to a newline from the server */
-std::string Agent::read_msg() const {
+// Reads a line, up to a newline from the server
+std::string Agent::readMsg() const {
   std::string msg;
   std::getline(std::cin, msg); // This is a blocking read
 
@@ -107,7 +107,7 @@ std::string Agent::read_msg() const {
 }
 
 // Tokenizes a message based upon whitespace
-std::vector<std::string> Agent::tokenize_msg(const std::string &msg) const {
+std::vector<std::string> Agent::tokenizeMsg(const std::string &msg) const {
   // Tokenize using whitespace as a delimiter
   std::stringstream ss(msg);
   std::istream_iterator<std::string> begin(ss);
@@ -119,8 +119,8 @@ std::vector<std::string> Agent::tokenize_msg(const std::string &msg) const {
 
 void Agent::waitForStart() {
   for (;;) {
-    std::string response = read_msg();
-    const std::vector<std::string> tokens = tokenize_msg(response);
+    std::string response = readMsg();
+    const std::vector<std::string> tokens = tokenizeMsg(response);
 
     if (tokens.size() == 4 && tokens[0] == "BEGIN" &&
         tokens[1] == "CHINESECHECKERS") {
@@ -173,7 +173,7 @@ void Agent::waitForStart() {
   current_player = player1;
 }
 
-void Agent::switch_current_player() {
+void Agent::switchCurrentPlayer() {
   current_player = (current_player == player1) ? player2 : player1;
 }
 
