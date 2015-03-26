@@ -206,7 +206,7 @@ Move ChineseCheckersState::translateToLocal(const std::vector<std::string> &toke
 }
 
 void ChineseCheckersState::swapTurn() {
-  currentPlayer = ((currentPlayer + 1) % 2) + 1;
+  currentPlayer = currentPlayer == 1 ? 2 : 1;
 }
 
 bool ChineseCheckersState::player1Wins() const {

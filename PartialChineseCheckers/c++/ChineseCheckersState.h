@@ -76,7 +76,7 @@ public:
 
 private:
   std::array<int, 81> board;
-  bool currentPlayer;
+  int currentPlayer;
 
   void getMovesSingleStep(std::vector<Move> &moves, unsigned from) const;
 
