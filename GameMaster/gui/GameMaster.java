@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -105,12 +106,29 @@ public class GameMaster {
     tabbed.add(gameBoardTab, "Board");
     */
 
-    tabbed.add(textAreas.get(StreamIDs.modstdout), "Moderator stdout");
-    tabbed.add(textAreas.get(StreamIDs.modstderr), "Moderator stderr");
-    tabbed.add(textAreas.get(StreamIDs.p1stdout), "Player 1 stdout");
-    tabbed.add(textAreas.get(StreamIDs.p1stderr), "Player 1 stderr");
-    tabbed.add(textAreas.get(StreamIDs.p2stdout), "Player 2 stdout");
-    tabbed.add(textAreas.get(StreamIDs.p2stderr), "Player 2 stderr");
+    JScrollPane modstdoutScroll = new JScrollPane(textAreas.get(StreamIDs.modstdout));
+    modstdoutScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(modstdoutScroll, "Moderator stdout");
+
+    JScrollPane modstderrScroll = new JScrollPane(textAreas.get(StreamIDs.modstderr));
+    modstderrScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(modstderrScroll, "Moderator stderr");
+
+    JScrollPane p1stdoutScroll = new JScrollPane(textAreas.get(StreamIDs.p1stdout));
+    p1stdoutScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(p1stdoutScroll, "Player 1 stdout");
+
+    JScrollPane p1stderrScroll = new JScrollPane(textAreas.get(StreamIDs.p1stderr));
+    p1stderrScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(p1stderrScroll, "Player 1 stderr");
+
+    JScrollPane p2stdoutScroll = new JScrollPane(textAreas.get(StreamIDs.p2stdout));
+    p2stdoutScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(p2stdoutScroll, "Player 2 stdout");
+
+    JScrollPane p2stderrScroll = new JScrollPane(textAreas.get(StreamIDs.p2stderr));
+    p2stderrScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(p2stderrScroll, "Player 2 stderr");
 
     pane.add(tabbed, BorderLayout.CENTER);
   }
