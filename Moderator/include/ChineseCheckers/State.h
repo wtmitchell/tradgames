@@ -79,7 +79,7 @@ public:
 private:
   // mutable due to how we find jump moves
   mutable std::array<int, 81> board;
-  bool currentPlayer;
+  int currentPlayer;
 
   void getMovesSingleStep(std::set<Move> &moves, unsigned from) const;
   void getMovesJumps(std::set<Move> &moves, unsigned from, unsigned current) const;

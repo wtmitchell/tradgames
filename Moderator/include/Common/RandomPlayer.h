@@ -183,12 +183,11 @@ void Random<GameState, GameClient>::waitForStart() {
       for (const auto i : moves)
         std::cout << i.from << ", " << i.to << "; ";
       std::cout << std::endl;
-    } else if (tokens[0] == "MOVE") {
+    } else if (GameClient::isValidMoveMessage(tokens)) {
       // Just apply the move
-      Move m;
-      m.from = static_cast<unsigned>(std::stoi(tokens[2]));
-      m.to = static_cast<unsigned>(std::stoi(tokens[5]));
-      gs.applyMove(m);
+      const Move m = gs.translateToLocal(tokens);
+      if (!gs.applyMove(m))
+        std::cout << "Unable to apply move '" << m << "'" << std::endl;
     } else {
       std::cerr << "Unexpected message " << response << "\n";
     }
@@ -197,7 +196,7 @@ void Random<GameState, GameClient>::waitForStart() {
   // Game is about to begin, restore to start state in case DUMPSTATE/LOADSTATE/LISTMOVES
   // were used
   gs.reset();
-  
+
   // Player 1 goes first
   currentPlayer = player1;
 }

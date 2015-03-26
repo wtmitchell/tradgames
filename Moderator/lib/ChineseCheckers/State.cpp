@@ -246,12 +246,19 @@ bool State::isValidMove(const Move &m) const {
 Move State::translateToLocal(const std::vector<std::string> &tokens) const {
   // The numbers in the MOVE command sent by the moderator is already in the
   // format we need
-  return Move{static_cast<unsigned>(std::stoi(tokens[2])),
-              static_cast<unsigned>(std::stoi(tokens[4]))};
+  try {
+    return Move{static_cast<unsigned>(std::stoi(tokens[2])),
+        static_cast<unsigned>(std::stoi(tokens[4]))};
+  } catch (std::invalid_argument e) {
+    return Move{0, 0};
+  } catch (std::out_of_range e) {
+    return Move{0, 0};
+  }
+
 }
 
 void State::swapTurn() {
-  currentPlayer = ((currentPlayer + 1) % 2) + 1;
+  currentPlayer = currentPlayer == 1 ?  2 : 1;
 }
 
 bool State::player1Wins() const {
