@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameInstance extends Thread {
   public GameInstance(ArrayList<ProcessControlBlock> pcbs, UpdateHook complete) {
@@ -80,10 +81,14 @@ public class GameInstance extends Thread {
       reply(m, "#players " + names.size());
     } else if (m.message.equals("#quit")) {
       // Quit the game
-      running = false;
+      running.set(false);
       postAll(new Message("#quit"));
     }
     return true;
+  }
+
+  public void stopRunning() {
+    running.set(false);
   }
 
   public void reply(Message m, String reply) {
@@ -103,9 +108,9 @@ public class GameInstance extends Thread {
   public void processMessages() {
     Message m;
 
-    running = true;
+    running.set(true);
   main:
-    while (running) {
+    while (running.get()) {
       try {
         Thread.sleep(5);
       } catch (InterruptedException e) {
@@ -187,7 +192,7 @@ public class GameInstance extends Thread {
   private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
   private HashMap<Integer, String> names = new HashMap<>();
   private ArrayList<Process> processes = new ArrayList<>();
-  private boolean running;
+  private AtomicBoolean running = new AtomicBoolean(false);
   private ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
   private UpdateHook complete;
 }

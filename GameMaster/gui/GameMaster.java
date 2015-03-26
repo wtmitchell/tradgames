@@ -63,7 +63,7 @@ public class GameMaster {
     if (currentState == State.WAITING)
       changeState(State.RUNNING);
     else if (currentState == State.RUNNING)
-      changeState(State.WAITING);
+      changeState(State.STOPPING);
   }
 
   private void createProgramSelectorPanel(Container pane) {
@@ -211,12 +211,15 @@ public class GameMaster {
       mainButton.setEnabled(true);
       mainButton.setText("Stop everything");
       currentState = State.RUNNING;
+      for (JTextArea i : textAreas)
+        i.setText("");
       startGame();
     } else if (newState == State.STOPPING) {
       changeEnable(false);
       mainButton.setEnabled(false);
       mainButton.setText("Stopping. Please wait");
       currentState = State.STOPPING;
+      gi.stopRunning();
     }
   }
 
@@ -338,7 +341,7 @@ public class GameMaster {
                                 }));
 
     // Start the actual game
-    GameInstance gi = new GameInstance(pcbs, new UpdateHook() {
+    gi = new GameInstance(pcbs, new UpdateHook() {
         @Override
         public void update() {
           SwingUtilities.invokeLater(new Runnable() {
@@ -351,6 +354,8 @@ public class GameMaster {
       });
     gi.start();
   }
+
+  private GameInstance gi;
 
   private JTextField p1cmd = new JTextField();
   private JTextField p2cmd = new JTextField();
