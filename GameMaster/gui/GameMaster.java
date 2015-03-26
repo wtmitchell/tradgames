@@ -4,10 +4,12 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -47,68 +49,54 @@ public class GameMaster {
       dest.setText(fc.getSelectedFile().getAbsolutePath());
     }
   }
+
+  private void mainListener() {
+    if (currentState == State.WAITING)
+      changeState(State.RUNNING);
+    else if (currentState == State.RUNNING)
+      changeState(State.WAITING);
+  }
+
   private void createProgramSelectorPanel(Container pane) {
     // Add center panel that has selectors
     JPanel center =
         new JPanel(new GridLayout(3, 3, 5, 5)); // row, col, hgap, vgap
     JLabel p1label = new JLabel("Player1:");
     center.add(p1label);
-    final JTextField p1text = new JTextField();
-    p1text.setEditable(true);
-    center.add(p1text);
-    JButton p1browse = new JButton("Browse");
-    p1browse.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        browseListener(p1text, "Player 1");
-      }
-    });
-    center.add(p1browse);
+    center.add(p1Browse);
+    center.add(p1cmd);
 
     JLabel p2label = new JLabel("Player2:");
     center.add(p2label);
-    final JTextField p2text = new JTextField();
-    p2text.setEditable(true);
-    center.add(p2text);
-    JButton p2browse = new JButton("Browse");
-    p2browse.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        browseListener(p2text, "Player 2");
-      }
-    });
-    center.add(p2browse);
+    center.add(p2Browse);
+    center.add(p2cmd);
 
     JLabel modlabel = new JLabel("Moderator:");
     center.add(modlabel);
-    final JTextField modtext = new JTextField();
-    modtext.setEditable(true);
-    center.add(modtext);
-    JButton modbrowse = new JButton("Browse");
-    modbrowse.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        browseListener(modtext, "Moderator");
-      }
-    });
-    center.add(modbrowse);
+    center.add(modBrowse);
+    center.add(modcmd);
 
     pane.add(center, BorderLayout.CENTER);
-    // Add Go button
-    JButton gobutton = new JButton("Begin Game");
-    pane.add(gobutton, BorderLayout.LINE_END);
+
+    pane.add(mainButton, BorderLayout.LINE_END);
   }
 
   private void createCenterPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
-    JPanel gameBoard = new JPanel();
-    gameBoard.add(new JLabel("Not yet implemented"));
-    tabbed.add(gameBoard, "Board");
+    JPanel gameBoardTab = new JPanel(new BorderLayout());
+    gameBoardTab.add(new JLabel("Not yet implemented"), BorderLayout.CENTER);
+    JPanel movePanel = new JPanel(new BorderLayout());
+    movePanel.add(new JLabel("Moves:"), BorderLayout.PAGE_START);
+    JTextArea movesArea = new JTextArea(
+        "Not yet implemented.\n Will be list"
+        + " of moves that can\n be clicked to show the board\n at that state");
+    movePanel.add(movesArea, BorderLayout.CENTER);
+    gameBoardTab.add(movePanel, BorderLayout.LINE_END);
+    tabbed.add(gameBoardTab, "Board");
 
-    // JPanel modstdoutpanel = new JPanel();
     JTextArea modstdout = new JTextArea();
-    // modstdoutpanel.add(modstdout);
-    // tabbed.add(modstdoutpanel, "Moderator stdout");
     tabbed.add(modstdout, "Moderator stdout");
-    // modstdot.append("test");
 
     JPanel modstderr = new JPanel();
     tabbed.add(modstderr, "Moderator stderr");
@@ -127,12 +115,7 @@ public class GameMaster {
 
     pane.add(tabbed, BorderLayout.CENTER);
 
-    JPanel movePanel = new JPanel(new BorderLayout());
-    JLabel moveLabel = new JLabel("Moves:");
-    movePanel.add(moveLabel, BorderLayout.PAGE_START);
-    JTextArea movesArea = new JTextArea("P1: MOVE XX TO YY");
-    movePanel.add(movesArea, BorderLayout.CENTER);
-    pane.add(movePanel, BorderLayout.LINE_END);
+
   }
 
   private void createAndShowGUI() {
@@ -152,8 +135,123 @@ public class GameMaster {
     createCenterPanel(center);
     frame.add(center, BorderLayout.CENTER);
 
+    // Make the GUI functional
+    addAllListeners();
+
+    // Begin waiting
+    changeState(State.WAITING);
+
     // Display the window.
     frame.pack();
     frame.setVisible(true);
   }
+
+  private void addAllListeners() {
+    p1Browse.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          browseListener(p1cmd, "Player 1");
+        }
+      });
+
+    p2Browse.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          browseListener(p2cmd, "Player 2");
+        }
+      });
+
+    modBrowse.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        browseListener(modcmd, "Moderator");
+      }
+    });
+
+    mainButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          mainListener();
+        }
+      });
+  }
+
+  private void changeState(State newState) {
+    // No change
+    if (currentState == newState)
+      return;
+
+    if (newState == State.WAITING) {
+      p1cmd.setEditable(true);
+      p2cmd.setEditable(true);
+      modcmd.setEditable(true);
+      p1Browse.setEnabled(true);
+      p2Browse.setEnabled(true);
+      modBrowse.setEnabled(true);
+      mainButton.setEnabled(true);
+      mainButton.setText("Begin Game");
+      currentState = State.WAITING;
+    } else if (newState == State.RUNNING) {
+      p1cmd.setEditable(false);
+      p2cmd.setEditable(false);
+      modcmd.setEditable(false);
+      p1Browse.setEnabled(false);
+      p2Browse.setEnabled(false);
+      modBrowse.setEnabled(false);
+      mainButton.setEnabled(true);
+      mainButton.setText("Stop everything");
+      currentState = State.RUNNING;
+      startGameInstance();
+    } else if (newState == State.STOPPING) {
+      p1cmd.setEditable(false);
+      p2cmd.setEditable(false);
+      modcmd.setEditable(false);
+      p1Browse.setEnabled(false);
+      p2Browse.setEnabled(false);
+      modBrowse.setEnabled(false);
+      mainButton.setEnabled(false);
+      mainButton.setText("Stopping. Please wait");
+      currentState = State.STOPPING;
+    }
+  }
+
+  private void startGameInstance() {
+    if (modcmd.getText().equals("")) {
+      JOptionPane.showMessageDialog(null,
+                                    "Moderator cannot be empty.",
+                                    "Cannot start game",
+                                    JOptionPane.ERROR_MESSAGE);
+      changeState(State.WAITING);
+      return;
+    }
+    if (p1cmd.getText().equals("")) {
+      JOptionPane.showMessageDialog(null,
+                                    "Player 1 cannot be empty.",
+                                    "Cannot start game",
+                                    JOptionPane.ERROR_MESSAGE);
+      changeState(State.WAITING);
+      return;
+    }
+    if (p2cmd.getText().equals("")) {
+      JOptionPane.showMessageDialog(null,
+                                    "Player 2 cannot be empty.",
+                                    "Cannot start game",
+                                    JOptionPane.ERROR_MESSAGE);
+      changeState(State.WAITING);
+      return;
+    }
+    ArrayList<String> programs = new ArrayList<String>();
+    programs.add(modcmd.getText());
+    programs.add(p1cmd.getText());
+    programs.add(p2cmd.getText());
+
+    GameInstance gi = new GameInstance(programs);
+    gi.start();
+  }
+
+  private JTextField p1cmd = new JTextField();
+  private JTextField p2cmd = new JTextField();
+  private JTextField modcmd = new JTextField();
+  private JButton mainButton = new JButton();
+  private JButton p1Browse = new JButton("Browse");
+  private JButton p2Browse = new JButton("Browse");
+  private JButton modBrowse = new JButton("Browse");
+  private enum State { WAITING, RUNNING, STOPPING }
+  private State currentState = State.STOPPING;
 }
