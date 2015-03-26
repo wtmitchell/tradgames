@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 
 public class ProcessControlBlock {
-  public ProcessControlBlock(String commandline, boolean broadcast, UpdateHook stdout, UpdateHook stderr) {
+  public ProcessControlBlock(String commandline, boolean broadcast,
+                             UpdateMsgHook stdout, UpdateMsgHook stderr) {
     for (String s : commandline.split(" "))
       args.add(s);
     this.broadcast = broadcast;
@@ -10,6 +11,6 @@ public class ProcessControlBlock {
   }
   public ArrayList<String> args = new ArrayList<String>();
   public boolean broadcast;
-  public UpdateHook stdout;
-  public UpdateHook stderr;
+  public UpdateMsgHook stdout;
+  public UpdateMsgHook stderr;
 }

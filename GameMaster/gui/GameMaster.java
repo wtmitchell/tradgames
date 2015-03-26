@@ -246,7 +246,7 @@ public class GameMaster {
     // Create a PCB for the moderator
     pcbs.add(
         new ProcessControlBlock(modcmd.getText(), true,
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.modstdout).add(msg);
@@ -258,7 +258,7 @@ public class GameMaster {
                                     });
                                   }
                                 },
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.modstderr).add(msg);
@@ -273,7 +273,7 @@ public class GameMaster {
     // Create a PCB for player1
     pcbs.add(
         new ProcessControlBlock(p1cmd.getText(), true,
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.p1stdout).add(msg);
@@ -285,7 +285,7 @@ public class GameMaster {
                                     });
                                   }
                                 },
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.p1stderr).add(msg);
@@ -300,7 +300,7 @@ public class GameMaster {
     // Create a PCB for player2
     pcbs.add(
         new ProcessControlBlock(p2cmd.getText(), true,
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.p2stdout).add(msg);
@@ -312,7 +312,7 @@ public class GameMaster {
                                     });
                                   }
                                 },
-                                new UpdateHook() {
+                                new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
                                     updateQueues.get(StreamIDs.p2stderr).add(msg);
