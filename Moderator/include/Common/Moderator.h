@@ -93,7 +93,7 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
 
   // Start game
   if (printBoard){
-    diagnostic("MOVE | Turn: 0 | Player 0: - | Move: - MOVE FROM - TO - | Elapsed:  0h  0m  0s  0ms");
+    diagnostic("MOVE | Turn: 0 | Player 0: - | Move: - | Elapsed:  -");
     printGUIInfo();
   }
   broadcast(GameClient::startGameMessage(playerNames[0], playerNames[1]));
