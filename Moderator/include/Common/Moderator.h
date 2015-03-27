@@ -35,7 +35,7 @@ public:
   Moderator &operator=(const Moderator &&) = delete;
 
   void playGame(bool printBoard, bool quiet, double turnTimeLimit,
-                 bool logGame);
+                bool logGame, bool enforceTimeLimit);
 
 private:
   void waitForStart();
@@ -46,6 +46,7 @@ private:
   void broadcast(const std::string &msg);
   void diagnostic(const std::string &msg);
   void final(unsigned winner, unsigned loser);
+  void printGUIInfo();
 
   GameState gs;
   std::set<std::string> echo;
@@ -75,7 +76,8 @@ Moderator<GameState, GameClient>::~Moderator() {
 template <typename GameState, typename GameClient>
 void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
                                                 double turnTimeLimit,
-                                                bool logGame) {
+                                                bool logGame,
+                                                bool enforceTimeLimit) {
   // Identify myself
   std::cout << "#name moderator\n"
             << "#master" << std::endl;
@@ -90,6 +92,10 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
   Common::Timer moveTimer;
 
   // Start game
+  if (printBoard){
+    diagnostic("MOVE | Turn: 0 | Player 0: - | Move: - MOVE FROM - TO - | Elapsed:  0h  0m  0s  0ms");
+    printGUIInfo();
+  }
   broadcast(GameClient::startGameMessage(playerNames[0], playerNames[1]));
 
   // start timer
@@ -130,12 +136,13 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
       ++turnCount;
       // Print out turn and time information
       std::stringstream timeMsg;
-      timeMsg << "Turn " << turnCount << " by " << playerIds[turn] << ":"
-              << playerNames[turn] << " took " << moveTimer;
+      timeMsg << "MOVE | Turn: " << turnCount << " | Player " << playerIds[turn] << ": "
+              << playerNames[turn] << " | Move: " << msg <<" | Elapsed: " << moveTimer;
       diagnostic(timeMsg.str());
 
+
       // Took too long
-      if (moveTimer.seconds_elapsed() > turnTimeLimit) {
+      if (enforceTimeLimit && moveTimer.seconds_elapsed() > turnTimeLimit) {
         std::stringstream forfeitMsg;
         forfeitMsg << "Too long. Exceeds time limit of " << turnTimeLimit
                    << " seconds. "
@@ -143,9 +150,6 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
                    << playerIds[turn] << ":" << playerNames[turn]
                    << " forfeits.";
         diagnostic(forfeitMsg.str());
-
-        if (printBoard)
-          std::cerr << gs.dumpState() << std::endl;
 
         final((turn + 1) % 2, turn);
         broadcast("#quit");
@@ -157,9 +161,6 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
 
       // Validate move
       if (!gs.isValidMove(m)) {
-        // Display board if requested
-        if (printBoard)
-          std::cerr << gs.dumpState() << std::endl;
         std::stringstream invalidMsg;
         invalidMsg << "Invalid move: " << msg;
         diagnostic(invalidMsg.str());
@@ -171,14 +172,15 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
 
       // Apply move and echo it
       gs.applyMove(m);
+
+      // Print GUI info after new move
+      if (printBoard)
+        printGUIInfo();
+
       broadcast(GameClient::moveMessage(m));
 
       // Start timer for next player's move
       moveTimer.start();
-
-      // Display board if requested
-      if (printBoard)
-        std::cerr << gs.dumpState() << std::endl;
 
       // Check if game is over
       if (gs.gameOver()) {
@@ -284,6 +286,15 @@ void Moderator<GameState, GameClient>::final(unsigned winner, unsigned loser) {
   std::stringstream movecountMsg;
   movecountMsg << turnCount << " moves were played in total";
   diagnostic(movecountMsg.str());
+}
+
+template <typename GameState, typename GameClient>
+void Moderator<GameState, GameClient>::printGUIInfo() {
+  std::stringstream gui;
+
+  gui << "GUI | " <<  gs.dumpState() << " | " << gs.listMoves();
+
+  diagnostic(gui.str());
 }
 } //namespace Common
 

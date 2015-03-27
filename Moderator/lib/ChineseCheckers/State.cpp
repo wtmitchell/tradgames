@@ -257,6 +257,17 @@ Move State::translateToLocal(const std::vector<std::string> &tokens) const {
 
 }
 
+std::string State::listMoves() const {
+  std::vector<Move> moves;
+  getMoves(moves);
+
+  std::stringstream ss;
+  for (const auto i : moves)
+    ss << i.from << ", " << i.to << "; ";
+
+  return ss.str();
+}
+
 void State::swapTurn() {
   currentPlayer = currentPlayer == 1 ?  2 : 1;
 }

@@ -76,6 +76,8 @@ public:
   // Translates a sequence of tokens from the move format used to the local move type
   Move translateToLocal(const std::vector<std::string> &tokens) const;
 
+  // Dumps a list of the possible moves
+  std::string listMoves() const;
 private:
   // mutable due to how we find jump moves
   mutable std::array<int, 81> board;
