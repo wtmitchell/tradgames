@@ -28,8 +28,10 @@ public class ChineseCheckersState {
 
     // Check the move
     // FIXME: This should be uncommented once you have getMoves working!!
+    /*
     if (!isValidMove(m))
       return false;
+    */
 
     // Apply the move
     int temp = board[m.from];

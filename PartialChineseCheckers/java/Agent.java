@@ -45,7 +45,8 @@ public class Agent {
         String server_msg = readMessage();
         String[] tokens = server_msg.split(" ");
 
-        if (tokens.length == 5 && tokens[0] == "MOVE") {
+        //if (tokens.length == 5 && tokens[0] == "MOVE") {
+        if (isValidMoveMessage(tokens)) {
           // Translate to local coordinates and update our local state
           Move m = state.translateToLocal(tokens);
           state.applyMove(m);
@@ -74,6 +75,10 @@ public class Agent {
           // Unknown command
           System.err.println("Unknown command of '" + server_msg +
                              "' from the server");
+          System.err.print("Tokens: ("+ tokens.length +")");
+          for (String s : tokens)
+            System.err.print("'" + s + "' ");
+          System.err.print("\n");
           System.err.flush();
         }
       }
