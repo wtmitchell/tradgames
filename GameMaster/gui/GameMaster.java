@@ -14,11 +14,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
 
 public class GameMaster {
   public static void main(String[] args) { GameMaster g = new GameMaster(); }
@@ -105,6 +108,32 @@ public class GameMaster {
     gameBoardTab.add(movePanel, BorderLayout.LINE_END);
     tabbed.add(gameBoardTab, "Board");
     */
+
+    moveTable.setFillsViewportHeight(true);
+
+    TableColumnModel tcm = moveTable.getColumnModel();
+    tcm.getColumn(0).setMinWidth(40); // Turn
+    tcm.getColumn(0).setMaxWidth(40); // Turn
+    tcm.getColumn(0).setResizable(false); // Turn
+    tcm.getColumn(1).setMinWidth(25); // #
+    tcm.getColumn(1).setMaxWidth(25); // #
+    tcm.getColumn(1).setResizable(false); // #
+    tcm.getColumn(2).setPreferredWidth(75); // Name
+    tcm.getColumn(3).setMinWidth(150); // Move
+    tcm.getColumn(3).setMaxWidth(150); // Move
+    tcm.getColumn(3).setResizable(false); // Move
+    tcm.getColumn(4).setMinWidth(150); // Time elapsed
+    tcm.getColumn(4).setMaxWidth(150); // Time elapsed
+    tcm.getColumn(4).setResizable(false); // Time elapsed
+    tcm.getColumn(5).setPreferredWidth(100); // Resulting Board State
+    tcm.getColumn(6).setPreferredWidth(100); // Next Moves
+
+    //moveTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+    JScrollPane moveTableScroll = new JScrollPane(moveTable);
+    moveTableScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    tabbed.add(moveTableScroll, "Moves");
+
 
     JScrollPane modstdoutScroll = new JScrollPane(textAreas.get(StreamIDs.modstdout));
     modstdoutScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -196,6 +225,12 @@ public class GameMaster {
     modBrowse.setEnabled(enable);
   }
 
+  private void resetForNewGame() {
+    for (JTextArea i : textAreas)
+      i.setText("");
+    ((MoveTableModel)moveTable.getModel()).clearAll();
+  }
+
   private void changeState(State newState) {
     // No change
     if (currentState == newState)
@@ -211,8 +246,7 @@ public class GameMaster {
       mainButton.setEnabled(true);
       mainButton.setText("Stop everything");
       currentState = State.RUNNING;
-      for (JTextArea i : textAreas)
-        i.setText("");
+      resetForNewGame();
       startGame();
     } else if (newState == State.STOPPING) {
       changeEnable(false);
@@ -228,6 +262,14 @@ public class GameMaster {
     for (String msg = updateQueues.get(id).poll(); msg != null;
          msg = updateQueues.get(id).poll())
       textAreas.get(id).append(msg + "\n");
+  }
+
+  private void processGUIUpdate(String msg) {
+    if (msg.startsWith("MOVE")) {
+      ((MoveTableModel)moveTable.getModel()).addMoveMsg(msg);
+    } else if (msg.startsWith("GUI")) {
+      ((MoveTableModel)moveTable.getModel()).addGUIState(msg);
+    }
   }
 
   private void startGame() {
@@ -281,6 +323,7 @@ public class GameMaster {
                                       @Override
                                       public void run() {
                                         processQueue(StreamIDs.modstderr);
+                                        processGUIUpdate(msg);
                                       }
                                     });
                                   }
@@ -382,4 +425,128 @@ public class GameMaster {
   private ArrayList<LinkedBlockingQueue<String>> updateQueues =
       new ArrayList<LinkedBlockingQueue<String>>();
   private ArrayList<JTextArea> textAreas = new ArrayList<JTextArea>();
+
+  private JTable moveTable = new JTable(new MoveTableModel());
+
+  private class MoveTableModel extends AbstractTableModel {
+    private String[] columnNames = {"Turn", "#", "Name", "Move", "Time elapsed",
+                                    "Resulting Board State", "Next Moves"};
+
+    private class Move {
+      public Integer turn;
+      public Integer playerNum;
+      public String playerName;
+      public String move;
+      public String elapsed;
+      public String state;
+      public String nextMoves;
+
+      public Object get(int i) {
+        switch (i) {
+        case 0:
+          return turn;
+        case 1:
+          return playerNum;
+        case 2:
+          return playerName;
+        case 3:
+          return move;
+        case 4:
+          return elapsed;
+        case 5:
+          return state;
+        case 6:
+          return nextMoves;
+        }
+        return "?"; // Should never happen
+      }
+    }
+
+    private ArrayList<Move> data = new ArrayList<>();
+
+    private String moveCache = "";
+
+    @Override
+    public int getColumnCount() {
+      return columnNames.length;
+    }
+
+    @Override
+    public int getRowCount() {
+      return data.size();
+    }
+
+    @Override
+    public String getColumnName(int col) {
+      return columnNames[col];
+    }
+
+    @Override
+    public Object getValueAt(int row, int col) {
+      return data.get(row).get(col);
+      //return "?";
+    }
+
+    @Override
+    public Class getColumnClass(int c) {
+      return getValueAt(0, c).getClass();
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int col) {
+      return false;
+    }
+
+    public void addMoveMsg(String msg) {
+      moveCache = msg;
+    }
+
+    public void addGUIState(String msg) {
+      // Only valid to call if moveCache is not empty
+      if (moveCache.equals(""))
+        return;
+
+      String[] p1 = moveCache.split("\\|");
+      String[] p2 = msg.split("\\|");
+
+      Move m = new Move();
+      /*
+      MOVE | Turn: 25 | Player 1: Random | Move: 1 MOVE FROM 27 TO 19 | Elapsed:  0h  0m  0s  21ms
+GUI | 2 1 1 1 1 0 0 0 0 0 1 0 1 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 0 0 0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2 | 28, 10; 28, 20; 28, 27; 28, 29; 28, 36; 28, 37; 61, 52; 61, 53; 61, 60; 62, 53; 62, 60; 69, 53; 69, 60; 69, 68; 70, 52; 70, 68; 71, 53; 77, 68; 77, 76; 78, 60; 78, 76;
+
+p1[0] = 'MOVE '
+p1[1] = ' Turn: 4 '
+p1[2] = ' Player 2: MyName '
+p1[3] = ' Move: 2 MOVE FROM 52 TO 51 '
+p1[4] = ' Elapsed:  0h  0m  0s  20ms'
+p2[0] = 'GUI '
+p2[1] = ' 1 1 1 1 0 1 1 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 2 2 0 0 0 0 0 0 2 2 2 0 0 0 0 0 2 2 2 2 '
+p2[2] = ' 1, 3; 1, 19; 2, 3; 2, 20; 4, 3; 4, 6; 4, 12; 4, 13; 5, 3; 5, 6; 5, 13; 5, 14; 5, 19; 10, 12; 10, 19; 11, 3; 11, 12; 11, 19; 11, 20; 18, 19; 18, 36; 27, 19; 27, 28; 27, 36; '
+      */
+
+      try {
+        m.turn = Integer.parseInt(p1[1].substring(6).trim());
+      } catch (NumberFormatException e) {
+        m.turn = -1;
+      }
+      m.playerNum = p1[2].charAt(8) - '0';
+      m.playerName = p1[2].substring(11).trim();
+      m.move = p1[3].substring(9).trim();
+      m.elapsed = p1[4].substring(9).trim();
+      m.state = p2[1].trim();
+      m.nextMoves = p2[2].trim();
+
+      data.add(m);
+      moveCache = "";
+
+      fireTableRowsInserted(data.size(), data.size());
+    }
+
+    public void clearAll() {
+      data.clear();
+      fireTableDataChanged();
+    }
+
+    // AbstractTableModel.fireTableRowsInserted(int firstRow, int lastRow)
+  }
 }
