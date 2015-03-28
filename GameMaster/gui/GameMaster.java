@@ -21,13 +21,17 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
-public class GameMaster {
-  public static void main(String[] args) { GameMaster g = new GameMaster(); }
+public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
+  public static void main(String[] args) {
+    GameMaster<HexGameBoard> g = new GameMaster<>(HexGameBoard.class);
+  }
 
-  public GameMaster() {
+  public GameMaster(Class<BoardPanelType> typeClass) {
     // Set the Look and Feel
     try {
       UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
@@ -48,6 +52,17 @@ public class GameMaster {
     for (int i = 0; i < StreamIDs.count; ++i) {
       updateQueues.add(new LinkedBlockingQueue<String>());
       textAreas.add(new JTextArea());
+    }
+
+    // Instantiate the BoardPanel. This nonsense is needed since Java's generics
+    // erases the type of BoardPanelType so there is no way to do something like:
+    // BoardPanelType boardPanel = new BoardPanelType();
+    try {
+      boardPanel = typeClass.newInstance();
+    } catch (InstantiationException ex) {
+      ex.printStackTrace();
+    } catch (IllegalAccessException ex) {
+      ex.printStackTrace();
     }
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -94,7 +109,7 @@ public class GameMaster {
     pane.add(mainButton, BorderLayout.LINE_END);
   }
 
-  private void createCenterPanel(Container pane) {
+  private void createTabbedPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
     /* Hide until functional
@@ -169,8 +184,10 @@ public class GameMaster {
     frame.add(top, BorderLayout.PAGE_START);
 
     JPanel center = new JPanel(new BorderLayout());
-    createCenterPanel(center);
+    createTabbedPanel(center);
     frame.add(center, BorderLayout.CENTER);
+
+    frame.add(boardPanel, BorderLayout.WEST);
 
     // Make the GUI functional
     addAllListeners();
@@ -207,6 +224,24 @@ public class GameMaster {
           mainListener();
         }
       });
+
+    moveTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        @SuppressWarnings("unchecked")
+        public void valueChanged(ListSelectionEvent e) {
+          //Ignore extra messages.
+          if (e.getValueIsAdjusting()) return;
+
+          ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+          if (!lsm.isSelectionEmpty()) {
+            int selectedRow = lsm.getMinSelectionIndex();
+
+            // This cast really is safe since we constructed the table with
+            // this specific model
+            Move m = ((MoveTableModel)moveTable.getModel()).getRow(selectedRow);
+            boardPanel.updateData(m.turn, m.state, m.nextMoves);
+          }
+        }
+      });
   }
 
   private void changeEnable(boolean enable) {
@@ -218,9 +253,13 @@ public class GameMaster {
     modBrowse.setEnabled(enable);
   }
 
+  @SuppressWarnings("unchecked")
   private void resetForNewGame() {
     for (JTextArea i : textAreas)
       i.setText("");
+
+    // This cast really is safe since we constructed the table with
+    // this specific model
     ((MoveTableModel)moveTable.getModel()).clearAll();
   }
 
@@ -257,7 +296,10 @@ public class GameMaster {
       textAreas.get(id).append(msg + "\n");
   }
 
+  @SuppressWarnings("unchecked")
   private void processGUIUpdate(String msg) {
+    // These casts really are safe since we constructed the table with
+    // this specific model
     if (msg.startsWith("MOVE")) {
       ((MoveTableModel)moveTable.getModel()).addMoveMsg(msg);
     } else if (msg.startsWith("GUI")) {
@@ -421,39 +463,42 @@ public class GameMaster {
 
   private JTable moveTable = new JTable(new MoveTableModel());
 
+  private BoardPanelType boardPanel; // initialized in ctor
+
+  private class Move {
+    public Integer turn;
+    public Integer playerNum;
+    public String playerName;
+    public String move;
+    public String elapsed;
+    public String state;
+    public String nextMoves;
+
+    public Object get(int i) {
+      switch (i) {
+      case 0:
+        return turn;
+      case 1:
+        return playerNum;
+      case 2:
+        return playerName;
+      case 3:
+        return move;
+      case 4:
+        return elapsed;
+      case 5:
+        return state;
+      case 6:
+        return nextMoves;
+      }
+      return "?"; // Should never happen
+    }
+  }
+
   private class MoveTableModel extends AbstractTableModel {
     private String[] columnNames = {"Turn", "#", "Name", "Move", "Time elapsed",
                                     "Resulting Board State", "Next Moves"};
 
-    private class Move {
-      public Integer turn;
-      public Integer playerNum;
-      public String playerName;
-      public String move;
-      public String elapsed;
-      public String state;
-      public String nextMoves;
-
-      public Object get(int i) {
-        switch (i) {
-        case 0:
-          return turn;
-        case 1:
-          return playerNum;
-        case 2:
-          return playerName;
-        case 3:
-          return move;
-        case 4:
-          return elapsed;
-        case 5:
-          return state;
-        case 6:
-          return nextMoves;
-        }
-        return "?"; // Should never happen
-      }
-    }
 
     private ArrayList<Move> data = new ArrayList<>();
 
@@ -541,6 +586,10 @@ public class GameMaster {
     public void clearAll() {
       data.clear();
       fireTableDataChanged();
+    }
+
+    public Move getRow(int i) {
+      return data.get(i);
     }
   }
 }
