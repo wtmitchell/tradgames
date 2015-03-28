@@ -17,6 +17,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -112,23 +113,15 @@ public class GameMaster {
     moveTable.setFillsViewportHeight(true);
 
     TableColumnModel tcm = moveTable.getColumnModel();
-    tcm.getColumn(0).setMinWidth(40); // Turn
-    tcm.getColumn(0).setMaxWidth(40); // Turn
+    tcm.getColumn(0).setMinWidth(50); // Turn
+    tcm.getColumn(0).setMaxWidth(50); // Turn
     tcm.getColumn(0).setResizable(false); // Turn
-    tcm.getColumn(1).setMinWidth(25); // #
-    tcm.getColumn(1).setMaxWidth(25); // #
+    tcm.getColumn(1).setMinWidth(20); // #
+    tcm.getColumn(1).setMaxWidth(20); // #
     tcm.getColumn(1).setResizable(false); // #
-    tcm.getColumn(2).setPreferredWidth(75); // Name
-    tcm.getColumn(3).setMinWidth(150); // Move
-    tcm.getColumn(3).setMaxWidth(150); // Move
-    tcm.getColumn(3).setResizable(false); // Move
-    tcm.getColumn(4).setMinWidth(150); // Time elapsed
-    tcm.getColumn(4).setMaxWidth(150); // Time elapsed
-    tcm.getColumn(4).setResizable(false); // Time elapsed
-    tcm.getColumn(5).setPreferredWidth(100); // Resulting Board State
-    tcm.getColumn(6).setPreferredWidth(100); // Next Moves
+    // The other columns are left alone since their width could vary
 
-    //moveTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    moveTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     JScrollPane moveTableScroll = new JScrollPane(moveTable);
     moveTableScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
