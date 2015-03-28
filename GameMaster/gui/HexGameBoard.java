@@ -26,7 +26,7 @@ public class HexGameBoard extends AbstractBoardPanel {
 
     // All the drawing is on a BufferedImage, so we just need to draw the image
     if (emptyBoard == null)
-      createEmptyBoard();
+      createBufferedImages();
 
     g.drawImage(emptyBoard, 0, 0, null);
     g.drawImage(piecesBoardOverlay, 0, 0, null);
@@ -111,7 +111,7 @@ public class HexGameBoard extends AbstractBoardPanel {
     g.drawOval(x + X_OFF, y + Y_OFF, DIAMETER, DIAMETER);
   }
 
-  private void createEmptyBoard() {
+  private void createBufferedImages() {
     emptyBoard = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     Graphics2D g2d = (Graphics2D) emptyBoard.getGraphics();
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
