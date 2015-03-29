@@ -188,6 +188,16 @@ void Random<GameState, GameClient>::waitForStart() {
       const Move m = gs.translateToLocal(tokens);
       if (!gs.applyMove(m))
         std::cout << "Unable to apply move '" << m << "'" << std::endl;
+    } else if (tokens[0] == "UNDO") {
+      tokens[0] = "MOVE";
+      if (GameClient::isValidMoveMessage(tokens)) {
+        const Move m = gs.translateToLocal(tokens);
+        if (!gs.undoMove(m))
+          std::cout << "Unable to undo move '" << m << "'" << std::endl;
+      }
+    } else if (response == "NEXTMOVE") {
+      const Move m = nextMove();
+      std::cout << m.from << ", " << m.to << std::endl;
     } else {
       std::cerr << "Unexpected message " << response << "\n";
     }
