@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -11,6 +12,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
@@ -20,6 +22,7 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
         new Dimension((int)(9 * FLAT_TO_FLAT + 2 * X_OFF),
                       (int)(52 * HALF_HEX_SIDE + 2 * Y_OFF))); // w, h
     addMouseListener(this);
+    addMouseMotionListener(this);
 
     createEmptyBoard();
   }
@@ -39,6 +42,23 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     g2d.setColor(UIManager.getColor("Panel.foreground"));
     g2d.drawString("Turn: " + turn, 0, 20);
 
+    // Draw mouse over hover
+    if (hover != -1) {
+      Spot s = state.get(hover);
+      g2d.setPaint(Color.YELLOW);
+      g2d.fillOval(s.xx - 5, s.yy - 5, DIAMETER + 10, DIAMETER + 10);
+    }
+
+    if (hover != -1) {
+      ArrayList<Integer> dests = moves.get(hover);
+      if (dests != null) {
+        for (Integer to : dests) {
+          Spot s = state.get(to);
+          g2d.setPaint(Color.MAGENTA);
+          g2d.fillOval(s.xx - 5, s.yy - 5, DIAMETER + 10, DIAMETER + 10);
+        }
+      }
+    }
 
     for (Spot i : state) {
       switch(i.state) {
@@ -78,15 +98,17 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     try {
       // Start at 1 since first digit is player's turn
       for (int i = 1; i < stateTokens.length; ++i) {
+        Spot s = state.get(i - 1);
+        //s.highlight = false;
         switch(Integer.parseInt(stateTokens[i])) {
         case 0:
-          state.get(i - 1).state = SpotState.EMPTY;
+          s.state = SpotState.EMPTY;
           break;
         case 1:
-          state.get(i - 1).state = SpotState.PLAYER1;
+          s.state = SpotState.PLAYER1;
           break;
         case 2:
-          state.get(i - 1).state = SpotState.PLAYER2;
+          s.state = SpotState.PLAYER2;
           break;
         }
       }
@@ -101,7 +123,17 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     try {
       for (int i = 0; i < moveTokens.length; ++i) {
         String[] tok = moveTokens[i].split(",");
-        moves.add(new Move(Integer.parseInt(tok[0].trim()), Integer.parseInt(tok[1].trim())));
+        int from = Integer.parseInt(tok[0].trim());
+        int to = Integer.parseInt(tok[1].trim());
+        ArrayList<Integer> dests = moves.get(from);
+        if (dests == null) {
+          dests = new ArrayList<Integer>();
+          dests.add(to);
+          moves.put(from, dests);
+        } else {
+          dests.add(to);
+        }
+        //moves.add(new Move(Integer.parseInt(tok[0].trim()), Integer.parseInt(tok[1].trim())));
       }
     } catch (NumberFormatException e) {
       System.err.println("Invalid move string passed to HexGameBoard: " + nextMoves);
@@ -126,14 +158,9 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     }
   }
 
-  @Override
-  public void mouseReleased(MouseEvent e) {
-  }
-
-  @Override
-  public void mouseClicked(MouseEvent e) {
-    int x = e.getX() - X_OFF;
-    int y = e.getY() - Y_OFF;
+  private int mouseToIndex(Point p) {
+    int x = p.x - X_OFF;
+    int y = p.y - Y_OFF;
     int dispCol = x / COL_WIDTH;
     int dispRow = (int)(y / ROW_HEIGHT);
     int col = (dispCol + dispRow - BOARD_DIM + 1) / 2;
@@ -141,15 +168,20 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
     // Outside of board
     if (row < 0 || row >= BOARD_DIM || col < 0 || col >= BOARD_DIM)
-      return;
+      return -1;
 
     int idx = row * BOARD_DIM + col;
 
-    // Check actual click
-    if (!state.get(idx).contains(e.getPoint()))
-      return;
+    return idx;
+  }
 
-    System.out.println("Clicked on " + idx);
+  @Override
+  public void mouseReleased(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    System.out.println("Clicked on " + hover);
   }
 
   @Override
@@ -158,6 +190,10 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
   @Override
   public void mouseExited(MouseEvent e) {
+    if (hover != -1) {
+      hover = -1;
+      repaint();
+    }
   }
 
   @Override
@@ -170,6 +206,26 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    // Quick no change
+    if (hover != -1 && state.get(hover).contains(e.getPoint()))
+      return;
+
+    int idx = mouseToIndex(e.getPoint());
+
+    // Outside of a spot
+    if (idx == -1 || !state.get(idx).contains(e.getPoint())) {
+      if (hover != -1) {
+        hover = -1;
+        repaint();
+      }
+      return;
+    }
+
+    // Start highlighting if we aren't already
+    if (hover != idx) {
+      hover = idx;
+      repaint();
+    }
   }
 
   private class Move {
@@ -194,8 +250,8 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     public Spot(int idx, int x, int y, SpotState state) {
       super(x, y, DIAMETER, DIAMETER);
       this.idx = idx;
-      this.xx = x;
-      this.yy = y;
+      xx = x;
+      yy = y;
       this.state = state;
     }
   }
@@ -211,6 +267,7 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
   private final static int BOARD_DIM = 9;
 
   private int turn = 0;
-  private ArrayList<Move> moves = new ArrayList<>();
+  private int hover = -1;
   private ArrayList<Spot> state = new ArrayList<>();
+  private HashMap<Integer, ArrayList<Integer>> moves = new HashMap<>();
 }
