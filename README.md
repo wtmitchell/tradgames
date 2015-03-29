@@ -84,7 +84,7 @@ An agent will receive this command to indicate an opponents move.
 An agent will send this command to indicate their move.
 A location is specified as a single integer ranging from 0 to 80, as in the above image.
 
-### `UNDO from_location TO to_location`
+#### `UNDO from_location TO to_location`
 Undoes the effects of a `MOVE from_location TO to_location` command.
 
 This command needs to only be supported prior to the first call of the `BEGIN` command.
