@@ -300,9 +300,7 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     }
   }
 
-  private enum SpotState {
-    EMPTY, PLAYER1, P1_MOVE_SOURCE, P1_MOVE_DEST,
-    PLAYER2, P2_MOVE_SOURCE, P2_MOVE_DEST }
+  private enum SpotState { EMPTY, PLAYER1, PLAYER2 }
 
   private class Spot extends Ellipse2D.Double {
     public int idx;
