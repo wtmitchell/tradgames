@@ -5,6 +5,9 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -13,11 +16,12 @@ import javax.swing.UIManager;
 
 // Leads to 24 * R = 320 * sqrt(3) = 554.25 height
 
-public class HexGameBoard extends AbstractBoardPanel {
+public class HexGameBoard extends AbstractBoardPanel implements MouseListener, MouseMotionListener {
   HexGameBoard() {
     setPreferredSize(
         new Dimension((int)(9 * FLAT_TO_FLAT + 2 * X_OFF),
                       (int)(52 * HALF_HEX_SIDE + 2 * Y_OFF))); // w, h
+    addMouseListener(this);
   }
 
   @Override
@@ -130,9 +134,60 @@ public class HexGameBoard extends AbstractBoardPanel {
       drawCircle(g2d, dispCol * COL_WIDTH, (int) (dispRow * ROW_HEIGHT), Color.WHITE);
     }
 
+    // Draw the grid upon which the board will be placed
+    // Really only need this uncommented if one wishes to understand the containing
+    // point code
+    for (int i = 0; i < 17; ++i) {
+      int topLine = (int) (i * ROW_HEIGHT) + Y_OFF;
+      int bottomLine = (int) ((i+1) * ROW_HEIGHT) + Y_OFF;
+      // Row lines
+      g2d.drawLine(X_OFF, topLine, getWidth(), topLine);
+      g2d.drawLine(X_OFF, bottomLine, getWidth(), bottomLine);
+      // Col lines
+      for (int j = 0; j < 9; ++j) {
+        int x = (2 * j + (i % 2)) * COL_WIDTH;
+        g2d.drawLine(x + X_OFF, topLine, x + X_OFF, bottomLine);
+      }
+    }
+
     g2d.dispose();
 
     piecesBoardOverlay = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+  }
+
+
+  @Override
+  public void mouseReleased(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    int x = e.getX() - X_OFF;
+    int y = e.getY() - Y_OFF;
+    int boardRow = (int) ((double) y / ROW_HEIGHT);
+    int boardCol = (x / COL_WIDTH - (boardRow & 1)) / 2;
+
+    System.out.println("X = " + x + " Y = " + y + " boardRow = " + boardRow + " boardCol = " + boardCol + " (boardRow & 1) = " + (boardRow & 1));
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseDragged(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseMoved(MouseEvent e) {
   }
 
   private class Move {
@@ -151,7 +206,7 @@ public class HexGameBoard extends AbstractBoardPanel {
   private final static double HALF_HEX_SIDE = 11.55;
   private final static double ROW_HEIGHT = 34.65; // 3 * HALF_HEX_SIDE
   private final static int DIAMETER = 30;
-  private final static int X_OFF = 5;
+  private final static int X_OFF = 10;
   private final static int Y_OFF = 5;
   private final static int BOARD_DIM = 9;
 
