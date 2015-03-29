@@ -161,6 +161,15 @@ public class Agent {
           System.err.println("Unable to apply move " + m);
           System.err.flush();
         }
+      } else if (tokens[0].equals("UNDO")) {
+        tokens[0] = "MOVE";
+        Move m = state.translateToLocal(tokens);
+        if (!state.undoMove(m)) {
+          System.out.println("Unable to undo move " + m);
+        }
+      } else if (response.equals("NEXTMOVE")) {
+        Move m = nextMove();
+        System.out.println(m.from + ", " + m.to);
       } else {
         System.err.println("Unexpected message '" + response + "'");
         System.err.flush();

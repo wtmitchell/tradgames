@@ -120,7 +120,7 @@ std::vector<std::string> Agent::tokenizeMsg(const std::string &msg) const {
 void Agent::waitForStart() {
   for (;;) {
     std::string response = readMsg();
-    const std::vector<std::string> tokens = tokenizeMsg(response);
+    std::vector<std::string> tokens = tokenizeMsg(response);
 
     if (tokens.size() == 4 && tokens[0] == "BEGIN" &&
         tokens[1] == "CHINESECHECKERS") {
@@ -161,6 +161,14 @@ void Agent::waitForStart() {
       const Move m = state.translateToLocal(tokens);
       if (!state.applyMove(m))
         std::cout << "Unable to apply move " << m << std::endl;
+    } else if (tokens[0] == "UNDO") {
+      tokens[0] = "MOVE";
+      const Move m = state.translateToLocal(tokens);
+      if (!state.undoMove(m))
+        std::cout << "Unable to undo move " << m << std::endl;
+    } else if (response == "NEXTMOVE") {
+      const Move m = nextMove();
+      std::cout << m.from << ", " << m.to << std::endl;
     } else {
       std::cerr << "Unexpected message " << response << "\n";
     }
