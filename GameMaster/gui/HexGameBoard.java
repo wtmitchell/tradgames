@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,9 +39,22 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     g2d.setColor(UIManager.getColor("Panel.background"));
     g2d.fillRect(0, 0, getWidth(), getHeight());
 
-    // Draw information
-    g2d.setColor(UIManager.getColor("Panel.foreground"));
-    g2d.drawString("Turn: " + turn, 0, 20);
+    // Draw information if sensible
+    if (turns >= 0) {
+      g2d.setColor(UIManager.getColor("Panel.foreground"));
+      g2d.drawString("Turn: " + turn, 0, 20);
+
+      String nextMove = "Next Move: ";
+      g2d.drawString(nextMove, 0, 40);
+
+      g2d.setPaint(turn % 2 == 0 ? UIColor.P1 : UIColor.P2);
+      Rectangle2D nextMoveBounds =
+          g2d.getFont().getStringBounds(nextMove, g2d.getFontRenderContext());
+      int nextMoveDiam = 10;
+      g2d.fillOval((int)nextMoveBounds.getWidth(),
+                   40 - (int)nextMoveBounds.getHeight() / 2 - nextMoveDiam / 2,
+                   nextMoveDiam, nextMoveDiam);
+    }
 
     // Draw mouse over hover
     if (hover != -1) {
@@ -266,7 +280,16 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
   private final static int Y_OFF = 5;
   private final static int BOARD_DIM = 9;
 
-  private int turn = 0;
+  private static class UIColor {
+    private final static Color EMPTY = Color.WHITE;
+    private final static Color P1 = Color.RED;
+    private final static Color P2 = Color.BLUE;
+    private final static Color FROM = Color.YELLOW;
+    private final static Color TO = Color.MAGENTA;
+    private final static Color BORDER = Color.BLACK;
+  }
+
+  private int turn = -1;
   private int hover = -1;
   private ArrayList<Spot> state = new ArrayList<>();
   private HashMap<Integer, ArrayList<Integer>> moves = new HashMap<>();
