@@ -19,6 +19,18 @@ import javax.swing.UIManager;
 
 public class HexGameBoard extends AbstractBoardPanel implements MouseListener, MouseMotionListener {
   HexGameBoard() {
+    // By default the hooks do nothing
+    p1Hook = new UpdateMsgHook() {
+        @Override
+        public void update(String msg) {
+        }
+      };
+    p2Hook = new UpdateMsgHook() {
+        @Override
+        public void update(String msg) {
+        }
+      };
+
     setPreferredSize(
         new Dimension((int)(9 * FLAT_TO_FLAT + 2 * X_OFF),
                       (int)(52 * HALF_HEX_SIDE + 2 * Y_OFF))); // w, h
@@ -57,19 +69,21 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     }
 
     // Draw mouse over hover
-    if (hover != -1) {
-      Spot s = state.get(hover);
-      g2d.setPaint(Color.YELLOW);
-      g2d.fillOval(s.xx - 5, s.yy - 5, DIAMETER + 10, DIAMETER + 10);
-    }
+    if (from != -1 || hover != -1) {
+      int source = from != -1 ? from : hover;
 
-    if (hover != -1) {
-      ArrayList<Integer> dests = moves.get(hover);
+      // Highlight source
+      Spot sourceSpot = state.get(source);
+      g2d.setPaint(UIColor.FROM);
+      g2d.fillOval(sourceSpot.xx - 5, sourceSpot.yy - 5, DIAMETER + 10, DIAMETER + 10);
+
+      // Highlight all dests
+      ArrayList<Integer> dests = moves.get(source);
       if (dests != null) {
         for (Integer to : dests) {
-          Spot s = state.get(to);
-          g2d.setPaint(Color.MAGENTA);
-          g2d.fillOval(s.xx - 5, s.yy - 5, DIAMETER + 10, DIAMETER + 10);
+          Spot destSpot = state.get(to);
+          g2d.setPaint(UIColor.TO);
+          g2d.fillOval(destSpot.xx - 5, destSpot.yy - 5, DIAMETER + 10, DIAMETER + 10);
         }
       }
     }
@@ -77,24 +91,24 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     for (Spot i : state) {
       switch(i.state) {
       case EMPTY:
-        g2d.setPaint(Color.WHITE);
+        g2d.setPaint(UIColor.EMPTY);
         g2d.fill(i);
         g2d.setStroke(new BasicStroke(3.0f));
-        g2d.setPaint(Color.BLACK);
+        g2d.setPaint(UIColor.BORDER);
         g2d.drawOval(i.xx, i.yy, DIAMETER, DIAMETER);
         break;
       case PLAYER1:
-        g2d.setPaint(Color.RED);
+        g2d.setPaint(UIColor.P1);
         g2d.fill(i);
         g2d.setStroke(new BasicStroke(3.0f));
-        g2d.setPaint(Color.BLACK);
+        g2d.setPaint(UIColor.BORDER);
         g2d.drawOval(i.xx, i.yy, DIAMETER, DIAMETER);
         break;
       case PLAYER2:
-        g2d.setPaint(Color.BLUE);
+        g2d.setPaint(UIColor.P2);
         g2d.fill(i);
         g2d.setStroke(new BasicStroke(3.0f));
-        g2d.setPaint(Color.BLACK);
+        g2d.setPaint(UIColor.BORDER);
         g2d.drawOval(i.xx, i.yy, DIAMETER, DIAMETER);
         break;
       }
@@ -147,7 +161,6 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
         } else {
           dests.add(to);
         }
-        //moves.add(new Move(Integer.parseInt(tok[0].trim()), Integer.parseInt(tok[1].trim())));
       }
     } catch (NumberFormatException e) {
       System.err.println("Invalid move string passed to HexGameBoard: " + nextMoves);
@@ -155,6 +168,16 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     }
 
     repaint();
+  }
+
+  @Override
+  public void setP1Hook(UpdateMsgHook hook) {
+    p1Hook = hook;
+  }
+
+  @Override
+  public void setP2Hook(UpdateMsgHook hook) {
+    p2Hook = hook;
   }
 
   private void createEmptyBoard() {
@@ -195,7 +218,30 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
   @Override
   public void mouseClicked(MouseEvent e) {
-    System.out.println("Clicked on " + hover);
+    // New from of a move
+    if (hover != -1 && from == -1) {
+      from = hover;
+      return;
+    }
+
+    // Or maybe not
+    if (!moves.containsKey(from))
+      return;
+
+    // Clicked on a valid destination
+    int idx = mouseToIndex(e.getPoint());
+    if (moves.get(from).contains(idx)) {
+      String move = "MOVE FROM " + from + " TO " + idx;
+      if (turn % 2 == 0)
+        p1Hook.update(move);
+      else
+        p2Hook.update(move);
+    }
+
+    // Since we clicked, reset to non-clicked state
+    hover = -1;
+    from = -1;
+    repaint();
   }
 
   @Override
@@ -206,6 +252,7 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
   public void mouseExited(MouseEvent e) {
     if (hover != -1) {
       hover = -1;
+      from = -1;
       repaint();
     }
   }
@@ -220,10 +267,6 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
   @Override
   public void mouseMoved(MouseEvent e) {
-    // Quick no change
-    if (hover != -1 && state.get(hover).contains(e.getPoint()))
-      return;
-
     int idx = mouseToIndex(e.getPoint());
 
     // Outside of a spot
@@ -234,6 +277,11 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
       }
       return;
     }
+
+    // If we already have a from or if this is not a valid source of
+    // a move, do nothing
+    if (from != -1 || !moves.containsKey(idx))
+      return;
 
     // Start highlighting if we aren't already
     if (hover != idx) {
@@ -291,6 +339,9 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
 
   private int turn = -1;
   private int hover = -1;
+  private int from = -1;
   private ArrayList<Spot> state = new ArrayList<>();
   private HashMap<Integer, ArrayList<Integer>> moves = new HashMap<>();
+  private UpdateMsgHook p1Hook;
+  private UpdateMsgHook p2Hook;
 }
