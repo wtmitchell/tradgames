@@ -97,7 +97,7 @@ Directs the agent to list all the valid moves for the current board state. A mov
 
 This command needs to only be supported prior to the first call of the `BEGIN` command.
 
-### `NEXTMOVE`
+#### `NEXTMOVE`
 Prints out the next move the agent would play given the current board state.
 A move will be formatted as `from, to` with a command between `from` and `to`.
 For example, this command may return
