@@ -5,7 +5,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.jar.JarFile;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -86,10 +88,19 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
       String filenameStem = filename.substring(0, filename.lastIndexOf('.'));
       String extention = filename.substring(filename.lastIndexOf('.'));
 
-      if (!extention.equals(".jar"))
+      if (!extention.equals(".jar")) {
         dest.setText("-classpath " + parentDir + " " + filenameStem);
-      else
-        dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
+      } else {
+        try {
+        JarFile jf = new JarFile(f);
+        if(jf.getManifest().getEntries().containsKey("Main-Class"))
+          dest.setText("-jar " + f.getAbsolutePath());
+        else
+          dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
+        } catch (IOException e) {
+          dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
+        }
+      }
     }
   }
 
