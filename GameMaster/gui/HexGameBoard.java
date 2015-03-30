@@ -52,7 +52,7 @@ public class HexGameBoard extends AbstractBoardPanel implements MouseListener, M
     g2d.fillRect(0, 0, getWidth(), getHeight());
 
     // Draw information if sensible
-    if (turns >= 0) {
+    if (turn >= 0) {
       g2d.setColor(UIManager.getColor("Panel.foreground"));
       g2d.drawString("Turn: " + turn, 0, 20);
 

@@ -112,19 +112,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   private void createTabbedPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
-    /* Hide until functional
-    JPanel gameBoardTab = new JPanel(new BorderLayout());
-    gameBoardTab.add(new JLabel("Not yet implemented"), BorderLayout.CENTER);
-    JPanel movePanel = new JPanel(new BorderLayout());
-    movePanel.add(new JLabel("Moves:"), BorderLayout.PAGE_START);
-    JTextArea movesArea = new JTextArea(
-        "Not yet implemented.\n Will be list"
-        + " of moves that can\n be clicked to show the board\n at that state");
-    movePanel.add(movesArea, BorderLayout.CENTER);
-    gameBoardTab.add(movePanel, BorderLayout.LINE_END);
-    tabbed.add(gameBoardTab, "Board");
-    */
-
     moveTable.setFillsViewportHeight(true);
 
     TableColumnModel tcm = moveTable.getColumnModel();
