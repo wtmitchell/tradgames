@@ -99,13 +99,16 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     // Add center panel that has selectors
     JPanel center =
-        new JPanel(new GridLayout(3, 2, 5, 5)); // row, col, hgap, vgap
-    center.add(p1Browse);
-    center.add(p1cmd);
-    center.add(p2Browse);
-    center.add(p2cmd);
-    center.add(modBrowse);
-    center.add(modcmd);
+        new JPanel(new GridLayout(3, 1, 5, 5)); // row, col, hgap, vgap
+    center.add(p1ps);
+    center.add(p2ps);
+    center.add(modps);
+    // center.add(p1Browse);
+    // center.add(p1cmd);
+    // center.add(p2Browse);
+    // center.add(p2cmd);
+    // center.add(modBrowse);
+    // center.add(modcmd);
     pane.add(center, BorderLayout.CENTER);
 
     pane.add(mainButton, BorderLayout.LINE_END);
@@ -297,6 +300,15 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   }
 
   private void startGame() {
+    String modCmd = modps.getProgram();
+    String p1Cmd = p1ps.getProgram();
+    boolean p1Human = p1ps.isHuman();
+    String p2Cmd = p2ps.getProgram();
+    boolean p2Human = p2ps.isHuman();
+
+    System.out.println("modCmd: '" + modCmd + "'");
+    System.out.println("p1Cmd: '" + p1Cmd + "' p1Human = " + p1Human);
+    System.out.println("p2Cmd: '" + p2Cmd + "' p2Human = " + p2Human);
     // Ensure the user selected at least something
     if (modcmd.getText().equals("")) {
       JOptionPane.showMessageDialog(null,
