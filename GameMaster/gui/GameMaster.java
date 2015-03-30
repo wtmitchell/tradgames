@@ -86,24 +86,26 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   }
 
   private void createProgramSelectorPanel(Container pane) {
+    // Labels
+    JPanel labels =
+        new JPanel(new GridLayout(3, 1, 5, 5)); // row, col, hgap, vgap
+    JLabel p1label = new JLabel("Player1:");
+    labels.add(p1label);
+    JLabel p2label = new JLabel("Player2:");
+    labels.add(p2label);
+    JLabel modlabel = new JLabel("Moderator:");
+    labels.add(modlabel);
+    pane.add(labels, BorderLayout.WEST);
+
     // Add center panel that has selectors
     JPanel center =
-        new JPanel(new GridLayout(3, 3, 5, 5)); // row, col, hgap, vgap
-    JLabel p1label = new JLabel("Player1:");
-    center.add(p1label);
+        new JPanel(new GridLayout(3, 2, 5, 5)); // row, col, hgap, vgap
     center.add(p1Browse);
     center.add(p1cmd);
-
-    JLabel p2label = new JLabel("Player2:");
-    center.add(p2label);
     center.add(p2Browse);
     center.add(p2cmd);
-
-    JLabel modlabel = new JLabel("Moderator:");
-    center.add(modlabel);
     center.add(modBrowse);
     center.add(modcmd);
-
     pane.add(center, BorderLayout.CENTER);
 
     pane.add(mainButton, BorderLayout.LINE_END);
@@ -431,6 +433,10 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   private JButton modBrowse = new JButton("Browse");
   private enum State { WAITING, RUNNING, STOPPING }
   private State currentState = State.STOPPING;
+
+  private ProgramSelectorPanel p1ps = new ProgramSelectorPanel(true);
+  private ProgramSelectorPanel p2ps = new ProgramSelectorPanel(true);
+  private ProgramSelectorPanel modps = new ProgramSelectorPanel();
 
   // Note that the elements of StreamIDs must start at zero
   // and increase by 1 between constants. These are used as
