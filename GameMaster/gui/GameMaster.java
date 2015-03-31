@@ -5,12 +5,17 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -18,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -159,9 +165,42 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     pane.add(tabbed, BorderLayout.CENTER);
   }
 
+  private void createMenu(JFrame main) {
+    JMenuBar menuBar = new JMenuBar();
+
+    JMenu menu = new JMenu("File");
+    menu.setMnemonic(KeyEvent.VK_F);
+    menu.getAccessibleContext().setAccessibleDescription("Open/Save a game");
+    menuBar.add(menu);
+
+    // Open
+    openItem = new JMenuItem("Open", KeyEvent.VK_O);
+    openItem.setAccelerator(
+        KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+    openItem.getAccessibleContext().setAccessibleDescription("Opens a game");
+    menu.add(openItem);
+
+    // Save
+    saveItem = new JMenuItem("Save", KeyEvent.VK_S);
+    saveItem.setAccelerator(
+        KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+    saveItem.getAccessibleContext().setAccessibleDescription("Saves a game");
+    menu.add(saveItem);
+
+    menu.addSeparator();
+
+    // Exit
+    exitItem = new JMenuItem("Exit", KeyEvent.VK_X);
+    exitItem.getAccessibleContext().setAccessibleDescription(
+        "Quits the program");
+    menu.add(exitItem);
+
+    main.setJMenuBar(menuBar);
+  }
+
   private void createAndShowGUI() {
     // Create and set up the window.
-    JFrame frame = new JFrame("GameMaster");
+    //JFrame frame = new JFrame("GameMaster");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     // Setup layout
@@ -177,6 +216,8 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     frame.add(center, BorderLayout.CENTER);
 
     frame.add(boardPanel, BorderLayout.WEST);
+
+    createMenu(frame);
 
     // Make the GUI functional
     addAllListeners();
@@ -233,6 +274,29 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
           }
         }
       });
+
+    // Menu items
+    openItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+          System.out.println("Called open item");
+        }
+      });
+
+    saveItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+          System.out.println("Called save item");
+        }
+      });
+
+    exitItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+          frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        }
+      });
+
   }
 
   private void changeEnable(boolean enable) {
@@ -487,6 +551,12 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   private ProgramSelectorPanel p1ps = new ProgramSelectorPanel(true);
   private ProgramSelectorPanel p2ps = new ProgramSelectorPanel(true);
   private ProgramSelectorPanel modps = new ProgramSelectorPanel();
+
+  private JMenuItem openItem;
+  private JMenuItem saveItem;
+  private JMenuItem exitItem;
+
+  private JFrame frame = new JFrame("GameMaster");
 
   private enum State { WAITING, RUNNING, STOPPING }
   private State currentState = State.STOPPING;
