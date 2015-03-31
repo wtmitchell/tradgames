@@ -1,17 +1,26 @@
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 
 public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
   public static void main(String[] args) {
@@ -53,9 +62,9 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
     });
   }
 
-    private void createAndShowGUI() {
+  private void createAndShowGUI() {
     // Create and set up the window.
-    //JFrame frame = new JFrame("GameMaster");
+    // JFrame frame = new JFrame("GameMaster");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     // Setup layout
@@ -88,7 +97,6 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
     frame.add(controls, BorderLayout.SOUTH);
 
-
     // Make the GUI functional
     addAllListeners();
 
@@ -102,8 +110,52 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
   private void addAllListeners() {
     startButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        startListener();
+      }
+    });
+
+    sendButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        sendListener();
+      }
+    });
+
+    input.addKeyListener(new KeyListener() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if (e.getKeyCode() ==  KeyEvent.VK_ENTER) {
+            sendListener();
+          }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+      });
+
+    refreshButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
-          startListener();
+          refreshListener();
+        }
+      });
+
+    boardPanel.setP1Hook(new UpdateMsgHook() {
+        @Override
+        public void update(String msg) {
+          input.setText(msg);
+        }
+      });
+
+    boardPanel.setP2Hook(new UpdateMsgHook() {
+        @Override
+        public void update(String msg) {
+          input.setText(msg);
         }
       });
   }
@@ -115,6 +167,30 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
       changeState(State.STOPPING);
   }
 
+  private void sendListener() {
+    try {
+      messages.put(new Message(input.getText()));
+    } catch (InterruptedException e) {
+      JOptionPane.showMessageDialog(null, e,
+                                    "InterrupedException writing to stdin",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+    input.setText("");
+  }
+
+  private void refreshListener() {
+    try {
+      expectingGUIUpdate = true;
+      lastBoardState = "";
+      lastMoves = "";
+      messages.put(new Message("DUMPSTATE"));
+      messages.put(new Message("LISTMOVES"));
+    } catch (InterruptedException e) {
+      JOptionPane.showMessageDialog(null, e,
+                                    "InterrupedException writing to stdin",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+  }
 
   private void changeState(State newState) {
     // No change
@@ -131,17 +207,38 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
       startButton.setEnabled(true);
       startButton.setText("Stop");
       currentState = State.RUNNING;
-      //resetForNewGame();
-      //startGame();
+      resetForRun();
+      (new MessageThread()).start();
     } else if (newState == State.STOPPING) {
       ps.setEnable(false);
       startButton.setEnabled(false);
       startButton.setText("Please wait");
       currentState = State.STOPPING;
-      //gi.stopRunning();
+      running.set(false);
     }
   }
 
+  private void resetForRun() {
+    inout.setText("");
+    err.setText("");
+  }
+
+  private void checkGUIUpdate(String msg) {
+    // Checks if return is from a GUI update and if so, handle it
+    if (!expectingGUIUpdate)
+      return;
+
+    String[] tokens = msg.split(" ");
+    if (tokens.length == 82) {
+      lastBoardState = msg;
+      return;
+    }
+
+    lastMoves = msg;
+
+    boardPanel.updateData(-1, lastBoardState, lastMoves);
+    expectingGUIUpdate = false;
+  }
 
   private JFrame frame = new JFrame("Agent Tester");
   private BoardPanelType boardPanel;
@@ -156,4 +253,106 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
   private enum State { WAITING, RUNNING, STOPPING }
   private State currentState = State.STOPPING;
 
+  private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+  private AtomicBoolean running = new AtomicBoolean(false);
+
+  private String lastBoardState = "";
+  private String lastMoves = "";
+  private boolean expectingGUIUpdate = false;
+
+  private class MessageThread extends Thread {
+    @Override
+    public void run() {
+      messages.clear();
+      startProcess();
+      processMessages();
+
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          changeState(AgentTester.State.WAITING);
+        }
+      });
+    }
+
+    private void startProcess() {
+      try {
+        ProcessBuilder pb = new ProcessBuilder(ps.getProgram());
+        proc = pb.start();
+
+        StreamConsumer stdout = new StreamConsumer(
+            proc.getInputStream(), StreamType.stdout, false, messages, 0);
+        StreamConsumer stderr = new StreamConsumer(
+            proc.getErrorStream(), StreamType.stderr, false, messages, 0);
+        stdout.start();
+        stderr.start();
+
+        stdin = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(
+                                    proc.getOutputStream())),
+                                true);
+      } catch (IOException e) {
+        JOptionPane.showMessageDialog(null, e, "IOException",
+                                      JOptionPane.ERROR_MESSAGE);
+        changeState(AgentTester.State.WAITING);
+      }
+    }
+
+    private void processMessages() {
+      Message m;
+      running.set(true);
+    main:
+      while (running.get()) {
+        try {
+          Thread.sleep(5);
+        } catch (InterruptedException e) {
+        }
+
+        // Check for new message
+        m = messages.poll();
+        if (m != null)
+          handleMessage(m);
+
+        // Check if client exited
+        try {
+          proc.exitValue();
+          break main;
+        } catch (IllegalThreadStateException e) {
+        }
+      }
+
+      // Handle any remaining messages
+      while ((m = messages.poll()) != null) {
+        handleMessage(m);
+      }
+
+      // Forcibly kill the process if needed
+      try {
+        proc.exitValue();
+      } catch (IllegalThreadStateException e) {
+        proc.destroy();
+      }
+    }
+
+    private void handleMessage(Message m) {
+      m.message = m.message.trim();
+
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          if (m.type == StreamType.stdout) {
+            inout.append(m.message + "\n");
+            checkGUIUpdate(m.message);
+          } else if (m.type == StreamType.stdin) {
+            stdin.println(m.message);
+            inout.append(m.message + "\n");
+          } else if (m.type == StreamType.stderr) {
+            err.append(m.message + "\n");
+          }
+        }
+      });
+    }
+
+    private Process proc;
+    private PrintWriter stdin;
+  }
 }
