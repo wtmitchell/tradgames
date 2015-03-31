@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
@@ -193,6 +196,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
         }
       });
 
+    // Have the board GUI update when a row is selected in the JTable
     moveTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
         @SuppressWarnings("unchecked")
         public void valueChanged(ListSelectionEvent e) {
@@ -207,6 +211,25 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
             // this specific model
             Move m = ((MoveTableModel)moveTable.getModel()).getRow(selectedRow);
             boardPanel.updateData(m.turn, m.state, m.nextMoves);
+          }
+        }
+      });
+
+    // Add hook to auto-scroll the table, and auto-select last row, which in turn
+    // updates the GUI as the game is played.
+    moveTable.getModel().addTableModelListener(new TableModelListener() {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+          if (e.getType() == TableModelEvent.INSERT) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                  int last = moveTable.getModel().getRowCount() - 1;
+                  Rectangle r = moveTable.getCellRect(last, 0, true);
+                  moveTable.setRowSelectionInterval(last, last);
+                  moveTable.scrollRectToVisible(r);
+                }
+              });
           }
         }
       });
@@ -338,73 +361,123 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
                                   }
                                 }));
     // Create a PCB for player1
-    pcbs.add(
-        new ProcessControlBlock(p1Cmd, false,
-                                new UpdateMsgHook() {
-                                  @Override
-                                  public void update(String msg) {
-                                    updateQueues.get(StreamIDs.p1stdout).add(msg);
-                                    SwingUtilities.invokeLater(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                        processQueue(StreamIDs.p1stdout);
-                                      }
-                                    });
-                                  }
-                                },
-                                new UpdateMsgHook() {
-                                  @Override
-                                  public void update(String msg) {
-                                    updateQueues.get(StreamIDs.p1stderr).add(msg);
-                                    SwingUtilities.invokeLater(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                        processQueue(StreamIDs.p1stderr);
-                                      }
-                                    });
-                                  }
-                                }));
+    if (p1Human) {
+      pcbs.add(new ProcessControlBlock());
+    } else {
+      pcbs.add(new ProcessControlBlock(
+          p1Cmd, false,
+          new UpdateMsgHook() {
+            @Override
+            public void update(String msg) {
+              updateQueues.get(StreamIDs.p1stdout).add(msg);
+              SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                  processQueue(StreamIDs.p1stdout);
+                }
+              });
+            }
+          },
+          new UpdateMsgHook() {
+            @Override
+            public void update(String msg) {
+              updateQueues.get(StreamIDs.p1stderr).add(msg);
+              SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                  processQueue(StreamIDs.p1stderr);
+                }
+              });
+            }
+          }));
+    }
     // Create a PCB for player2
-    pcbs.add(
-        new ProcessControlBlock(p2Cmd, false,
-                                new UpdateMsgHook() {
-                                  @Override
-                                  public void update(String msg) {
-                                    updateQueues.get(StreamIDs.p2stdout).add(msg);
-                                    SwingUtilities.invokeLater(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                        processQueue(StreamIDs.p2stdout);
-                                      }
-                                    });
-                                  }
-                                },
-                                new UpdateMsgHook() {
-                                  @Override
-                                  public void update(String msg) {
-                                    updateQueues.get(StreamIDs.p2stderr).add(msg);
-                                    SwingUtilities.invokeLater(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                        processQueue(StreamIDs.p2stderr);
-                                      }
-                                    });
-                                  }
-                                }));
-
+    if (p2Human) {
+      pcbs.add(new ProcessControlBlock());
+    } else {
+      pcbs.add(new ProcessControlBlock(
+          p2Cmd, false,
+          new UpdateMsgHook() {
+            @Override
+            public void update(String msg) {
+              updateQueues.get(StreamIDs.p2stdout).add(msg);
+              SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                  processQueue(StreamIDs.p2stdout);
+                }
+              });
+            }
+          },
+          new UpdateMsgHook() {
+            @Override
+            public void update(String msg) {
+              updateQueues.get(StreamIDs.p2stderr).add(msg);
+              SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                  processQueue(StreamIDs.p2stderr);
+                }
+              });
+            }
+          }));
+    }
     // Start the actual game
-    gi = new GameInstance(pcbs, new UpdateHook() {
-        @Override
-        public void update() {
-          SwingUtilities.invokeLater(new Runnable() {
-              @Override
-              public void run() {
-                changeState(State.WAITING);
-              }
-            });
-        }
-      });
+    gi = new GameInstance(pcbs,
+                          new UpdateHook() {
+                            @Override
+                            public void update() {
+                              SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                  changeState(State.WAITING);
+                                }
+                              });
+                            }
+                          },
+                          new UpdateMsgHook() {
+                            @Override
+                            public void update(String msg) {
+                              SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                  JOptionPane.showMessageDialog(
+                                      null, msg, "Error",
+                                      JOptionPane.ERROR_MESSAGE);
+                                }
+                              });
+                            }
+                          });
+
+    // Add appropriate hooks for human players and have them report their
+    // names
+    if (p1Human) {
+      boardPanel.setP1Hook(new UpdateMsgHook() {
+          @Override
+          public void update(String msg) {
+            gi.getMessageQueue().add(new Message(StreamType.stdout, false, msg, 1));
+          }
+        });
+    }
+    if (p2Human) {
+      boardPanel.setP2Hook(new UpdateMsgHook() {
+          @Override
+          public void update(String msg) {
+            gi.getMessageQueue().add(new Message(StreamType.stdout, false, msg, 2));
+          }
+        });
+    }
+
     gi.start();
+
+    if (p1Human) {
+      gi.getMessageQueue().add(new Message(StreamType.stdout, false, "#name " + p1Cmd, 1));
+    }
+    if (p2Human) {
+      gi.getMessageQueue().add(new Message(StreamType.stdout, false, "#name " + p2Cmd, 2));
+    }
+
+
   }
 
   private GameInstance gi;

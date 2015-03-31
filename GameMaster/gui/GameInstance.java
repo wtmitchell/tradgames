@@ -9,17 +9,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameInstance extends Thread {
-  public GameInstance(ArrayList<ProcessControlBlock> pcbs, UpdateHook complete) {
+  public GameInstance(ArrayList<ProcessControlBlock> pcbs, UpdateHook complete, UpdateMsgHook error) {
     this.pcbs = pcbs;
     this.complete = complete;
+    this.error = error;
   }
 
   public void handleMessage(Message m) {
     // Report message to appropriate hook
-    if (m.type == StreamType.stdout)
-      pcbs.get(m.id).stdout.update(m.message);
-    if (m.type == StreamType.stderr)
-      pcbs.get(m.id).stderr.update(m.message);
+    if (!pcbs.get(m.id).isHuman) {
+      if (m.type == StreamType.stdout)
+        pcbs.get(m.id).stdout.update(m.message);
+      if (m.type == StreamType.stderr)
+        pcbs.get(m.id).stderr.update(m.message);
+    }
 
     // Ignore things sent to stderr
     if (m.type == StreamType.stderr)
@@ -50,29 +53,29 @@ public class GameInstance extends Thread {
     if (m.message.startsWith("#getname")) {
       // Get name of specified player
       if (m.message.length() < 10) {
-        System.err.println("Malformed #getname query from " + names.get(m.id) +
-                           ". Proper syntax is '#getname ID'");
+        error.update("Malformed #getname query from " + names.get(m.id) +
+                     ". Proper syntax is '#getname ID'");
       } else {
         try {
           int query = Integer.parseInt(m.message.substring(9));
           reply(m, "#getname " + query + " " + names.get(query));
         } catch (NumberFormatException e) {
-          System.err.println("Malformed #getname query from " +
-                             names.get(m.id) +
-                             ". ID was not parsable as a number. "
-                             + "Proper syntax is '#getname ID'");
+          error.update("Malformed #getname query from " +
+                       names.get(m.id) +
+                       ". ID was not parsable as a number. "
+                       + "Proper syntax is '#getname ID'");
         } catch (ArrayIndexOutOfBoundsException e) {
-          System.err.println("Malformed #getname query from " +
-                             names.get(m.id) + ". ID is not valid. "
-                             + "Proper syntax is '#getname ID'");
+          error.update("Malformed #getname query from " +
+                       names.get(m.id) + ". ID is not valid. "
+                       + "Proper syntax is '#getname ID'");
         }
       }
     } else if (m.message.startsWith("#name")) {
       // Set name for a client
       if (m.message.length() < 7) {
-        System.err.println("Malformed #name command from " + names.get(m.id) +
+        error.update("Malformed #name command from " + names.get(m.id) +
                            ". No name specified. "
-                           + "Proper syntax is '#name NAME'");
+                     + "Proper syntax is '#name NAME'");
       } else {
         names.put(m.id, m.message.substring(6));
       }
@@ -126,8 +129,11 @@ public class GameInstance extends Thread {
       for (int i = 0; i < processes.size(); ++i) {
         try {
           processes.get(i).exitValue();
-          System.err.println("Player '" + names.get(i) + "' has quit. cmd: '" +
-                             pcbs.get(i) + "'");
+          // In principle this really should be there, but it triggers
+          // when the client quits after it lost and gets annoying with
+          // false positives. BUG
+          //error.update("Player '" + names.get(i) + "' has quit.\n cmd: '" +
+          //             pcbs.get(i) + "'");
           break main;
         } catch (IllegalThreadStateException e) {
         }
@@ -160,6 +166,9 @@ public class GameInstance extends Thread {
   }
 
   private void startProcess(ProcessControlBlock pcb, int id) {
+    // Can't start a human process. That just doesn't make sense
+    if (pcb.isHuman)
+      return;
     try {
       ProcessBuilder pb = new ProcessBuilder(pcb.args);
       Process p = pb.start();
@@ -181,9 +190,13 @@ public class GameInstance extends Thread {
       else
         input_rest.add(id);
     } catch (IOException e) {
-      System.err.println("IO Exception when running '" + pcb + "'");
-      System.err.println(e);
+      error.update("IO Exception when running '" + pcb + "'\n" + e);
     }
+  }
+
+  public LinkedBlockingQueue<Message> getMessageQueue() {
+    // Used by human processes
+    return messages;
   }
 
   private HashMap<Integer, PrintWriter> input_all = new HashMap<>();
@@ -195,4 +208,5 @@ public class GameInstance extends Thread {
   private AtomicBoolean running = new AtomicBoolean(false);
   private ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
   private UpdateHook complete;
+  private UpdateMsgHook error;
 }
