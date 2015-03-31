@@ -92,11 +92,13 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
         dest.setText("-classpath " + parentDir + " " + filenameStem);
       } else {
         try {
-        JarFile jf = new JarFile(f);
-        if(jf.getManifest().getEntries().containsKey("Main-Class"))
-          dest.setText("-jar " + f.getAbsolutePath());
-        else
-          dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
+          // In principle this should work. However for some reason the manifest
+          // being read is treated as empty. BUG
+          JarFile jf = new JarFile(f);
+          if(jf.getManifest() != null && jf.getManifest().getEntries().containsKey("Main-Class"))
+            dest.setText("-jar " + f.getAbsolutePath());
+          else
+            dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
         } catch (IOException e) {
           dest.setText("-classpath " + f.getAbsolutePath() + " " + filenameStem);
         }
