@@ -52,6 +52,7 @@ public class HexGameBoard extends AbstractBoardPanel {
     // Split apart state
     String[] stateTokens = boardState.split(" ");
     try {
+      nextPlayer = Integer.parseInt(stateTokens[0]);
       // Start at 1 since first digit is player's turn
       for (int i = 1; i < stateTokens.length; ++i) {
         Spot s = state.get(i - 1);
@@ -162,6 +163,7 @@ public class HexGameBoard extends AbstractBoardPanel {
   private int turn = -1;
   private int hover = -1;
   private int from = -1;
+  private int nextPlayer = -1;
   private ArrayList<Spot> state = new ArrayList<>();
   private HashMap<Integer, ArrayList<Integer>> moves = new HashMap<>();
   private UpdateMsgHook p1Hook;
@@ -196,11 +198,14 @@ public class HexGameBoard extends AbstractBoardPanel {
       if (turn >= 0) {
         g2d.setColor(UIManager.getColor("Panel.foreground"));
         g2d.drawString("Turn: " + turn, 0, 20 + Y_OFF);
+      }
 
+      if (nextPlayer != -1) {
         String nextMove = "Next Move: ";
+        g2d.setColor(UIManager.getColor("Panel.foreground"));
         g2d.drawString(nextMove, 0, 40 + Y_OFF);
 
-        g2d.setPaint(turn % 2 == 0 ? UIColor.P1 : UIColor.P2);
+        g2d.setPaint(nextPlayer == 1 ? UIColor.P1 : UIColor.P2);
         Rectangle2D nextMoveBounds =
             g2d.getFont().getStringBounds(nextMove, g2d.getFontRenderContext());
         int nextMoveDiam = 10;
