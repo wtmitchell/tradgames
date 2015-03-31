@@ -103,12 +103,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     center.add(p1ps);
     center.add(p2ps);
     center.add(modps);
-    // center.add(p1Browse);
-    // center.add(p1cmd);
-    // center.add(p2Browse);
-    // center.add(p2cmd);
-    // center.add(modBrowse);
-    // center.add(modcmd);
     pane.add(center, BorderLayout.CENTER);
 
     pane.add(mainButton, BorderLayout.LINE_END);
@@ -193,24 +187,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   }
 
   private void addAllListeners() {
-    p1Browse.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          browseListener(p1cmd, "Player 1");
-        }
-      });
-
-    p2Browse.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          browseListener(p2cmd, "Player 2");
-        }
-      });
-
-    modBrowse.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        browseListener(modcmd, "Moderator");
-      }
-    });
-
     mainButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           mainListener();
@@ -237,12 +213,9 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   }
 
   private void changeEnable(boolean enable) {
-    p1cmd.setEditable(enable);
-    p2cmd.setEditable(enable);
-    modcmd.setEditable(enable);
-    p1Browse.setEnabled(enable);
-    p2Browse.setEnabled(enable);
-    modBrowse.setEnabled(enable);
+    p1ps.setEnable(enable);
+    p2ps.setEnable(enable);
+    modps.setEnable(enable);
   }
 
   @SuppressWarnings("unchecked")
@@ -310,7 +283,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     System.out.println("p1Cmd: '" + p1Cmd + "' p1Human = " + p1Human);
     System.out.println("p2Cmd: '" + p2Cmd + "' p2Human = " + p2Human);
     // Ensure the user selected at least something
-    if (modcmd.getText().equals("")) {
+    if (modCmd.equals("")) {
       JOptionPane.showMessageDialog(null,
                                     "Moderator cannot be empty.",
                                     "Cannot start game",
@@ -318,7 +291,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       changeState(State.WAITING);
       return;
     }
-    if (p1cmd.getText().equals("")) {
+    if (p1Cmd.equals("")) {
       JOptionPane.showMessageDialog(null,
                                     "Player 1 cannot be empty.",
                                     "Cannot start game",
@@ -326,7 +299,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       changeState(State.WAITING);
       return;
     }
-    if (p2cmd.getText().equals("")) {
+    if (p2Cmd.equals("")) {
       JOptionPane.showMessageDialog(null,
                                     "Player 2 cannot be empty.",
                                     "Cannot start game",
@@ -338,7 +311,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     ArrayList<ProcessControlBlock> pcbs = new ArrayList<>();
     // Create a PCB for the moderator
     pcbs.add(
-        new ProcessControlBlock(modcmd.getText(), true,
+        new ProcessControlBlock(modCmd, true,
                                 new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
@@ -366,7 +339,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
                                 }));
     // Create a PCB for player1
     pcbs.add(
-        new ProcessControlBlock(p1cmd.getText(), false,
+        new ProcessControlBlock(p1Cmd, false,
                                 new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
@@ -393,7 +366,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
                                 }));
     // Create a PCB for player2
     pcbs.add(
-        new ProcessControlBlock(p2cmd.getText(), false,
+        new ProcessControlBlock(p2Cmd, false,
                                 new UpdateMsgHook() {
                                   @Override
                                   public void update(String msg) {
@@ -436,19 +409,14 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
   private GameInstance gi;
 
-  private JTextField p1cmd = new JTextField();
-  private JTextField p2cmd = new JTextField();
-  private JTextField modcmd = new JTextField();
   private JButton mainButton = new JButton();
-  private JButton p1Browse = new JButton("Browse");
-  private JButton p2Browse = new JButton("Browse");
-  private JButton modBrowse = new JButton("Browse");
-  private enum State { WAITING, RUNNING, STOPPING }
-  private State currentState = State.STOPPING;
 
   private ProgramSelectorPanel p1ps = new ProgramSelectorPanel(true);
   private ProgramSelectorPanel p2ps = new ProgramSelectorPanel(true);
   private ProgramSelectorPanel modps = new ProgramSelectorPanel();
+
+  private enum State { WAITING, RUNNING, STOPPING }
+  private State currentState = State.STOPPING;
 
   // Note that the elements of StreamIDs must start at zero
   // and increase by 1 between constants. These are used as

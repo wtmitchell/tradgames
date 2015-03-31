@@ -128,6 +128,14 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     return path + javaTF.getText();
   }
 
+  public void setEnable(boolean enabled) {
+    binTF.setEditable(enabled);
+    binButton.setEnabled(enabled);
+    javaTF.setEditable(enabled);
+    javaButton.setEnabled(enabled);
+    humanTF.setEditable(enabled);
+  }
+
   final static String BINARYPANEL = "Binary";
   final static String JAVAPANEL = "Java";
   final static String HUMANPANEL = "Human";
