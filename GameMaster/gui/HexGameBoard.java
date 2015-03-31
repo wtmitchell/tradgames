@@ -152,7 +152,7 @@ public class HexGameBoard extends AbstractBoardPanel {
   private static class UIColor {
     private final static Color EMPTY = Color.WHITE;
     private final static Color P1 = Color.RED;
-    private final static Color P2 = Color.BLUE;
+    private final static Color P2 = Color.CYAN;
     private final static Color FROM = Color.YELLOW;
     private final static Color TO = Color.MAGENTA;
     private final static Color BORDER = Color.BLACK;
