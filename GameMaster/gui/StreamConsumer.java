@@ -27,7 +27,9 @@ class StreamConsumer extends Thread {
       while ((message = br.readLine()) != null)
         queue.add(new Message(type, broadcast, message, id));
     } catch (IOException e) {
-      System.err.println("IO Exception while reading on ID " + id);
+      // In principle this should be there, but in practice this just
+      // generate useless noise
+      //System.err.println("IO Exception while reading on ID " + id);
     }
   }
 }
