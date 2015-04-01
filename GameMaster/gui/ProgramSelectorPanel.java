@@ -62,7 +62,6 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
           browseJavaListener(javaTF);
         }
       });
-    //switchState(State.App);
   }
 
   private void browseListener(JTextField dest) {
@@ -132,7 +131,7 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     String separator = System.getProperty("file.separator");
     String path = System.getProperty("java.home")
       + separator + "bin" + separator + "java";
-	  
+
 	if (!(new File(path)).isFile() && (new File(path + ".exe")).isFile())
 		path += ".exe";
 
@@ -160,9 +159,7 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
   private JTextField humanTF = new JTextField();
 
   private JPanel cards = new JPanel(new CardLayout());
-  //private enum State { App, Java, Human };
 
-  //private State currentState = State.Human;
   private String currentCard;
   private JComboBox<String> mode = new JComboBox<String>();
 }
