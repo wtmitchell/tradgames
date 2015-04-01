@@ -7,6 +7,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JButton;
@@ -277,7 +278,12 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
     private void startProcess() {
       try {
-        ProcessBuilder pb = new ProcessBuilder(ps.getProgram());
+		String cmd = ps.getProgram();
+		ArrayList<String> args = new ArrayList<String>();
+
+		for (String s : cmd.split(" "))
+		  args.add(s);
+        ProcessBuilder pb = new ProcessBuilder(args);
         proc = pb.start();
 
         StreamConsumer stdout = new StreamConsumer(

@@ -131,9 +131,12 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
 
     String separator = System.getProperty("file.separator");
     String path = System.getProperty("java.home")
-      + separator + "bin" + separator + "java ";
+      + separator + "bin" + separator + "java";
+	  
+	if (!(new File(path)).isFile() && (new File(path + ".exe")).isFile())
+		path += ".exe";
 
-    return path + javaTF.getText();
+    return path + " " + javaTF.getText();
   }
 
   public void setEnable(boolean enabled) {
