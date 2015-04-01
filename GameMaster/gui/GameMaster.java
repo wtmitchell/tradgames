@@ -79,14 +79,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     });
   }
 
-  private void browseListener(JTextField dest, String title) {
-    final JFileChooser fc = new JFileChooser();
-    fc.setDialogTitle(title);
-    if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-      dest.setText(fc.getSelectedFile().getAbsolutePath());
-    }
-  }
-
   private void mainListener() {
     if (currentState == State.WAITING)
       changeState(State.RUNNING);
