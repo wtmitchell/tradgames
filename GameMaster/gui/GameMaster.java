@@ -7,8 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -271,14 +276,14 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     openItem.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          System.out.println("Called open item");
+          loadFromFile();
         }
       });
 
     saveItem.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          System.out.println("Called save item");
+          saveToFile();
         }
       });
 
@@ -289,6 +294,63 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
         }
       });
 
+  }
+
+  private void saveToFile() {
+    final JFileChooser fc = new JFileChooser();
+    fc.setDialogTitle("Save a game");
+    if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+      try {
+      ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(fc.getSelectedFile()));
+
+      ZipEntry zeModOut = new ZipEntry("moderator.stdout.txt");
+      zout.putNextEntry(zeModOut);
+      zout.write(textAreas.get(StreamIDs.modstdout).getText().getBytes());
+
+      ZipEntry zeModErr = new ZipEntry("moderator.stderr.txt");
+      zout.putNextEntry(zeModErr);
+      zout.write(textAreas.get(StreamIDs.modstderr).getText().getBytes());
+
+      ZipEntry zeP1Out = new ZipEntry("player1.stdout.txt");
+      zout.putNextEntry(zeP1Out);
+      zout.write(textAreas.get(StreamIDs.p1stdout).getText().getBytes());
+
+      ZipEntry zeP1Err = new ZipEntry("player1.stderr.txt");
+      zout.putNextEntry(zeP1Err);
+      zout.write(textAreas.get(StreamIDs.p1stderr).getText().getBytes());
+
+      ZipEntry zeP2Out = new ZipEntry("player2.stdout.txt");
+      zout.putNextEntry(zeP2Out);
+      zout.write(textAreas.get(StreamIDs.p2stdout).getText().getBytes());
+
+      ZipEntry zeP2Err = new ZipEntry("player2.stderr.txt");
+      zout.putNextEntry(zeP2Err);
+      zout.write(textAreas.get(StreamIDs.p2stderr).getText().getBytes());
+
+      ZipEntry zeMoveTable = new ZipEntry("moveTable.txt");
+      zout.putNextEntry(zeMoveTable);
+
+      zout.close();
+      } catch (FileNotFoundException e) {
+        JOptionPane.showMessageDialog(null,
+                                      "Cannot save:\n" + e,
+                                      "File Write error",
+                                      JOptionPane.ERROR_MESSAGE);
+      } catch (IOException e) {
+        JOptionPane.showMessageDialog(null,
+                                      "Cannot save:\n" + e,
+                                      "File Write error",
+                                      JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
+
+  private void loadFromFile() {
+    final JFileChooser fc = new JFileChooser();
+    fc.setDialogTitle("Load a game");
+    if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+      //fc.getSelectedFile().getAbsolutePath();
+    }
   }
 
   private void changeEnable(boolean enable) {
@@ -358,9 +420,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     String p2Cmd = p2ps.getProgram();
     boolean p2Human = p2ps.isHuman();
 
-    System.out.println("modCmd: '" + modCmd + "'");
-    System.out.println("p1Cmd: '" + p1Cmd + "' p1Human = " + p1Human);
-    System.out.println("p2Cmd: '" + p2Cmd + "' p2Human = " + p2Human);
     // Ensure the user selected at least something
     if (modCmd.equals("")) {
       JOptionPane.showMessageDialog(null,
