@@ -122,6 +122,20 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     return currentCard.equals(HUMANPANEL);
   }
 
+  public ArrayList<String> splitOffLeadingFile(String in) {
+    int i = 1;
+    for (; i < in.length(); ++i) {
+      if ((new File(in.substring(0,i))).isFile())
+        break;
+    }
+    ArrayList<String> split = new ArrayList<>();
+    split.add(in.substring(0, i));
+    if (i < in.length())
+      split.add(in.substring(i));
+
+    return split;
+  }
+
   public ArrayList<String> getProgram() {
     ArrayList<String> args = new ArrayList<>();
     if (currentCard.equals(HUMANPANEL)) {
@@ -133,8 +147,17 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
       String TFString = binTF.getText();
 
       if (TFString.startsWith(binFile)) {
+        // The selected file was not modified
         args.add(binFile);
         TFString = TFString.substring(binFile.length());
+      } else {
+        // Try to find a valid file
+        ArrayList<String> split = splitOffLeadingFile(TFString);
+        args.add(split.get(0));
+        if (split.size() > 1)
+          TFString = split.get(1);
+        else
+          TFString = "";
       }
       String[] tokens = TFString.split(" ");
       for (String s : tokens) {
@@ -142,14 +165,12 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
           args.add(s);
       }
 
-      System.out.print("Split '" + binTF.getText() + "' as ");
-      for (String s : args)
-        System.out.print("'" + s + "' ");
-      System.out.print("\n");
-
       return args;
     }
 
+    // Java case
+
+    // Add java executable
     String separator = System.getProperty("file.separator");
     String path = System.getProperty("java.home")
       + separator + "bin" + separator + "java";
@@ -158,6 +179,8 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
       path += ".exe";
 
     args.add(path);
+
+    // Handle rest
     args.add(javaTF.getText());
 
     System.out.print("Split '" + javaTF.getText() + "' as ");
@@ -186,6 +209,9 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
 
   private JTextField javaTF = new JTextField();
   private JButton javaButton = new JButton("Browse");
+  private String javaSelected = "";
+  private boolean javaJar = false;
+  private boolean javaJarExecutable = false;
 
   private JTextField humanTF = new JTextField();
 
