@@ -189,6 +189,10 @@ public class GameInstance extends Thread {
         input_master.add(id);
       else
         input_rest.add(id);
+
+      if (!p.isAlive()) {
+        error.update("Immediate termination of program '" + pcb + "'");
+      }
     } catch (IOException e) {
       error.update("IO Exception when running '" + pcb + "'\n" + e);
     }

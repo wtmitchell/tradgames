@@ -294,6 +294,14 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
         stdin = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(
                                     proc.getOutputStream())),
                                 true);
+
+        if (!proc.isAlive()) {
+          JOptionPane.showMessageDialog(
+              null, "The process " + args +
+                        " immediately terminated. Ensure it is a valid program",
+              "Execution error", JOptionPane.ERROR_MESSAGE);
+          return false;
+        }
         return true;
       } catch (IOException e) {
         JOptionPane.showMessageDialog(null, e, "IOException",
