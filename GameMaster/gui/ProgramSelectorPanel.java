@@ -53,7 +53,7 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     binButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          browseListener(binTF);
+          browseBinListener(binTF);
         }
       });
     javaButton.addActionListener(new ActionListener() {
@@ -64,11 +64,12 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
       });
   }
 
-  private void browseListener(JTextField dest) {
+  private void browseBinListener(JTextField dest) {
     final JFileChooser fc = new JFileChooser();
     fc.setDialogTitle("Select an executable");
     if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-      dest.setText(fc.getSelectedFile().getAbsolutePath());
+      binFile = fc.getSelectedFile().getAbsolutePath();
+      dest.setText(binFile);
     }
   }
 
@@ -121,21 +122,50 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     return currentCard.equals(HUMANPANEL);
   }
 
-  public String getProgram() {
-    if (currentCard.equals(HUMANPANEL))
-      return humanTF.getText();
+  public ArrayList<String> getProgram() {
+    ArrayList<String> args = new ArrayList<>();
+    if (currentCard.equals(HUMANPANEL)) {
+      args.add(humanTF.getText());
+      return args;
+    }
 
-    if (currentCard.equals(BINARYPANEL))
-      return binTF.getText();
+    if (currentCard.equals(BINARYPANEL)) {
+      String TFString = binTF.getText();
+
+      if (TFString.startsWith(binFile)) {
+        args.add(binFile);
+        TFString = TFString.substring(binFile.length());
+      }
+      String[] tokens = TFString.split(" ");
+      for (String s : tokens) {
+        if (s.length() > 0)
+          args.add(s);
+      }
+
+      System.out.print("Split '" + binTF.getText() + "' as ");
+      for (String s : args)
+        System.out.print("'" + s + "' ");
+      System.out.print("\n");
+
+      return args;
+    }
 
     String separator = System.getProperty("file.separator");
     String path = System.getProperty("java.home")
       + separator + "bin" + separator + "java";
 
-	if (!(new File(path)).isFile() && (new File(path + ".exe")).isFile())
-		path += ".exe";
+    if (!(new File(path)).isFile() && (new File(path + ".exe")).isFile())
+      path += ".exe";
 
-    return path + " " + javaTF.getText();
+    args.add(path);
+    args.add(javaTF.getText());
+
+    System.out.print("Split '" + javaTF.getText() + "' as ");
+    for (String s : args)
+      System.out.print("'" + s + "' ");
+    System.out.print("\n");
+
+    return args;
   }
 
   public void setEnable(boolean enabled) {
@@ -152,6 +182,7 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
 
   private JTextField binTF = new JTextField();
   private JButton binButton = new JButton("Browse");
+  private String binFile = "";
 
   private JTextField javaTF = new JTextField();
   private JButton javaButton = new JButton("Browse");

@@ -414,14 +414,14 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   }
 
   private void startGame() {
-    String modCmd = modps.getProgram();
-    String p1Cmd = p1ps.getProgram();
+    ArrayList<String> modCmd = modps.getProgram();
+    ArrayList<String> p1Cmd = p1ps.getProgram();
     boolean p1Human = p1ps.isHuman();
-    String p2Cmd = p2ps.getProgram();
+    ArrayList<String> p2Cmd = p2ps.getProgram();
     boolean p2Human = p2ps.isHuman();
 
     // Ensure the user selected at least something
-    if (modCmd.equals("")) {
+    if (modCmd.size() == 0) {
       JOptionPane.showMessageDialog(null,
                                     "Moderator cannot be empty.",
                                     "Cannot start game",
@@ -429,7 +429,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       changeState(State.WAITING);
       return;
     }
-    if (p1Cmd.equals("")) {
+    if (p1Cmd.size() == 0) {
       JOptionPane.showMessageDialog(null,
                                     "Player 1 cannot be empty.",
                                     "Cannot start game",
@@ -437,7 +437,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       changeState(State.WAITING);
       return;
     }
-    if (p2Cmd.equals("")) {
+    if (p2Cmd.size() == 0) {
       JOptionPane.showMessageDialog(null,
                                     "Player 2 cannot be empty.",
                                     "Cannot start game",

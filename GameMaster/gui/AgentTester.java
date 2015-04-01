@@ -265,24 +265,22 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
     @Override
     public void run() {
       messages.clear();
-      startProcess();
-      processMessages();
+      if (startProcess()) {
+        processMessages();
 
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        @Override
-        public void run() {
-          changeState(AgentTester.State.WAITING);
-        }
-      });
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+              changeState(AgentTester.State.WAITING);
+            }
+          });
+      }
     }
 
-    private void startProcess() {
+    private boolean startProcess() {
       try {
-		String cmd = ps.getProgram();
-		ArrayList<String> args = new ArrayList<String>();
+        ArrayList<String> args = ps.getProgram();
 
-		for (String s : cmd.split(" "))
-		  args.add(s);
         ProcessBuilder pb = new ProcessBuilder(args);
         proc = pb.start();
 
@@ -296,11 +294,13 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
         stdin = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(
                                     proc.getOutputStream())),
                                 true);
+        return true;
       } catch (IOException e) {
         JOptionPane.showMessageDialog(null, e, "IOException",
                                       JOptionPane.ERROR_MESSAGE);
         changeState(AgentTester.State.WAITING);
       }
+      return false;
     }
 
     private void processMessages() {
