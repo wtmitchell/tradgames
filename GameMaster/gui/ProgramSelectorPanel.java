@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -86,12 +87,17 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
       String parentDir = f.getParent();
       String filename = f.getName();
       String filenameStem = filename.substring(0, filename.lastIndexOf('.'));
-      String extention = filename.substring(filename.lastIndexOf('.'));
+      String extension = filename.substring(filename.lastIndexOf('.'));
 
-      if (!extention.equals(".jar")) {
+      if (!extension.equals(".jar")) {
         dest.setText("-classpath " + parentDir + " " + filenameStem);
+        javaSelected = parentDir;
+        javaJar = false;
+        javaJarExecutable = false;
       } else {
         try {
+          javaJar = true;
+          javaSelected = f.getAbsolutePath();
           JarFile jf = new JarFile(f);
 
           // It would seem that
@@ -99,12 +105,16 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
           // should work, but for some reason it did not, and comparing the
           // Main-Class to the empty string does work BUG
           if (jf.getManifest() != null &&
-              jf.getManifest().getMainAttributes().getValue("Main-Class") != "")
+              jf.getManifest().getMainAttributes().getValue("Main-Class") != "") {
+            javaJarExecutable = true;
             dest.setText("-jar " + f.getAbsolutePath());
-          else
+          } else {
+            javaJarExecutable = false;
             dest.setText("-classpath " + f.getAbsolutePath() + " " +
                          filenameStem);
+          }
         } catch (IOException e) {
+          javaJarExecutable = false;
           dest.setText("-classpath " + f.getAbsolutePath() + " " +
                        filenameStem);
         }
@@ -123,9 +133,25 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
   }
 
   public ArrayList<String> splitOffLeadingFile(String in) {
+    // Looks for a valid file left to right
     int i = 1;
     for (; i < in.length(); ++i) {
       if ((new File(in.substring(0,i))).isFile())
+        break;
+    }
+    ArrayList<String> split = new ArrayList<>();
+    split.add(in.substring(0, i));
+    if (i < in.length())
+      split.add(in.substring(i));
+
+    return split;
+  }
+
+  public ArrayList<String> splitOffLeadingDirectory(String in) {
+    // Looks for a valid directory right to left
+    int i = in.length();
+    for(; i > 0; --i) {
+      if ((new File(in.substring(0, i))).isDirectory())
         break;
     }
     ArrayList<String> split = new ArrayList<>();
@@ -178,15 +204,62 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     if (!(new File(path)).isFile() && (new File(path + ".exe")).isFile())
       path += ".exe";
 
+    if (!(new File(path)).isFile()) {
+      // Had trouble detecting java executable
+      JOptionPane.showMessageDialog(
+          null, "Attemped to find java executable as:\n" + path +
+                    "\nHowever it was not found",
+          "Unable to find Java executable", JOptionPane.ERROR_MESSAGE);
+    }
     args.add(path);
 
     // Handle rest
-    args.add(javaTF.getText());
+    String rawTF = javaTF.getText();
 
-    System.out.print("Split '" + javaTF.getText() + "' as ");
-    for (String s : args)
-      System.out.print("'" + s + "' ");
-    System.out.print("\n");
+    if (rawTF.startsWith("-classpath " + javaSelected)) {
+      // Either a .class or a nonexecutable jar
+      args.add("-classpath");
+      args.add(javaSelected);
+      rawTF = rawTF.substring(("-classpath " + javaSelected).length());
+    } else if (javaJarExecutable && rawTF.startsWith("-jar " + javaSelected)) {
+      args.add("-jar");
+      args.add(javaSelected);
+      rawTF = rawTF.substring(("-jar " + javaSelected).length());
+    } else if (javaJar && !javaJarExecutable && rawTF.startsWith("-classpath ")) {
+      args.add("-classpath");
+      rawTF = rawTF.substring(("-classpath").length()).trim();
+      ArrayList<String> split = splitOffLeadingFile(rawTF);
+      args.add(split.get(0));
+      if (split.size() > 1)
+        rawTF = split.get(1);
+      else
+        rawTF = "";
+    } else if (rawTF.startsWith("-classpath ")) {
+      args.add("-classpath");
+      rawTF = rawTF.substring(("-classpath").length()).trim();
+      ArrayList<String> split = splitOffLeadingDirectory(rawTF);
+      args.add(split.get(0));
+      if (split.size() > 1)
+        rawTF = split.get(1);
+      else
+        rawTF = "";
+    } else if (rawTF.startsWith("-jar ")) {
+      args.add("-jar");
+      rawTF = rawTF.substring(("-jar").length()).trim();
+      ArrayList<String> split = splitOffLeadingFile(rawTF);
+      args.add(split.get(0));
+      if (split.size() > 1)
+        rawTF = split.get(1);
+      else
+        rawTF = "";
+    }
+
+    // Split remainder
+    String[] tokens = rawTF.split(" ");
+    for (String s : tokens) {
+      if (s.length() > 0)
+        args.add(s);
+    }
 
     return args;
   }
