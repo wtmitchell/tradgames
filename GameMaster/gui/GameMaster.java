@@ -47,6 +47,8 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
   public GameMaster(Class<BoardPanelType> typeClass) {
     // Set the Look and Feel
+    /* Use the default Look and Feel since this exact code triggers a bug
+       in Java 8 on OSX
     try {
       UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
     } catch (UnsupportedLookAndFeelException ex) {
@@ -61,7 +63,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     // Turn off metal's use bold fonts
     UIManager.put("swing.boldMetal", Boolean.FALSE);
-
+    */
     // Instantiate the update queues
     for (int i = 0; i < StreamIDs.count; ++i) {
       updateQueues.add(new LinkedBlockingQueue<String>());

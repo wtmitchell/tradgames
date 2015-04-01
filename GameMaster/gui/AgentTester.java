@@ -30,8 +30,11 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
   public AgentTester(Class<BoardPanelType> typeClass) {
     // Set the Look and Feel
+    /* Use the default Look and Feel since this exact code triggers a bug
+       in Java 8 on OSX
     try {
-      UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+   //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
     } catch (UnsupportedLookAndFeelException ex) {
       ex.printStackTrace();
     } catch (IllegalAccessException ex) {
@@ -41,9 +44,10 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
     } catch (ClassNotFoundException ex) {
       ex.printStackTrace();
     }
+    */
 
     // Turn off metal's use bold fonts
-    UIManager.put("swing.boldMetal", Boolean.FALSE);
+    //UIManager.put("swing.boldMetal", Boolean.FALSE);
 
     // Instantiate the BoardPanel. This nonsense is needed since Java's
     // generics
