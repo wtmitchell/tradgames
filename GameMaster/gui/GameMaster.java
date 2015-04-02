@@ -7,12 +7,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -357,11 +361,73 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void loadFromFile() {
     final JFileChooser fc = new JFileChooser();
     fc.setDialogTitle("Load a game");
     if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-      //fc.getSelectedFile().getAbsolutePath();
+      resetForNewGame();
+      try {
+        ZipInputStream zin = new ZipInputStream(new FileInputStream(fc.getSelectedFile()));
+
+        ZipEntry ze = zin.getNextEntry();
+
+        byte[] buffer = new byte[4096];
+
+        while (ze != null) {
+          String name = ze.getName();
+
+          System.out.println("Name: " + name);
+          if (name.equals("moderator.stdout.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.modstdout).append(new String(buffer, 0, len));
+          } else if (name.equals("moderator.stderr.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.modstderr).append(new String(buffer, 0, len));
+          } else if (name.equals("player1.stdout.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.p1stdout).append(new String(buffer, 0, len));
+          } else if (name.equals("player1.stderr.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.p1stderr).append(new String(buffer, 0, len));
+          } else if (name.equals("player2.stdout.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.p2stdout).append(new String(buffer, 0, len));
+          } else if (name.equals("player2.stderr.txt")) {
+            int len = 0;
+            while ((len = zin.read(buffer)) > 0)
+              textAreas.get(StreamIDs.p2stderr).append(new String(buffer, 0, len));
+            } else if (name.equals("moveTable.txt")) {
+            int len = 0;
+            StringBuilder sb = new StringBuilder();
+            while ((len = zin.read(buffer)) > 0)
+              sb.append(new String(buffer, 0, len));
+
+            Scanner lines = new Scanner(sb.toString());
+            while (lines.hasNextLine())
+              ((MoveTableModel)moveTable.getModel()).addRow(lines.nextLine()); // TODO
+          }
+
+          zin.closeEntry();
+          ze = zin.getNextEntry();
+        }
+        zin.close();
+      } catch (FileNotFoundException e) {
+        JOptionPane.showMessageDialog(null,
+                                      "Cannot save:\n" + e,
+                                      "File Write error",
+                                      JOptionPane.ERROR_MESSAGE);
+      } catch (IOException e) {
+        JOptionPane.showMessageDialog(null,
+                                      "Cannot save:\n" + e,
+                                      "File Write error",
+                                      JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -640,7 +706,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       new ArrayList<LinkedBlockingQueue<String>>();
   private ArrayList<JTextArea> textAreas = new ArrayList<JTextArea>();
 
-  private JTable moveTable = new JTable(new MoveTableModel());
+  private JTable moveTable = new JTable(new MoveTableModel()); // FIXME make this not initialized here so we can keep a handle on the table model and not have to @SuppressWarnings
 
   private BoardPanelType boardPanel; // initialized in ctor
 
@@ -769,6 +835,10 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     public Move getRow(int i) {
       return data.get(i);
+    }
+
+    // Assumes a tab delimited row
+    public void addRow(String in) {
     }
   }
 }
