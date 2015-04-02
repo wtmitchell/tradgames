@@ -25,6 +25,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
   public static void main(String[] args) {
+    // If using Windows turn off Direct3d rendering because it quite broken
+    // with Java 8 and some unknown combination of Windows and video drivers
+    // This is equivalent to putting -Dsun.java2d.d3d=false on the command
+    // line
+    if (System.getProperty("os.name").contains("Windows")) {
+      System.setProperty("sun.java2d.d3d", "false");
+    }
+
     AgentTester<HexGameBoard> a = new AgentTester<>(HexGameBoard.class);
   }
 
