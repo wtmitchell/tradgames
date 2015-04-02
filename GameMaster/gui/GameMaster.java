@@ -123,6 +123,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   private void createTabbedPanel(Container pane) {
     JTabbedPane tabbed = new JTabbedPane();
 
+    moveTable = new JTable(moveTableModel);
     moveTable.setFillsViewportHeight(true);
 
     TableColumnModel tcm = moveTable.getColumnModel();
@@ -242,7 +243,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     // Have the board GUI update when a row is selected in the JTable
     moveTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-        @SuppressWarnings("unchecked")
         public void valueChanged(ListSelectionEvent e) {
           //Ignore extra messages.
           if (e.getValueIsAdjusting()) return;
@@ -253,7 +253,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
             // This cast really is safe since we constructed the table with
             // this specific model
-            Move m = ((MoveTableModel)moveTable.getModel()).getRow(selectedRow);
+            Move m = moveTableModel.getRow(selectedRow);
             boardPanel.updateData(m.turn, m.state, m.nextMoves);
           }
         }
@@ -377,7 +377,6 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
         while (ze != null) {
           String name = ze.getName();
 
-          System.out.println("Name: " + name);
           if (name.equals("moderator.stdout.txt")) {
             int len = 0;
             while ((len = zin.read(buffer)) > 0)
@@ -402,7 +401,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
             int len = 0;
             while ((len = zin.read(buffer)) > 0)
               textAreas.get(StreamIDs.p2stderr).append(new String(buffer, 0, len));
-            } else if (name.equals("moveTable.txt")) {
+          } else if (name.equals("moveTable.txt")) {
             int len = 0;
             StringBuilder sb = new StringBuilder();
             while ((len = zin.read(buffer)) > 0)
@@ -410,7 +409,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
             Scanner lines = new Scanner(sb.toString());
             while (lines.hasNextLine())
-              ((MoveTableModel)moveTable.getModel()).addRow(lines.nextLine()); // TODO
+              moveTableModel.addRow(lines.nextLine());
           }
 
           zin.closeEntry();
@@ -437,14 +436,11 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
     modps.setEnable(enable);
   }
 
-  @SuppressWarnings("unchecked")
   private void resetForNewGame() {
     for (JTextArea i : textAreas)
       i.setText("");
 
-    // This cast really is safe since we constructed the table with
-    // this specific model
-    ((MoveTableModel)moveTable.getModel()).clearAll();
+    moveTableModel.clearAll();
   }
 
   private void changeState(State newState) {
@@ -480,14 +476,11 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       textAreas.get(id).append(msg + "\n");
   }
 
-  @SuppressWarnings("unchecked")
   private void processGUIUpdate(String msg) {
-    // These casts really are safe since we constructed the table with
-    // this specific model
     if (msg.startsWith("MOVE")) {
-      ((MoveTableModel)moveTable.getModel()).addMoveMsg(msg);
+      moveTableModel.addMoveMsg(msg);
     } else if (msg.startsWith("GUI")) {
-      ((MoveTableModel)moveTable.getModel()).addGUIState(msg);
+      moveTableModel.addGUIState(msg);
     }
   }
 
@@ -706,7 +699,8 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       new ArrayList<LinkedBlockingQueue<String>>();
   private ArrayList<JTextArea> textAreas = new ArrayList<JTextArea>();
 
-  private JTable moveTable = new JTable(new MoveTableModel()); // FIXME make this not initialized here so we can keep a handle on the table model and not have to @SuppressWarnings
+  private MoveTableModel moveTableModel = new MoveTableModel();
+  private JTable moveTable;
 
   private BoardPanelType boardPanel; // initialized in ctor
 
@@ -839,6 +833,20 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     // Assumes a tab delimited row
     public void addRow(String in) {
+      Move m = new Move();
+
+      String[] tokens = in.split("\t");
+
+      m.turn = Integer.parseInt(tokens[0]);
+      m.playerNum = Integer.parseInt(tokens[1]);
+      m.playerName = tokens[2];
+      m.move = tokens[3];
+      m.elapsed = tokens[4];
+      m.state = tokens[5];
+      m.nextMoves = tokens[6];
+
+      data.add(m);
+      fireTableRowsInserted(data.size(), data.size());
     }
   }
 }
