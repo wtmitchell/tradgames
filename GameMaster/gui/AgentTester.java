@@ -242,7 +242,8 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
       return;
 
     String[] tokens = msg.split(" ");
-    if (tokens.length == 82) {
+    if (tokens.length == 82 && lastBoardState.equals("")) {
+      System.out.println("It is");
       lastBoardState = msg;
       return;
     }
