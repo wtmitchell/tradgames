@@ -332,6 +332,16 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       ZipEntry zeMoveTable = new ZipEntry("moveTable.txt");
       zout.putNextEntry(zeMoveTable);
 
+      for (int i = 0, e = moveTable.getRowCount(); i < e; ++i) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0, f = moveTable.getColumnCount(); j < f; ++j) {
+          sb.append(moveTable.getValueAt(i,j));
+          sb.append("\t");
+        }
+        sb.append("\n");
+        zout.write(sb.toString().getBytes());
+      }
+
       zout.close();
       } catch (FileNotFoundException e) {
         JOptionPane.showMessageDialog(null,
