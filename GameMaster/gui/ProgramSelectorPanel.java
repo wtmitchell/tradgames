@@ -270,6 +270,51 @@ public class ProgramSelectorPanel extends JPanel implements ItemListener {
     javaTF.setEditable(enabled);
     javaButton.setEnabled(enabled);
     humanTF.setEditable(enabled);
+    mode.setEnabled(enabled);
+  }
+
+  public void swap(ProgramSelectorPanel other) {
+    // Swap contents of all private variables
+
+    // Binary
+    String tempString = binTF.getText();
+    binTF.setText(other.binTF.getText());
+    other.binTF.setText(tempString);
+
+    tempString = binFile;
+    binFile = other.binFile;
+    other.binFile = tempString;
+
+    // Java
+    tempString = javaTF.getText();
+    javaTF.setText(other.javaTF.getText());
+    other.javaTF.setText(tempString);
+
+    tempString = javaSelected;
+    javaSelected = other.javaSelected;
+    other.javaSelected = tempString;
+
+    boolean tempBool = javaJar;
+    javaJar = other.javaJar;
+    other.javaJar = tempBool;
+
+    tempBool = javaJarExecutable;
+    javaJarExecutable = other.javaJarExecutable;
+    other.javaJarExecutable = tempBool;
+
+    // Human
+    tempString = humanTF.getText();
+    humanTF.setText(other.humanTF.getText());
+    other.humanTF.setText(tempString);
+
+    // GUI Status
+    int tempInt = mode.getSelectedIndex();
+    mode.setSelectedIndex(other.mode.getSelectedIndex());
+    other.mode.setSelectedIndex(tempInt);
+
+    tempBool = binTF.isEditable();
+    setEnable(other.binTF.isEditable());
+    other.setEnable(tempBool);
   }
 
   final static String BINARYPANEL = "Binary";

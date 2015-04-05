@@ -182,8 +182,16 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
 
     JMenu menu = new JMenu("File");
     menu.setMnemonic(KeyEvent.VK_F);
-    menu.getAccessibleContext().setAccessibleDescription("Open/Save a game");
+    menu.getAccessibleContext().setAccessibleDescription("File menu");
     menuBar.add(menu);
+
+    swapItem = new JMenuItem("Swap P1/P2", KeyEvent.VK_P);
+    swapItem.setAccelerator(
+        KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK));
+    swapItem.getAccessibleContext().setAccessibleDescription("Swaps P1/P2");
+    menu.add(swapItem);
+
+    menu.addSeparator();
 
     // Open
     openItem = new JMenuItem("Open", KeyEvent.VK_O);
@@ -287,23 +295,31 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
       });
 
     // Menu items
+    swapItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          if (currentState == State.WAITING)
+            p1ps.swap(p2ps);
+        }
+      });
+
     openItem.addActionListener(new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(ActionEvent e) {
           loadFromFile();
         }
       });
 
     saveItem.addActionListener(new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(ActionEvent e) {
           saveToFile();
         }
       });
 
     exitItem.addActionListener(new ActionListener() {
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(ActionEvent e) {
           frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         }
       });
@@ -685,6 +701,7 @@ public class GameMaster<BoardPanelType extends AbstractBoardPanel> {
   private JMenuItem openItem;
   private JMenuItem saveItem;
   private JMenuItem exitItem;
+  private JMenuItem swapItem;
 
   private JFrame frame = new JFrame("GameMaster");
 
