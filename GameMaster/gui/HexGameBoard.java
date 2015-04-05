@@ -78,6 +78,8 @@ public class HexGameBoard extends AbstractBoardPanel {
     // Split apart moves
     String[] moveTokens = nextMoves.split(";");
     moves.clear();
+    movesCount = 0;
+    movesDupes = false;
     try {
       for (int i = 0; i < moveTokens.length; ++i) {
         String[] tok = moveTokens[i].split(",");
@@ -88,8 +90,13 @@ public class HexGameBoard extends AbstractBoardPanel {
           dests = new ArrayList<Integer>();
           dests.add(to);
           moves.put(from, dests);
+          ++movesCount;
         } else {
-          dests.add(to);
+          if (!dests.contains(to))
+            dests.add(to);
+          else
+            movesDupes = true;
+          ++movesCount;
         }
       }
     } catch (NumberFormatException e) {
@@ -166,6 +173,8 @@ public class HexGameBoard extends AbstractBoardPanel {
   private int nextPlayer = -1;
   private ArrayList<Spot> state = new ArrayList<>();
   private HashMap<Integer, ArrayList<Integer>> moves = new HashMap<>();
+  private int movesCount = -1;
+  private boolean movesDupes = false;
   private UpdateMsgHook p1Hook;
   private UpdateMsgHook p2Hook;
   private JCheckBox showNumsCheck = new JCheckBox("Show location numbers");
@@ -213,6 +222,15 @@ public class HexGameBoard extends AbstractBoardPanel {
                      40 + Y_OFF - (int)nextMoveBounds.getHeight() / 2 -
                          nextMoveDiam / 2,
                      nextMoveDiam, nextMoveDiam);
+      }
+      if (movesCount != -1) {
+        g2d.setColor(UIManager.getColor("Panel.foreground"));
+        g2d.drawString("# moves: " + movesCount, 0, 60 + Y_OFF);
+      }
+
+      if (movesDupes) {
+        g2d.setColor(UIManager.getColor("Panel.foreground"));
+        g2d.drawString("Contains duplicate moves", 0, 80 + Y_OFF);
       }
 
       // Draw mouse over hover
