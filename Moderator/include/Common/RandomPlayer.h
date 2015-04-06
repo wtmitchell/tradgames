@@ -8,7 +8,9 @@
 #define COMMON_RANDOMPLAYER_H_INCLUDED
 
 #include <iostream>
+#include <iterator>
 #include <random>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -178,7 +180,7 @@ void Random<GameState, GameClient>::waitForStart() {
       if (!gs.loadState(newState))
         std::cerr << "Failed to load '" << newState << "'\n";
     } else if (response == "LISTMOVES") {
-      std::vector<typename GameClient::Move> moves;
+      std::set<typename GameClient::Move> moves;
       gs.getMoves(moves);
       for (const auto i : moves)
         std::cout << i.from << ", " << i.to << "; ";
@@ -218,12 +220,14 @@ void Random<GameState, GameClient>::switchCurrentPlayer() {
 
 template <typename GameState, typename GameClient>
 typename GameClient::Move Random<GameState, GameClient>::nextMove() {
-  std::vector<typename GameClient::Move> moves;
+  std::set<typename GameClient::Move> moves;
   gs.getMoves(moves);
 
   std::uniform_int_distribution<> dis(0, int(moves.size() - 1));
 
-  return moves[size_t(dis(mt))];
+  auto m = moves.begin();
+  std::advance(m, size_t(dis(mt)));
+  return *m;
 }
 
 template <typename GameState, typename GameClient>

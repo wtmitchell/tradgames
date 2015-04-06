@@ -47,7 +47,7 @@ public:
   State &operator=(const State&&) = delete;
 
   // Put all valid moves into the vector of moves passed in by reference
-  void getMoves(std::vector<Move> &moves) const;
+  void getMoves(std::set<Move> &moves) const;
 
   // Apply the move m, returning true if m is a valid move, false if not
   bool applyMove(Move m);

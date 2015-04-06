@@ -18,8 +18,8 @@ TEST(State, CtorDump) {
 TEST(State, getMoves) {
   ChineseCheckers::State s;
 
-  std::vector<ChineseCheckers::Move> moves;
-  std::vector<ChineseCheckers::Move> expected;
+  std::set<ChineseCheckers::Move> moves;
+  std::set<ChineseCheckers::Move> expected;
 
   // This assumes the order of returned moves which is not a safe assumption
   // in general. We know the order in this specific case is lexicographic
@@ -37,7 +37,7 @@ TEST(State, getMoves) {
                                                        {19, 28},
                                                        {27, 28},
                                                        {27, 36}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
 
@@ -57,7 +57,7 @@ TEST(State, getMoves) {
   expected.clear();
 
   for (auto i : std::array<ChineseCheckers::Move, 2>{{{0, 2}, {0, 18}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
   EXPECT_EQ(expected, moves);
@@ -117,7 +117,7 @@ TEST(State, getMoves) {
                                                        {48, 49},
                                                        {48, 56},
                                                        {48, 57}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
   EXPECT_EQ(expected, moves);
@@ -193,7 +193,7 @@ TEST(State, getMoves) {
                                                        {37, 38},
                                                        {37, 45},
                                                        {37, 46}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
   EXPECT_EQ(expected, moves);
@@ -252,7 +252,7 @@ TEST(State, getMoves) {
                                                        {78, 80},
                                                        {79, 70},
                                                        {79, 80}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
   EXPECT_EQ(expected, moves);
@@ -424,7 +424,7 @@ TEST(State, getMoves) {
                                                         {80, 74},
                                                         {80, 76},
                                                         {80, 78}}})
-    expected.push_back(i);
+    expected.insert(i);
 
   s.getMoves(moves);
   EXPECT_EQ(expected, moves);
@@ -436,7 +436,7 @@ void DepthLimitedDFS(ChineseCheckers::State &s, int depth) {
   if (depth == 0)
     return;
 
-  std::vector<ChineseCheckers::Move> moves;
+  std::set<ChineseCheckers::Move> moves;
   s.getMoves(moves);
 
   for (const auto m : moves) {

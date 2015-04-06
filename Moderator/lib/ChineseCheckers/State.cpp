@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -32,20 +33,14 @@ State::State() {
   reset();
 }
 
-void State::getMoves(std::vector<Move> &moves) const {
-  // Using set like this is inefficient, but it will correctly
-  // solve having duplicate moves
-  std::set<Move> setMoves;
+void State::getMoves(std::set<Move> &moves) const {
+  moves.clear();
   for (unsigned i = 0; i < 81; ++i) {
     if (board[i] == currentPlayer) {
-      getMovesSingleStep(setMoves, i);
-      getMovesJumps(setMoves, i, i);
+      getMovesSingleStep(moves, i);
+      getMovesJumps(moves, i, i);
     }
   }
-
-  moves.clear();
-  for (auto i : setMoves)
-    moves.push_back(i);
 }
 
 bool State::applyMove(Move m) {
@@ -234,7 +229,7 @@ bool State::isValidMove(const Move &m) const {
     return false;
 
   // Get current available moves
-  std::vector<Move> moves;
+  std::set<Move> moves;
   getMoves(moves);
 
   // Find the move among the set of available moves
@@ -258,7 +253,7 @@ Move State::translateToLocal(const std::vector<std::string> &tokens) const {
 }
 
 std::string State::listMoves() const {
-  std::vector<Move> moves;
+  std::set<Move> moves;
   getMoves(moves);
 
   std::stringstream ss;
