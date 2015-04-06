@@ -92,10 +92,12 @@ public class HexGameBoard extends AbstractBoardPanel {
           moves.put(from, dests);
           ++movesCount;
         } else {
-          if (!dests.contains(to))
+          if (!dests.contains(to)) {
             dests.add(to);
-          else
+          } else {
             movesDupes = true;
+            System.out.println("Duplicate move " + from + ", " + to);
+          }
           ++movesCount;
         }
       }
@@ -230,7 +232,7 @@ public class HexGameBoard extends AbstractBoardPanel {
 
       if (movesDupes) {
         g2d.setColor(UIManager.getColor("Panel.foreground"));
-        g2d.drawString("Contains duplicate moves", 0, 80 + Y_OFF);
+        g2d.drawString("Has duplicates", 0, 80 + Y_OFF);
       }
 
       // Draw mouse over hover
