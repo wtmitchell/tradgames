@@ -166,14 +166,17 @@ void State::getMovesSingleStep(std::set<Move> &moves, unsigned from) const {
 
 void State::getMovesJumps(std::set<Move> &moves, unsigned from,
                           unsigned current) const {
-  // Mark the current state as visited
-  int originalCurrent = board[current];
-  board[current] = -1;
 
   // If from != current we have a valid move to get here
-  if (from != current)
-    moves.insert({from, current});
+  if (from != current) {
+    auto isDupe = !moves.insert({from, current}).second;
+    if (isDupe)
+      return;
+  }
 
+    // Mark the current state as visited
+  int originalCurrent = board[current];
+  board[current] = -1;
   unsigned row = current / 9;
   unsigned col = current % 9;
 
