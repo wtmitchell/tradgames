@@ -40,7 +40,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
-
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 
   // Configuration that leads to duplicated moves arrived at by different paths
@@ -60,6 +60,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 
   // Another
@@ -120,6 +121,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 
   // Another
@@ -196,6 +198,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 
   // Another
@@ -255,6 +258,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 
   // Pathological case with many duplicate potentials
@@ -427,6 +431,7 @@ TEST(State, getMoves) {
     expected.insert(i);
 
   s.getMoves(moves);
+  EXPECT_EQ(expected.size(), moves.size());
   EXPECT_EQ(expected, moves);
 }
 
