@@ -201,7 +201,7 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
 
 
 template <typename GameState, typename GameClient>
-void Moderator<GameState, GameClient>::waitForStart() noexcept(false) {
+void Moderator<GameState, GameClient>::waitForStart() {
   // Wait for the game to begin
   for (;;) {
     std::cout << "#players" << std::endl;
