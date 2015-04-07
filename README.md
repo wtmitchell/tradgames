@@ -202,7 +202,7 @@ If you are using Linux, use CMake. Create a new build directory, then in a termi
 
 If you are using OSX, you can either use CMake or the provided makefile.
 
-If you are using Windows, you can either use CMake with Visual Studio or see Canvas for pre-built executables.
+If you are using Windows, you can either use the provided solution file in Moderator/VS2013 or use CMake to generate Visual Studio solution file or see Canvas for pre-built executables.
 
 If there are any problems compiling, please contact Will.
 
