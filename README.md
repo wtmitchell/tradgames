@@ -1,12 +1,14 @@
 # Code for AI for Traditional Games Spring 2015
 
-There are two programs in this repository:
+There are four programs in this repository:
 
 1. GameMaster - A Java program that controls the interactions between agents and a moderator running the game.
 
-2. ChineseCheckersModerator - A C++ program that validates moves and moderates the play of a game of Chinese Checkers
+2. AgentTester - A Java program that runs one agent in isolation and helps with visualizing the game state.
 
-3. ChineseCheckersRandom - A C++ program that plays a game of Chinese Checkers by taking each move randomly.
+3. ChineseCheckersModerator - A C++ program that validates moves and moderates the play of a game of Chinese Checkers
+
+4. ChineseCheckersRandom - A C++ program that plays a game of Chinese Checkers by taking each move randomly.
 
 Additionally there are various partial agent implementations to play Chinese Checkers.
 
@@ -14,10 +16,16 @@ Additionally there are various partial agent implementations to play Chinese Che
 GameMaster is a Java programs that controls the interactions between agents and a master running the game.
 It has both a command line interface and a graphical user interface.
 
-### GUI (WIP)
-If GameMaster is executed with no arguments the GUI interface is loaded.
+### GUI
+The source code for the GUI version is at GameMaster/gui with the main class being named GameMaster.
+
+The GameMaster GUI version is a swing GUI to control running a game.
+
+It requires Java 8 to run.
 
 ### Command line interface
+The source for the command line interface version is at GameMaster/cli.
+
 To start a game between two random players type the following:
 
     java GameMaster -1 'path/to/breakthrough_random player1' -2 'path/to/breakthrough_random player2' -m 'path/to/breakthrough'
@@ -35,6 +43,38 @@ It can then be loaded like:
 A sample response file is included named Random.vs.Random.txt.
 
 Running GameMaster with the argument `--help` will display the full set of options that the program supports.
+
+## AgentTester
+The source code for AgentTester is at GameMaster/gui with the main class being named AgentTester.
+
+AgentTester is a Java Swing GUI to make debugging you agent easier.
+
+It requires Java 8 to run.
+
+To use:
+1. Select the type agent you have from the combo box in the upper left corner. Use
+   "Binary" if you are using C++, and "Java" if you are using Java.
+2. Press the Browse and navigate to your executable, or main class (Main.class if
+   you used the starting Java code).
+3. Press the "Start" button. This will launch a new instance of your agent.
+
+At this point you can send commands by typing in the textfield at the bottom of the
+window and either pressing enter or the "Send" button.
+
+If you wish to view the state of the board, press the "Refresh Board" button. This
+will send the DUMPSTATE and LISTMOVES commands to your agent and graphically show
+the results on the gameboard.
+
+When there is a board displayed, hovering over the pieces of the player whose turn
+it is will highlight the moves reported by the LISTMOVES command. If you click on
+the source piece and then its destination, the input box at the bottom of the screen
+will be populated by the corresponding MOVE command for that move.
+
+Finally, when AgentTester launches an agent, it does this in a new process each time
+(and separate VM for Java). Because of this, you should be able to leave AgentTester
+open, recompile in your IDE, then stop and restart the agent in AgentTester and get
+the new version.
+
 
 ## ChineseCheckersModerator
 ChineseCheckersModerator is a C++ program that validates moves and moderates the play of a game of Chinese Checkers.
@@ -106,6 +146,11 @@ For example, this command may return
 
 This command needs to only be supported prior to the first call of the `BEGIN` command.
 
+### `EVAL`
+Prints out the current state evaluated with respect to the current player. The output will be on one line and treated as a string by the tools. Practically this should be a number.
+
+This command needs to only be supported prior to the first call of the `BEGIN` command.
+
 #### `DUMPSTATE`
 Directs the agent to print out the current game state.
 The format is the digit 1 or 2 indicating whose turn it is, followed by a space, followed by 81 integers valued 0, 1, or 2, indicating an empty square, a place occupied by player 1, or a place occupied by player 2. For example, the state prior to the game starting should be:
@@ -125,8 +170,9 @@ This command needs to only be supported prior to the first call of the `BEGIN` c
 ## Your program
 When your program starts is must immediately register using the `#name` command.
 It will then wait for the `BEGIN` command to start a game.
-Prior to a game starting, your agent should correctly respond to `LOADSTATE`, `DUMPSTATE`, `LISTMOVES`, and the `MOVE` command which will immediately call the apply moves.
+Prior to a game starting, your agent should correctly respond to `LOADSTATE`, `DUMPSTATE`, `LISTMOVES`, `EVAL`, `NEXTMOVE`, and the `MOVE` command which will immediately call the apply moves.
 The purpose of handling these commands prior to a game beginning to allow for automated testing of your agent's handling of the game state.
+They are most easily accessed using the AgentTester tool.
 
 
 ## Sample Agents
@@ -138,15 +184,25 @@ Additionally there are two partial Chinese Checkers agents, again in C++ and Jav
 Finally, when compiling the Moderator project, a ChineseCheckersRandom program will be created. This agent will play all of the rules of Chinese Checkers and it speaks the above communication protocol, but its move selection is uniformly random among all of its options. If at least one command line parameter is passed, the first will be used as the agent's name instead of the default "Random".
 
 ## Compiling Everything
-Since GameMaster is Java, a simple "javac GameMaster.java" in the appropriate directory is enough.
+### GameMaster GUI
+The GameMaster GUI can be build as simply as `javac GameMaster.java` in the appropriate directory.
 
-To build the moderator and random agent, the build is operating system dependent.
+Additionally in the GameMaster/gui directory there is a makefile which will build the GameMaster GUI and the AgentTester and package them in jar files.
 
-If you are using Visual Studio 2012 on Windows, load the solution file VS2012\breakthrough.sln and build the two projects contained within. FIXME
+### AgentTester
+The AgentTester can be build as simply as `javac GameMaster.java` in the appropriate directory.
+
+Additionally in the GameMaster/gui directory there is a makefile which will build the GameMaster GUI and the AgentTester and package them in jar files.
+
+
+### ChineseCheckersModerator and ChineseCheckersRandom
+Since these programs are in C++, the build process is operating system dependent.
 
 If you are using Linux, use CMake. Create a new build directory, then in a terminal execute `cmake path/to/Moderator; make`. Alternatively the provided makefile should also work.
 
-If you are using OSX, the provided makefile should work. Alternatively the CMake build should also work, if you have CMake installed.
+If you are using OSX, you can either use CMake or the provided makefile.
+
+If you are using Windows, you can either use CMake with Visual Studio or see Canvas for pre-built executables.
 
 If there are any problems compiling, please contact Will.
 
