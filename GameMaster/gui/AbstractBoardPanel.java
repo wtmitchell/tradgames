@@ -6,6 +6,7 @@ public abstract class AbstractBoardPanel extends JPanel {
     super(layout);
   }
   public abstract void updateData(int turn, String state, String nextMoves);
+  public abstract void updateData(int turn, String state, String nextMoves, String eval);
   public abstract void setP1Hook(UpdateMsgHook hook);
   public abstract void setP2Hook(UpdateMsgHook hook);
 }

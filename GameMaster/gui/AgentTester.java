@@ -193,11 +193,13 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
   private void refreshListener() {
     try {
-      expectingGUIUpdate = true;
-      lastBoardState = "";
-      lastMoves = "";
+      expectingGUIUpdate = 3;
+      updateBoardState = "";
+      updateMoves = "";
+      updateEval = "";
       messages.put(new Message("DUMPSTATE"));
       messages.put(new Message("LISTMOVES"));
+      messages.put(new Message("EVAL"));
     } catch (InterruptedException e) {
       JOptionPane.showMessageDialog(null, e,
                                     "InterrupedException writing to stdin",
@@ -238,19 +240,19 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
 
   private void checkGUIUpdate(String msg) {
     // Checks if return is from a GUI update and if so, handle it
-    if (!expectingGUIUpdate)
+    if (expectingGUIUpdate == 0)
       return;
 
-    String[] tokens = msg.split(" ");
-    if (tokens.length == 82 && lastBoardState.equals("")) {
-      lastBoardState = msg;
-      return;
+    if (expectingGUIUpdate == 3) {
+      updateBoardState = msg;
+    } else if (expectingGUIUpdate == 2) {
+      updateMoves = msg;
+    } else {
+      updateEval = msg;
+
+      boardPanel.updateData(-1, updateBoardState, updateMoves, updateEval);
     }
-
-    lastMoves = msg;
-
-    boardPanel.updateData(-1, lastBoardState, lastMoves);
-    expectingGUIUpdate = false;
+    --expectingGUIUpdate;
   }
 
   private JFrame frame = new JFrame("Agent Tester");
@@ -269,9 +271,10 @@ public class AgentTester<BoardPanelType extends AbstractBoardPanel> {
   private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
   private AtomicBoolean running = new AtomicBoolean(false);
 
-  private String lastBoardState = "";
-  private String lastMoves = "";
-  private boolean expectingGUIUpdate = false;
+  private String updateBoardState = "";
+  private String updateMoves = "";
+  private String updateEval = "";
+  private int expectingGUIUpdate = 0;
 
   private class MessageThread extends Thread {
     @Override

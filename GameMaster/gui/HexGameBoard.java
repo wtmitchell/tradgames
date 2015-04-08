@@ -47,6 +47,20 @@ public class HexGameBoard extends AbstractBoardPanel {
 
   @Override
   public void updateData(int turn, String boardState, String nextMoves) {
+    evalValid = false;
+    internalupdateData(turn, boardState, nextMoves);
+    board.repaint();
+  }
+
+  @Override
+  public void updateData(int turn, String boardState, String nextMoves, String eval) {
+    evalValid = true;
+    this.eval = eval;
+    internalupdateData(turn, boardState, nextMoves);
+    board.repaint();
+  }
+
+  private void internalupdateData(int turn, String boardState, String nextMoves) {
     this.turn = turn;
 
     // Split apart state
@@ -106,8 +120,6 @@ public class HexGameBoard extends AbstractBoardPanel {
                          nextMoves);
       e.printStackTrace();
     }
-
-    board.repaint();
   }
 
   @Override
@@ -181,6 +193,8 @@ public class HexGameBoard extends AbstractBoardPanel {
   private UpdateMsgHook p2Hook;
   private JCheckBox showNumsCheck = new JCheckBox("Show location numbers");
   private TheBoard board = new TheBoard();
+  private String eval = "";
+  private boolean evalValid = false;
 
   private class TheBoard
       extends JPanel implements MouseListener, MouseMotionListener {
@@ -233,6 +247,11 @@ public class HexGameBoard extends AbstractBoardPanel {
       if (movesDupes) {
         g2d.setColor(UIManager.getColor("Panel.foreground"));
         g2d.drawString("Has duplicates", 0, 80 + Y_OFF);
+      }
+
+      if (evalValid) {
+        g2d.setColor(UIManager.getColor("Panel.foreground"));
+        g2d.drawString("Eval: " + eval, state.get(0).xx + DIAMETER + 20, 20 + Y_OFF);
       }
 
       // Draw mouse over hover
