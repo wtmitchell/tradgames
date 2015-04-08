@@ -170,6 +170,9 @@ public class Agent {
       } else if (response.equals("NEXTMOVE")) {
         Move m = nextMove();
         System.out.println(m.from + ", " + m.to);
+      } else if (response.equals("EVAL")) {
+        // somehow evaluate the state like: eval(state, state.getCurrentPlayer())
+        System.out.println("0.00");
       } else {
         System.err.println("Unexpected message '" + response + "'");
         System.err.flush();

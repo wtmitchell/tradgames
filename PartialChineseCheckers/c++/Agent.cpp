@@ -169,6 +169,9 @@ void Agent::waitForStart() {
     } else if (response == "NEXTMOVE") {
       const Move m = nextMove();
       std::cout << m.from << ", " << m.to << std::endl;
+    } else if (response == "EVAL") {
+      // somehow evaluate the state like: eval(state, state.getCurrentPlayer())
+      std::cout << "0.00" << std::endl;
     } else {
       std::cerr << "Unexpected message " << response << "\n";
     }
