@@ -85,6 +85,22 @@ It is responsible for the following tasks:
 * Ensuring that a player does not play out of turn
 * Determining when a game is over
 
+### Command line options
+#### `--quiet`
+This option will silence the printing of the board every move. The
+GameMaster GUI relies upon this output, so this option should really
+only be used when running the moderator directly.
+
+This option is off by default.
+
+#### `--enforce TIME`
+This option will put an enforced time limit per move. The parameter
+`TIME` is interpreted as a floating point number. The game will not be
+stopped at the time limit, but after a too slow move is played, the
+game will be called against the slow player.
+
+This option is off by default.
+
 ## Communication Protocol
 All communication between agents and the moderator will use only `std::cin` and `std::cout` (`stdin` and `stdout` in C and `System.in` and `System.out` in Java).
 You may freely write to `std::cerr` if you wish to have debugging output (`stderr` in C and `System.err` in Java).
