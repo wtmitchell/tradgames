@@ -203,8 +203,9 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
 
       // Check if game is over
       if (gs.gameOver()) {
-        // Game was just won by last played move
-        final(turn, (turn + 1) % 2);
+        unsigned winner = gs.winner() == 1 ? 0 : 1;
+        unsigned loser = winner == 0 ? 1 : 0;
+        final(winner, loser);
         broadcast("#quit");
         continue;
       }
