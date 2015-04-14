@@ -109,6 +109,14 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
   for (;;) {
     // Read message
     std::string msg = Common::readMsg();
+
+    // Ensure it is actually a message
+    if (msg.length() == 0) {
+      std::cerr << "Received a message of length 0. Aborting.\n";
+      broadcast("#quit");
+      break;
+    }
+
     std::vector<std::string> tokens = Common::split(msg);
 
     // Stop the timer
@@ -122,15 +130,26 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
       continue;
     }
 
-    if (static_cast<unsigned>(std::stoi(tokens[0])) != playerIds[turn]) {
-      std::cerr << "Received out of turn message '"<< msg <<"'from " << playerNames[static_cast<unsigned>(std::stoi(tokens[0]))] << ". They automatically forfeit.\n";
-      std::stringstream forfeitMsg;
-      forfeitMsg << "FINAL " << playerNames[turn] << " BEATS " << playerNames[(turn + 1) % 2];
-      broadcast(forfeitMsg.str());
-      broadcast("#quit");
-      break;
+    // Enforce that the message was sent by the correct player
+    try {
+      unsigned player = static_cast<unsigned>(std::stoi(tokens[0]));
+      if (player != playerIds[turn]) {
+        std::cerr << "Received out of turn message '" << msg << "'from "
+                  << playerNames[static_cast<unsigned>(std::stoi(tokens[0]))]
+                  << ". They automatically forfeit.\n";
+        std::stringstream forfeitMsg;
+        forfeitMsg << "FINAL " << playerNames[turn] << " BEATS " << playerNames[(turn + 1) % 2];
+        broadcast(forfeitMsg.str());
+        broadcast("#quit");
+        break;
+      }
+      tokens.erase(tokens.begin(), tokens.begin() + 1);
+    } catch (std::invalid_argument e) {
+      std::cerr << "Received message not prefixed by player ID. Expected first "
+                   "token of " << msg << " to be the player ID. Instead found '"
+                << tokens[0] << "'\n";
+      continue;
     }
-    tokens.erase(tokens.begin(), tokens.begin() + 1);
 
     if (GameClient::isValidMoveMessage(tokens)) {
       ++turnCount;
@@ -208,7 +227,19 @@ void Moderator<GameState, GameClient>::waitForStart() {
     std::string response = Common::readMsg();
     std::vector<std::string> tokens = Common::split(response);
 
-    int players = std::stoi(tokens[1]);
+    int players;
+    try {
+      players = std::stoi(tokens[1]);
+    } catch (std::invalid_argument e) {
+      std::cerr << "Expected number of players as token[1] of " << response
+                << " to be int, instead found '" << tokens[1] << "'\n";
+      continue;
+    } catch (std::out_of_range e) {
+      std::cerr << "Expected number of players as token[1] of " << response
+                << " to be int, instead found '" << tokens[1] << "'\n";
+      continue;
+    }
+
 
     if (tokens.size() == 2 && tokens[0] == "#players" && players >= 3) {
       // Enough have joined. Get player names
@@ -216,13 +247,19 @@ void Moderator<GameState, GameClient>::waitForStart() {
         std::cout << "#getname " << i << std::endl;
         std::string name = Common::readMsg();
         std::vector<std::string> nameTokens  = Common::split(name);
-        if (nameTokens.size() == 3 && nameTokens[0] == "#getname" &&
-            std::stoi(nameTokens[1]) == i) {
-          names.push_back(nameTokens[2]);
-        } else {
-          std::cerr << "Did not received expected response '#getname " << i
-               << " name'."
-                    << " Received message '" << name << "'" << std::endl;
+        try {
+          if (nameTokens.size() == 3 && nameTokens[0] == "#getname" &&
+              std::stoi(nameTokens[1]) == i) {
+            names.push_back(nameTokens[2]);
+          } else {
+            std::cerr << "Did not received expected response '#getname " << i
+                      << " name'."
+                      << " Received message '" << name << "'" << std::endl;
+          }
+        } catch (std::invalid_argument e) {
+          std::cerr << "Expected integer as tokens[1] of " << name
+                    << " instead found '" << nameTokens[1] << "'\n";
+          continue;
         }
       }
       break;
