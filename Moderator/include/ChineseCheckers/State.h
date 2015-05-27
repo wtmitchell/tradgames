@@ -10,6 +10,9 @@
 #define CHINESECHECKERS_STATE_H_INCLUDED
 
 #include <array>
+#include <climits>
+#include <cstdint>
+#include <map>
 #include <ostream>
 #include <set>
 #include <string>
@@ -27,6 +30,34 @@ bool operator==(const Move &lhs, const Move &rhs);
 bool operator<(const Move &lhs, const Move &rhs);
 std::ostream &operator<<(std::ostream &out, const Move &m);
 
+class PerfectHash {
+public:
+  PerfectHash();
+  uint64_t &operator[](size_t idx);
+  uint64_t operator[](size_t idx) const;
+
+  friend bool operator==(const PerfectHash &lhs, const PerfectHash &rhs);
+  friend bool operator<(const PerfectHash &lhs, const PerfectHash &rhs);
+  friend std::ostream &operator<<(std::ostream &out, const PerfectHash &h);
+
+  enum {
+    // Bits per uint64_t
+    NumBitsInElt = sizeof(uint64_t) * CHAR_BIT,
+
+    // How many uint64_t needed
+    NumElts = (81 * 2 + NumBitsInElt - 1) / NumBitsInElt,
+
+    // How many positions per uint64_t
+    PosPerElt = NumBitsInElt / 2
+  };
+
+private:
+  std::array<uint64_t, NumElts> hash;
+};
+
+bool operator==(const PerfectHash &lhs, const PerfectHash &rhs);
+bool operator<(const PerfectHash &lhs, const PerfectHash &rhs);
+std::ostream &operator<<(std::ostream &out, const PerfectHash &h);
 
 class State {
 public:
@@ -78,6 +109,12 @@ public:
 
   // Dumps a list of the possible moves
   std::string listMoves() const;
+
+  // Returns a perfect hash of the current state
+  PerfectHash getHash() const;
+
+  // Returns true iff there has been a duplicated state
+  bool seenDuplicatedState() const;
 private:
   // mutable due to how we find jump moves
   mutable std::array<int, 81> board;
@@ -91,6 +128,12 @@ private:
 
   bool player1Wins() const;
   bool player2Wins() const;
+
+  void addStateAsSeen();
+  void removeStateAsSeen();
+
+  std::set<PerfectHash> statesSeen;
+  std::map<PerfectHash, int> duplicatedStates;
 };
 } // namespace ChineseCheckers
 

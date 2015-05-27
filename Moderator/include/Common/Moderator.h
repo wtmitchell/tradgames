@@ -35,7 +35,7 @@ public:
   Moderator &operator=(const Moderator &&) = delete;
 
   void playGame(bool printBoard, bool quiet, double turnTimeLimit,
-                bool logGame, bool enforceTimeLimit);
+                bool logGame, bool enforceTimeLimit, bool forbidDuplicateStates);
 
 private:
   void waitForStart();
@@ -77,7 +77,8 @@ template <typename GameState, typename GameClient>
 void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
                                                 double turnTimeLimit,
                                                 bool logGame,
-                                                bool enforceTimeLimit) {
+                                                bool enforceTimeLimit,
+                                                bool forbidDuplicateStates) {
   // Identify myself
   std::cout << "#name moderator\n"
             << "#master" << std::endl;
@@ -195,6 +196,17 @@ void Moderator<GameState, GameClient>::playGame(bool printBoard, bool quiet,
       // Print GUI info after new move
       if (printBoard)
         printGUIInfo();
+
+      // Check for duplicated moves
+      if (forbidDuplicateStates && gs.seenDuplicatedState()) {
+        std::stringstream invalidMsg;
+        invalidMsg << "State duplicated by move: " << msg;
+        diagnostic(invalidMsg.str());
+
+        final((turn + 1) % 2, turn);
+        broadcast("#quit");
+        continue;
+      }
 
       broadcast(GameClient::moveMessage(m));
 

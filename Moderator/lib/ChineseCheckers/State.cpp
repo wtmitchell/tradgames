@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
+#include <iomanip>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <string>
@@ -26,6 +29,39 @@ bool operator<(const Move &lhs, const Move &rhs) {
 
 std::ostream &operator<<(std::ostream &out, const Move &m) {
   out << "{" << m.from << ", " << m.to << "}";
+  return out;
+}
+
+PerfectHash::PerfectHash() : hash{{0, 0, 0}} {}
+
+uint64_t &PerfectHash::operator[](size_t idx) {
+  assert(idx < 4 && "OOB Index");
+  return hash[idx];
+}
+
+uint64_t PerfectHash::operator[](size_t idx) const {
+  assert(idx < 4 && "OOB Index");
+  return hash[idx];
+}
+
+bool operator==(const PerfectHash &lhs, const PerfectHash &rhs) {
+  return std::equal(std::begin(lhs.hash), std::end(lhs.hash), std::begin(rhs.hash));
+}
+
+bool operator<(const PerfectHash &lhs, const PerfectHash &rhs) {
+  return std::lexicographical_compare(std::begin(lhs.hash), std::end(lhs.hash),
+                                      std::begin(rhs.hash), std::end(rhs.hash));
+}
+
+std::ostream &operator<<(std::ostream &out, const PerfectHash &h) {
+  std::ios state(nullptr);
+  state.copyfmt(out);
+
+  out << std::hex;
+  for (const auto& i : h.hash)
+    out << i;
+
+  out.copyfmt(state);
   return out;
 }
 
@@ -58,6 +94,9 @@ bool State::applyMove(Move m) {
   // Update whose turn it is
   swapTurn();
 
+  // Add state to seen list
+  addStateAsSeen();
+
   return true;
 }
 
@@ -79,11 +118,14 @@ bool State::undoMove(Move m) {
     return false;
   }
 
+  // Remove state from seen list
+  removeStateAsSeen();
+
   return true;
 }
 
 bool State::gameOver() const {
-  return player1Wins() || player2Wins();
+  return !duplicatedStates.empty() || player1Wins() || player2Wins();
 }
 
 int State::winner() const {
@@ -100,7 +142,9 @@ void State::reset() {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0,
             0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2}};
   currentPlayer = 1;
-
+  statesSeen.clear();
+  duplicatedStates.clear();
+  addStateAsSeen();
 }
 
 bool State::loadState(const std::string &newState) {
@@ -266,6 +310,23 @@ std::string State::listMoves() const {
   return ss.str();
 }
 
+PerfectHash State::getHash() const {
+  PerfectHash hash;
+
+  for (unsigned i = 0; i < 81; ++i) {
+    unsigned idx = i / PerfectHash::PosPerElt;
+    unsigned off = i % PerfectHash::PosPerElt;
+
+    hash[idx] |= static_cast<uint64_t>(board[i] & 0x3) << off;
+  }
+
+  return hash;
+}
+
+bool State::seenDuplicatedState() const {
+  return !duplicatedStates.empty();
+}
+
 void State::swapTurn() {
   currentPlayer = currentPlayer == 1 ?  2 : 1;
 }
@@ -298,6 +359,43 @@ bool State::player2Wins() const {
   }
 
   return p2inTriangle;
+}
+
+}
+#include <iostream>
+namespace ChineseCheckers {
+
+
+void State::addStateAsSeen() {
+  auto hash = getHash();
+
+  if (!statesSeen.insert(hash).second) {
+    // Duplicated state
+    auto i = duplicatedStates.find(hash);
+    if (i == duplicatedStates.end())
+      duplicatedStates[hash] = 1;
+    else
+      ++duplicatedStates[hash];
+  }
+}
+
+
+void State::removeStateAsSeen() {
+  // Warning: This logic is not fully tested.
+
+  auto hash = getHash();
+
+  auto i = duplicatedStates.find(hash);
+
+  if (i != duplicatedStates.end()) {
+    // Removing a duplicate
+    if (duplicatedStates[hash] == 1) {
+      // Last duplicate
+      duplicatedStates.erase(i);
+    } else {
+      --duplicatedStates[hash];
+    }
+  }
 }
 
 } // namespace ChineseCheckers

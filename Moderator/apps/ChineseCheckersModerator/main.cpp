@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   double turnTimeLimit = 30.0; // in seconds
   bool logGame = false; // to file
   bool enforceTimeLimit = false;
+  bool forbidDuplicateStates = true;
 
   // Check if command line arguments overrides any of these
   if (commandExists(argv, argv + argc, "--quiet")) {
@@ -39,6 +40,10 @@ int main(int argc, char **argv) {
     }
   }
 
+  if (commandExists(argv, argv + argc, "--allow-dupe-states")) {
+    forbidDuplicateStates = false;
+  }
+
   if (!printBoard)
     std::cout << "--quiet enabled. Will not print GUI updates to std::err" << std::endl;
 
@@ -46,7 +51,7 @@ int main(int argc, char **argv) {
     std::cout << "Will enforce time limit of " << turnTimeLimit << " seconds." << std::endl;
 
   Common::Moderator<ChineseCheckers::State, ChineseCheckers::Client> m;
-  m.playGame(printBoard, quiet, turnTimeLimit, logGame, enforceTimeLimit);
+  m.playGame(printBoard, quiet, turnTimeLimit, logGame, enforceTimeLimit, forbidDuplicateStates);
 
   return EXIT_SUCCESS;
 }
